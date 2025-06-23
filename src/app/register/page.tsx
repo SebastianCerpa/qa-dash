@@ -129,7 +129,7 @@ export default function RegisterPage() {
       } else {
         setErrors({ general: data.message || 'Registration failed. Please try again.' });
       }
-    } catch (error) {
+    } catch {
       setErrors({ general: 'Registration failed. Please try again.' });
     } finally {
       setIsLoading(false);
@@ -151,7 +151,7 @@ export default function RegisterPage() {
       } else if (result?.url) {
         router.push(result.url);
       }
-    } catch (error) {
+    } catch {
       setErrors({ general: 'Google authentication failed. Please try again.' });
     } finally {
       setIsGoogleLoading(false);

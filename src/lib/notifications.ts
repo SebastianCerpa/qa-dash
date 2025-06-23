@@ -1,4 +1,4 @@
-import { prisma } from '@/lib/prisma';
+import { prisma } from '../../lib/prisma';
 
 interface NotificationData {
   user_id: string;
@@ -26,14 +26,8 @@ class NotificationService {
       await prisma.notifications.create({
         data: {
           user_id: notificationData.user_id,
-          type: notificationData.type,
-          title: notificationData.title,
-          message: notificationData.message,
-          data: notificationData.data || {},
-          priority: notificationData.priority || 'MEDIUM',
-          expires_at: notificationData.expires_at,
+          message: `${notificationData.title}: ${notificationData.message}`,
           is_read: false,
-          created_at: new Date()
         }
       });
 
@@ -62,14 +56,8 @@ class NotificationService {
       await prisma.notifications.createMany({
         data: notifications.map(notification => ({
           user_id: notification.user_id,
-          type: notification.type,
-          title: notification.title,
-          message: notification.message,
-          data: notification.data || {},
-          priority: notification.priority || 'MEDIUM',
-          expires_at: notification.expires_at,
-          is_read: false,
-          created_at: new Date()
+          message: `${notification.title}: ${notification.message}`,
+          is_read: false
         }))
       });
 
@@ -102,11 +90,7 @@ class NotificationService {
       const { limit = 20, offset = 0, unreadOnly = false, type } = options;
       
       const where: any = {
-        user_id: userId,
-        OR: [
-          { expires_at: null },
-          { expires_at: { gt: new Date() } }
-        ]
+        user_id: userId
       };
 
       if (unreadOnly) {
@@ -130,11 +114,7 @@ class NotificationService {
       const unreadCount = await prisma.notifications.count({
         where: {
           user_id: userId,
-          is_read: false,
-          OR: [
-            { expires_at: null },
-            { expires_at: { gt: new Date() } }
-          ]
+          is_read: false
         }
       });
 
@@ -166,8 +146,7 @@ class NotificationService {
           user_id: userId
         },
         data: {
-          is_read: true,
-          read_at: new Date()
+          is_read: true
         }
       });
     } catch (error) {
@@ -186,8 +165,7 @@ class NotificationService {
           is_read: false
         },
         data: {
-          is_read: true,
-          read_at: new Date()
+          is_read: true
         }
       });
     } catch (error) {
@@ -213,16 +191,12 @@ class NotificationService {
 
   /**
    * Clean up expired notifications
+   * Note: expires_at field not available in current schema
    */
   async cleanupExpiredNotifications(): Promise<void> {
     try {
-      await prisma.notifications.deleteMany({
-        where: {
-          expires_at: {
-            lt: new Date()
-          }
-        }
-      });
+      // TODO: Implement cleanup logic when expires_at field is added to schema
+      console.log('Cleanup method called - expires_at field not available in current schema');
     } catch (error) {
       console.error('Error cleaning up expired notifications:', error);
     }
@@ -266,18 +240,15 @@ class NotificationService {
       // Get user email
       const user = await prisma.users.findUnique({
         where: { id: notification.user_id },
-        select: { email: true, name: true, notification_preferences: true }
+        select: { email: true, name: true }
       });
 
       if (!user || !user.email) {
         return;
       }
 
-      // Check user preferences
-      const preferences = user.notification_preferences as any;
-      if (preferences?.email === false) {
-        return;
-      }
+      // Note: User notification preferences would need to be implemented
+      // if email preferences are required in the future
 
       // Generate email template
       const emailTemplate = this.generateEmailTemplate(notification, user.name);
@@ -306,26 +277,18 @@ class NotificationService {
       // Get user's push notification tokens
       const user = await prisma.users.findUnique({
         where: { id: notification.user_id },
-        select: { push_tokens: true, notification_preferences: true }
+        select: { id: true }
       });
 
       if (!user) {
         return;
       }
 
-      // Check user preferences
-      const preferences = user.notification_preferences as any;
-      if (preferences?.push === false) {
-        return;
-      }
-
-      const pushTokens = user.push_tokens as string[] || [];
-      if (pushTokens.length === 0) {
-        return;
-      }
-
+      // Note: Push notification tokens and preferences would need to be implemented
+      // if push notifications are required in the future
+      
       // This would integrate with your push notification service (FCM, APNs, etc.)
-      console.log('Push notification would be sent to tokens:', pushTokens);
+      console.log('Push notification would be sent (tokens not implemented)');
       console.log('Push notification data:', {
         title: notification.title,
         body: notification.message,

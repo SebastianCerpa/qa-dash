@@ -4,11 +4,12 @@ import { getServerSession } from "next-auth";
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const comments = await prisma.bug_comments.findMany({
-      where: { bug_id: params.id },
+      where: { bug_id: id },
       include: {
         author: {
           select: { id: true, name: true, email: true, avatar_url: true },
@@ -29,9 +30,10 @@ export async function GET(
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const session = await getServerSession();
     if (!session?.user?.email) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -56,7 +58,7 @@ export async function POST(
 
     // Verify bug exists
     const bug = await prisma.bug_reports.findUnique({
-      where: { id: params.id },
+      where: { id },
     });
 
     if (!bug) {
@@ -65,7 +67,7 @@ export async function POST(
 
     const comment = await prisma.bug_comments.create({
       data: {
-        bug_id: params.id,
+        bug_id: id,
         author_id: user.id,
         content: content.trim(),
       },
@@ -79,7 +81,7 @@ export async function POST(
     // Create activity log
     await prisma.bug_activities.create({
       data: {
-        bug_id: params.id,
+        bug_id: id,
         user_id: user.id,
         action: "commented",
         description: `Added a comment: ${content.substring(0, 100)}${

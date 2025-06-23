@@ -98,13 +98,27 @@ model test_cases {
   id              String      @id @default(cuid())
   test_plan_id    String?
   title           String
-  steps           String?
+  description     String?
+  priority        TestCasePriority @default(MEDIUM)
+  type            TestCaseType @default(FUNCTIONAL)
+  preconditions   String?
+  steps           Json        // Almacenar array de steps como JSON
   expected_result String?
+  status          TestCaseStatus @default(NOT_EXECUTED)
+  ticket_id       String?     // Para linkear con tasks
+  tags            String?     // JSON string de tags
+  last_executed   DateTime?
   created_by      String?
   created_at      DateTime?   @default(now())
+  updated_at      DateTime?   @updatedAt
+  
+  // Relationships
   users           users?      @relation(fields: [created_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
   test_plans      test_plans? @relation(fields: [test_plan_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  linked_task     tasks?      @relation(fields: [ticket_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
+
+
 
 model test_cycles {
   id         String    @id @default(cuid())
@@ -352,4 +366,28 @@ enum TestExecutionStatus {
   FAILED
   SKIPPED
   FLAKY
+}
+
+enum TestCasePriority {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum TestCaseType {
+  FUNCTIONAL
+  INTEGRATION
+  PERFORMANCE
+  SECURITY
+  USABILITY
+  REGRESSION
+}
+
+enum TestCaseStatus {
+  NOT_EXECUTED
+  PASSED
+  FAILED
+  BLOCKED
+  SKIPPED
 }

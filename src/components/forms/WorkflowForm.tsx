@@ -1,6 +1,6 @@
 import React from 'react';
 import { useForm } from 'react-hook-form';
-import { useStore } from '@/store/useStore';
+import { useStore, Workflow } from '@/store/useStore';
 import Button from '@/components/ui/Button';
 
 interface WorkflowFormProps {
@@ -24,12 +24,16 @@ export default function WorkflowForm({ workflowId, onSuccess, onCancel }: Workfl
   });
 
   const onSubmit = async (data: any) => {
-    // Convert collaborators from string to array if needed
-    const formattedData = {
-      ...data,
+    // Ensure all required fields are present and properly typed
+    const formattedData: Omit<Workflow, 'id' | 'tasks' | 'createdAt' | 'updatedAt'> = {
+      name: data.name || '',
+      description: data.description || '',
+      owner: data.owner || '',
       collaborators: Array.isArray(data.collaborators) 
         ? data.collaborators 
-        : data.collaborators?.split(',').map((id: string) => id.trim()) || [],
+        : typeof data.collaborators === 'string' 
+          ? (data.collaborators as string).split(',').map((id: string) => id.trim()) 
+          : [],
     };
 
     if (existingWorkflow) {

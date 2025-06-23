@@ -1,19 +1,35 @@
-import React, { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { useStore, TestType, TaskPriority, TaskStatus } from '@/store/useStore';
-import Button from '@/components/ui/Button';
-import Badge from '@/components/ui/Badge';
+import React, { useState } from "react";
+import { useForm, SubmitHandler } from "react-hook-form";
+import {
+  useStore,
+  TestType,
+  TaskPriority,
+  TaskStatus,
+  Task,
+} from "@/store/useStore";
+import Button from "@/components/ui/Button";
+
 import {
   ClipboardDocumentListIcon,
   UserIcon,
   CalendarIcon,
   ExclamationTriangleIcon,
   CheckCircleIcon,
-  ClockIcon,
   TagIcon,
   DocumentTextIcon,
-  SparklesIcon
-} from '@heroicons/react/24/outline';
+  SparklesIcon,
+} from "@heroicons/react/24/outline";
+
+// Definir el tipo para los datos del formulario
+interface TaskFormData {
+  title: string;
+  description: string;
+  assignee: string;
+  testType: TestType;
+  status: TaskStatus;
+  priority: TaskPriority;
+  dueDate?: string;
+}
 
 interface TaskFormProps {
   taskId?: string;
@@ -21,73 +37,122 @@ interface TaskFormProps {
   onCancel?: () => void;
 }
 
-export default function TaskForm({ taskId, onSuccess, onCancel }: TaskFormProps) {
+export default function TaskForm({
+  taskId,
+  onSuccess,
+  onCancel,
+}: TaskFormProps) {
   const { tasks, teamMembers, addTask, updateTask } = useStore();
   const [focusedField, setFocusedField] = useState<string | null>(null);
-  
-  const existingTask = taskId ? tasks.find(task => task.id === taskId) : undefined;
-  
-  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm({
-    defaultValues: existingTask ? {
-      title: existingTask.title,
-      description: existingTask.description,
-      assignee: existingTask.assignee,
-      testType: existingTask.testType,
-      status: existingTask.status,
-      priority: existingTask.priority,
-      dueDate: existingTask.dueDate ? existingTask.dueDate.split('T')[0] : '',
-    } : {
-      status: 'Todo' as TaskStatus,
-      priority: 'Medium' as TaskPriority,
-    }
+
+  const existingTask = taskId
+    ? tasks.find((task) => task.id === taskId)
+    : undefined;
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<TaskFormData>({
+    defaultValues: existingTask
+      ? {
+          title: existingTask.title,
+          description: existingTask.description,
+          assignee: existingTask.assignee,
+          testType: existingTask.testType,
+          status: existingTask.status,
+          priority: existingTask.priority,
+          dueDate: existingTask.dueDate
+            ? existingTask.dueDate.split("T")[0]
+            : "",
+        }
+      : {
+          title: "",
+          description: "",
+          assignee: "",
+          testType: "Functional" as TestType,
+          status: "Todo" as TaskStatus,
+          priority: "Medium" as TaskPriority,
+          dueDate: "",
+        },
   });
 
   const testTypes: TestType[] = [
-    'Positive',
-    'Negative',
-    'Functional',
-    'Non-functional',
-    'Regression',
-    'API',
-    'Exploratory',
-    'Boundary',
-    'Smoke',
-    'Stress',
-    'Accessibility'
+    "Positive",
+    "Negative",
+    "Functional",
+    "Non-functional",
+    "Regression",
+    "API",
+    "Exploratory",
+    "Boundary",
+    "Smoke",
+    "Stress",
+    "Accessibility",
   ];
 
-  const statuses: TaskStatus[] = ['Todo', 'In Progress', 'Review', 'Done'];
-  const priorities: TaskPriority[] = ['Low', 'Medium', 'High', 'Critical'];
+  const statuses: TaskStatus[] = ["Todo", "In Progress", "Review", "Done"];
+  const priorities: TaskPriority[] = ["Low", "Medium", "High", "Critical"];
 
-  const onSubmit = async (data: any) => {
-    if (existingTask) {
-      updateTask(taskId!, data);
-    } else {
-      addTask(data);
-    }
-    
-    if (onSuccess) {
-      onSuccess();
+  const onSubmit: SubmitHandler<TaskFormData> = async (data) => {
+    try {
+      // Preparar los datos para el store
+      const taskData: Omit<
+        Task,
+        "id" | "createdAt" | "updatedAt" | "comments"
+      > = {
+        title: data.title,
+        description: data.description,
+        assignee: data.assignee,
+        testType: data.testType,
+        status: data.status,
+        priority: data.priority,
+        dueDate: data.dueDate || undefined,
+      };
+
+      if (existingTask && taskId) {
+        updateTask(taskId, taskData);
+      } else {
+        addTask(taskData);
+      }
+
+      if (onSuccess) {
+        onSuccess();
+      }
+    } catch (error) {
+      console.error("Error submitting form:", error);
     }
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case 'Critical': return 'bg-red-100 text-red-800 border-red-200';
-      case 'High': return 'bg-orange-100 text-orange-800 border-orange-200';
-      case 'Medium': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-      case 'Low': return 'bg-green-100 text-green-800 border-green-200';
-      default: return 'bg-gray-100 text-gray-800 border-gray-200';
+      case "Critical":
+        return "bg-red-100 text-red-800 border-red-200";
+      case "High":
+        return "bg-orange-100 text-orange-800 border-orange-200";
+      case "Medium":
+        return "bg-yellow-100 text-yellow-800 border-yellow-200";
+      case "Low":
+        return "bg-green-100 text-green-800 border-green-200";
+      default:
+        return "bg-gray-100 text-gray-800 border-gray-200";
     }
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'Todo': return 'bg-gray-100 text-gray-800 border-gray-200';
-      case 'In Progress': return 'bg-blue-100 text-blue-800 border-blue-200';
-      case 'Review': return 'bg-purple-100 text-purple-800 border-purple-200';
-      case 'Done': return 'bg-green-100 text-green-800 border-green-200';
-      default: return 'bg-gray-100 text-gray-800 border-gray-200';
+      case "Todo":
+        return "bg-gray-100 text-gray-800 border-gray-200";
+      case "In Progress":
+        return "bg-blue-100 text-blue-800 border-blue-200";
+      case "Review":
+        return "bg-purple-100 text-purple-800 border-purple-200";
+      case "Done":
+        return "bg-green-100 text-green-800 border-green-200";
+      default:
+        return "bg-gray-100 text-gray-800 border-gray-200";
     }
   };
 
@@ -101,10 +166,12 @@ export default function TaskForm({ taskId, onSuccess, onCancel }: TaskFormProps)
           </div>
           <div>
             <h3 className="text-lg font-semibold text-white">
-              {existingTask ? 'Edit Task' : 'Create New Task'}
+              {existingTask ? "Edit Task" : "Create New Task"}
             </h3>
             <p className="text-blue-100 text-sm">
-              {existingTask ? 'Update task details and settings' : 'Fill in the details to create a new task'}
+              {existingTask
+                ? "Update task details and settings"
+                : "Fill in the details to create a new task"}
             </p>
           </div>
         </div>
@@ -113,7 +180,10 @@ export default function TaskForm({ taskId, onSuccess, onCancel }: TaskFormProps)
       <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-8">
         {/* Title Section */}
         <div className="space-y-2">
-          <label htmlFor="title" className="flex items-center text-sm font-semibold text-gray-700">
+          <label
+            htmlFor="title"
+            className="flex items-center text-sm font-semibold text-gray-700"
+          >
             <DocumentTextIcon className="h-4 w-4 mr-2 text-gray-500" />
             Task Title
           </label>
@@ -122,19 +192,19 @@ export default function TaskForm({ taskId, onSuccess, onCancel }: TaskFormProps)
               id="title"
               type="text"
               placeholder="Enter a descriptive task title..."
-              {...register('title', { required: 'Title is required' })}
-              onFocus={() => setFocusedField('title')}
+              {...register("title", { required: "Title is required" })}
+              onFocus={() => setFocusedField("title")}
               onBlur={() => setFocusedField(null)}
               className={`w-full px-4 py-3 border-2 rounded-lg transition-all duration-200 ${
-                focusedField === 'title'
-                  ? 'border-blue-500 ring-4 ring-blue-100 shadow-md'
-                  : 'border-gray-300 hover:border-gray-400'
+                focusedField === "title"
+                  ? "border-blue-500 ring-4 ring-blue-100 shadow-md"
+                  : "border-gray-300 hover:border-gray-400"
               } focus:outline-none text-gray-900 placeholder-gray-500`}
             />
             {errors.title && (
               <div className="mt-2 flex items-center text-red-600">
                 <ExclamationTriangleIcon className="h-4 w-4 mr-1" />
-                <span className="text-sm">{errors.title.message as string}</span>
+                <span className="text-sm">{errors.title.message}</span>
               </div>
             )}
           </div>
@@ -142,7 +212,10 @@ export default function TaskForm({ taskId, onSuccess, onCancel }: TaskFormProps)
 
         {/* Description Section */}
         <div className="space-y-2">
-          <label htmlFor="description" className="flex items-center text-sm font-semibold text-gray-700">
+          <label
+            htmlFor="description"
+            className="flex items-center text-sm font-semibold text-gray-700"
+          >
             <DocumentTextIcon className="h-4 w-4 mr-2 text-gray-500" />
             Description
           </label>
@@ -151,19 +224,21 @@ export default function TaskForm({ taskId, onSuccess, onCancel }: TaskFormProps)
               id="description"
               rows={4}
               placeholder="Provide detailed information about the task..."
-              {...register('description', { required: 'Description is required' })}
-              onFocus={() => setFocusedField('description')}
+              {...register("description", {
+                required: "Description is required",
+              })}
+              onFocus={() => setFocusedField("description")}
               onBlur={() => setFocusedField(null)}
               className={`w-full px-4 py-3 border-2 rounded-lg transition-all duration-200 resize-none ${
-                focusedField === 'description'
-                  ? 'border-blue-500 ring-4 ring-blue-100 shadow-md'
-                  : 'border-gray-300 hover:border-gray-400'
+                focusedField === "description"
+                  ? "border-blue-500 ring-4 ring-blue-100 shadow-md"
+                  : "border-gray-300 hover:border-gray-400"
               } focus:outline-none text-gray-900 placeholder-gray-500`}
             />
             {errors.description && (
               <div className="mt-2 flex items-center text-red-600">
                 <ExclamationTriangleIcon className="h-4 w-4 mr-1" />
-                <span className="text-sm">{errors.description.message as string}</span>
+                <span className="text-sm">{errors.description.message}</span>
               </div>
             )}
           </div>
@@ -173,20 +248,23 @@ export default function TaskForm({ taskId, onSuccess, onCancel }: TaskFormProps)
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Assignee */}
           <div className="space-y-2">
-            <label htmlFor="assignee" className="flex items-center text-sm font-semibold text-gray-700">
+            <label
+              htmlFor="assignee"
+              className="flex items-center text-sm font-semibold text-gray-700"
+            >
               <UserIcon className="h-4 w-4 mr-2 text-gray-500" />
               Assignee
             </label>
             <div className="relative">
               <select
                 id="assignee"
-                {...register('assignee', { required: 'Assignee is required' })}
-                onFocus={() => setFocusedField('assignee')}
+                {...register("assignee", { required: "Assignee is required" })}
+                onFocus={() => setFocusedField("assignee")}
                 onBlur={() => setFocusedField(null)}
                 className={`w-full px-4 py-3 border-2 rounded-lg transition-all duration-200 ${
-                  focusedField === 'assignee'
-                    ? 'border-blue-500 ring-4 ring-blue-100 shadow-md'
-                    : 'border-gray-300 hover:border-gray-400'
+                  focusedField === "assignee"
+                    ? "border-blue-500 ring-4 ring-blue-100 shadow-md"
+                    : "border-gray-300 hover:border-gray-400"
                 } focus:outline-none text-gray-900 bg-white`}
               >
                 <option value="">Select team member...</option>
@@ -199,7 +277,7 @@ export default function TaskForm({ taskId, onSuccess, onCancel }: TaskFormProps)
               {errors.assignee && (
                 <div className="mt-2 flex items-center text-red-600">
                   <ExclamationTriangleIcon className="h-4 w-4 mr-1" />
-                  <span className="text-sm">{errors.assignee.message as string}</span>
+                  <span className="text-sm">{errors.assignee.message}</span>
                 </div>
               )}
             </div>
@@ -207,20 +285,23 @@ export default function TaskForm({ taskId, onSuccess, onCancel }: TaskFormProps)
 
           {/* Test Type */}
           <div className="space-y-2">
-            <label htmlFor="testType" className="flex items-center text-sm font-semibold text-gray-700">
+            <label
+              htmlFor="testType"
+              className="flex items-center text-sm font-semibold text-gray-700"
+            >
               <TagIcon className="h-4 w-4 mr-2 text-gray-500" />
               Test Type
             </label>
             <div className="relative">
               <select
                 id="testType"
-                {...register('testType', { required: 'Test type is required' })}
-                onFocus={() => setFocusedField('testType')}
+                {...register("testType", { required: "Test type is required" })}
+                onFocus={() => setFocusedField("testType")}
                 onBlur={() => setFocusedField(null)}
                 className={`w-full px-4 py-3 border-2 rounded-lg transition-all duration-200 ${
-                  focusedField === 'testType'
-                    ? 'border-blue-500 ring-4 ring-blue-100 shadow-md'
-                    : 'border-gray-300 hover:border-gray-400'
+                  focusedField === "testType"
+                    ? "border-blue-500 ring-4 ring-blue-100 shadow-md"
+                    : "border-gray-300 hover:border-gray-400"
                 } focus:outline-none text-gray-900 bg-white`}
               >
                 <option value="">Choose test type...</option>
@@ -233,7 +314,7 @@ export default function TaskForm({ taskId, onSuccess, onCancel }: TaskFormProps)
               {errors.testType && (
                 <div className="mt-2 flex items-center text-red-600">
                   <ExclamationTriangleIcon className="h-4 w-4 mr-1" />
-                  <span className="text-sm">{errors.testType.message as string}</span>
+                  <span className="text-sm">{errors.testType.message}</span>
                 </div>
               )}
             </div>
@@ -241,20 +322,23 @@ export default function TaskForm({ taskId, onSuccess, onCancel }: TaskFormProps)
 
           {/* Status */}
           <div className="space-y-2">
-            <label htmlFor="status" className="flex items-center text-sm font-semibold text-gray-700">
+            <label
+              htmlFor="status"
+              className="flex items-center text-sm font-semibold text-gray-700"
+            >
               <CheckCircleIcon className="h-4 w-4 mr-2 text-gray-500" />
               Status
             </label>
             <div className="relative">
               <select
                 id="status"
-                {...register('status', { required: 'Status is required' })}
-                onFocus={() => setFocusedField('status')}
+                {...register("status", { required: "Status is required" })}
+                onFocus={() => setFocusedField("status")}
                 onBlur={() => setFocusedField(null)}
                 className={`w-full px-4 py-3 border-2 rounded-lg transition-all duration-200 ${
-                  focusedField === 'status'
-                    ? 'border-blue-500 ring-4 ring-blue-100 shadow-md'
-                    : 'border-gray-300 hover:border-gray-400'
+                  focusedField === "status"
+                    ? "border-blue-500 ring-4 ring-blue-100 shadow-md"
+                    : "border-gray-300 hover:border-gray-400"
                 } focus:outline-none text-gray-900 bg-white`}
               >
                 {statuses.map((status) => (
@@ -266,7 +350,7 @@ export default function TaskForm({ taskId, onSuccess, onCancel }: TaskFormProps)
               {errors.status && (
                 <div className="mt-2 flex items-center text-red-600">
                   <ExclamationTriangleIcon className="h-4 w-4 mr-1" />
-                  <span className="text-sm">{errors.status.message as string}</span>
+                  <span className="text-sm">{errors.status.message}</span>
                 </div>
               )}
             </div>
@@ -274,20 +358,23 @@ export default function TaskForm({ taskId, onSuccess, onCancel }: TaskFormProps)
 
           {/* Priority */}
           <div className="space-y-2">
-            <label htmlFor="priority" className="flex items-center text-sm font-semibold text-gray-700">
+            <label
+              htmlFor="priority"
+              className="flex items-center text-sm font-semibold text-gray-700"
+            >
               <ExclamationTriangleIcon className="h-4 w-4 mr-2 text-gray-500" />
               Priority
             </label>
             <div className="relative">
               <select
                 id="priority"
-                {...register('priority', { required: 'Priority is required' })}
-                onFocus={() => setFocusedField('priority')}
+                {...register("priority", { required: "Priority is required" })}
+                onFocus={() => setFocusedField("priority")}
                 onBlur={() => setFocusedField(null)}
                 className={`w-full px-4 py-3 border-2 rounded-lg transition-all duration-200 ${
-                  focusedField === 'priority'
-                    ? 'border-blue-500 ring-4 ring-blue-100 shadow-md'
-                    : 'border-gray-300 hover:border-gray-400'
+                  focusedField === "priority"
+                    ? "border-blue-500 ring-4 ring-blue-100 shadow-md"
+                    : "border-gray-300 hover:border-gray-400"
                 } focus:outline-none text-gray-900 bg-white`}
               >
                 {priorities.map((priority) => (
@@ -299,7 +386,7 @@ export default function TaskForm({ taskId, onSuccess, onCancel }: TaskFormProps)
               {errors.priority && (
                 <div className="mt-2 flex items-center text-red-600">
                   <ExclamationTriangleIcon className="h-4 w-4 mr-1" />
-                  <span className="text-sm">{errors.priority.message as string}</span>
+                  <span className="text-sm">{errors.priority.message}</span>
                 </div>
               )}
             </div>
@@ -308,7 +395,10 @@ export default function TaskForm({ taskId, onSuccess, onCancel }: TaskFormProps)
 
         {/* Due Date - Full Width */}
         <div className="space-y-2">
-          <label htmlFor="dueDate" className="flex items-center text-sm font-semibold text-gray-700">
+          <label
+            htmlFor="dueDate"
+            className="flex items-center text-sm font-semibold text-gray-700"
+          >
             <CalendarIcon className="h-4 w-4 mr-2 text-gray-500" />
             Due Date
           </label>
@@ -316,13 +406,13 @@ export default function TaskForm({ taskId, onSuccess, onCancel }: TaskFormProps)
             <input
               id="dueDate"
               type="date"
-              {...register('dueDate')}
-              onFocus={() => setFocusedField('dueDate')}
+              {...register("dueDate")}
+              onFocus={() => setFocusedField("dueDate")}
               onBlur={() => setFocusedField(null)}
               className={`w-full px-4 py-3 border-2 rounded-lg transition-all duration-200 ${
-                focusedField === 'dueDate'
-                  ? 'border-blue-500 ring-4 ring-blue-100 shadow-md'
-                  : 'border-gray-300 hover:border-gray-400'
+                focusedField === "dueDate"
+                  ? "border-blue-500 ring-4 ring-blue-100 shadow-md"
+                  : "border-gray-300 hover:border-gray-400"
               } focus:outline-none text-gray-900 bg-white`}
             />
           </div>
@@ -331,16 +421,17 @@ export default function TaskForm({ taskId, onSuccess, onCancel }: TaskFormProps)
         {/* Action Buttons */}
         <div className="flex flex-col sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-4 pt-6 border-t border-gray-200">
           {onCancel && (
-            <Button 
-              variant="outline" 
+            <Button
+              type="button"
+              variant="outline"
               onClick={onCancel}
               className="w-full sm:w-auto px-6 py-3 text-gray-700 border-gray-300 hover:bg-gray-50 transition-colors duration-200"
             >
               Cancel
             </Button>
           )}
-          <Button 
-            type="submit" 
+          <Button
+            type="submit"
             isLoading={isSubmitting}
             className="w-full sm:w-auto px-8 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center"
           >
@@ -352,7 +443,7 @@ export default function TaskForm({ taskId, onSuccess, onCancel }: TaskFormProps)
             ) : (
               <>
                 <SparklesIcon className="h-4 w-4 mr-2" />
-                {existingTask ? 'Update Task' : 'Create Task'}
+                {existingTask ? "Update Task" : "Create Task"}
               </>
             )}
           </Button>

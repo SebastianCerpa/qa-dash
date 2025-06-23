@@ -110,7 +110,7 @@ function SprintForm({
           </label>
           <select
             value={formData.status}
-            onChange={(e) => setFormData(prev => ({ ...prev, status: e.target.value as any }))}
+            onChange={(e) => setFormData(prev => ({ ...prev, status: e.target.value as 'Planning' | 'Active' | 'Completed' | 'Cancelled' }))}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
           >
             <option value="Planning">Planning</option>
@@ -551,10 +551,9 @@ export default function SprintsPage() {
           <div className="p-6">
             <h3 className="text-lg font-medium text-gray-900 mb-4">Sprint Timeline</h3>
             <div className="space-y-4">
-              {sortedSprints.map((sprint, index) => {
+              {sortedSprints.map((sprint) => {
                 const startDate = new Date(sprint.startDate);
                 const endDate = new Date(sprint.endDate);
-                const now = new Date();
                 const isActive = sprint.status === 'Active';
                 const isCompleted = sprint.status === 'Completed';
                 

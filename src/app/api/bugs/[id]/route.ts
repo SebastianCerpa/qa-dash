@@ -5,11 +5,12 @@ import { getServerSession } from "next-auth";
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const bug = await prisma.bug_reports.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         reporter: {
           select: { id: true, name: true, email: true, avatar_url: true },
@@ -56,9 +57,10 @@ export async function GET(
 
 export async function PUT(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const session = await getServerSession();
     if (!session?.user?.email) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -76,7 +78,7 @@ export async function PUT(
 
     // Get current bug to track changes
     const currentBug = await prisma.bug_reports.findUnique({
-      where: { id: params.id },
+      where: { id },
     });
 
     if (!currentBug) {
@@ -84,7 +86,7 @@ export async function PUT(
     }
 
     const updatedBug = await prisma.bug_reports.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         title: data.title,
         description: data.description,
@@ -151,7 +153,7 @@ export async function PUT(
     for (const change of changes) {
       await prisma.bug_activities.create({
         data: {
-          bug_id: params.id,
+          bug_id: id,
           user_id: user.id,
           action: "updated",
           field: change.field,
@@ -185,9 +187,10 @@ export async function PUT(
 
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const session = await getServerSession();
     if (!session?.user?.email) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -203,7 +206,7 @@ export async function DELETE(
 
     // Check if user has permission to delete (admin or bug reporter)
     const bug = await prisma.bug_reports.findUnique({
-      where: { id: params.id },
+      where: { id },
     });
 
     if (!bug) {
@@ -222,7 +225,7 @@ export async function DELETE(
     }
 
     await prisma.bug_reports.delete({
-      where: { id: params.id },
+      where: { id },
     });
 
     return NextResponse.json({ message: "Bug deleted successfully" });

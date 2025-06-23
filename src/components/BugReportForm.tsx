@@ -240,7 +240,7 @@ export default function BugReportForm({
                 <SelectContent>
                   {severityOptions.map(option => (
                     <SelectItem key={option.value} value={option.value}>
-                      <Badge className={option.color}>{option.label}</Badge>
+                      <Badge label={option.label} className={option.color} />
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -351,7 +351,7 @@ export default function BugReportForm({
               <Checkbox
                 id="regression"
                 checked={formData.is_regression}
-                onCheckedChange={(checked) => handleInputChange('is_regression', checked)}
+                onChange={(e) => handleInputChange('is_regression', e.target.checked)}
               />
               <Label htmlFor="regression">This is a regression bug</Label>
             </div>
@@ -402,13 +402,13 @@ export default function BugReportForm({
             </div>
             <div className="flex flex-wrap gap-2">
               {formData.labels.map(label => (
-                <Badge key={label} variant="secondary" className="flex items-center gap-1">
+                <div key={label} className="inline-flex items-center gap-1 bg-gray-100 text-gray-800 px-3 py-1.5 text-xs font-semibold rounded-full border border-gray-200">
                   {label}
                   <X 
-                    className="h-3 w-3 cursor-pointer" 
+                    className="h-3 w-3 cursor-pointer hover:text-red-600" 
                     onClick={() => handleRemoveLabel(label)}
                   />
-                </Badge>
+                </div>
               ))}
             </div>
           </div>
@@ -449,7 +449,7 @@ export default function BugReportForm({
                   {field.type === 'boolean' ? (
                     <Checkbox
                       checked={field.value === 'true'}
-                      onCheckedChange={(checked) => updateCustomField(field.id, { value: checked ? 'true' : 'false' })}
+                      onChange={(e) => updateCustomField(field.id, { value: e.target.checked ? 'true' : 'false' })}
                     />
                   ) : (
                     <Input

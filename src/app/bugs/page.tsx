@@ -1,39 +1,46 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect } from 'react';
-import Button  from '../../components/ui/Button';
-import { Input } from '@/components/ui/Input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/Select';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
-import Badge  from '@/components/ui/Badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/Tabs';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/Dialog';
-import { 
-  Plus, 
-  Search, 
-  Filter, 
-  Download, 
-  AlertTriangle, 
-  Bug, 
-  Clock, 
-  User, 
+import React, { useState, useEffect, useCallback } from "react";
+import Button from "../../components/ui/Button";
+import { Input } from "@/components/ui/Input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/Select";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
+import Badge from "@/components/ui/Badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/Tabs";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/Dialog";
+import {
+  Plus,
+  Search,
+  Download,
+  AlertTriangle,
+  Bug,
+  User,
   Calendar,
   MoreHorizontal,
-  Eye,
-  Edit,
-  Trash2
-} from 'lucide-react';
-import { toast } from 'sonner';
-import BugReportForm from '@/components/BugReportForm';
-import AnalyticsDashboard from '@/components/AnalyticsDashboard';
+} from "lucide-react";
+import { toast } from "sonner";
+import BugReportForm from "@/components/BugReportForm";
+import AnalyticsDashboard from "@/components/AnalyticsDashboard";
 
 interface BugReport {
   id: string;
   title: string;
   description: string;
-  severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' | 'BLOCKER';
-  priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';
-  status: 'OPEN' | 'IN_PROGRESS' | 'RESOLVED' | 'CLOSED' | 'REOPENED';
+  severity: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL" | "BLOCKER";
+  priority: "LOW" | "MEDIUM" | "HIGH" | "URGENT";
+  status: "OPEN" | "IN_PROGRESS" | "RESOLVED" | "CLOSED" | "REOPENED";
   project_id: string;
   reporter_id: string;
   assignee_id?: string;
@@ -71,22 +78,6 @@ interface TestCase {
   name: string;
 }
 
-const SEVERITY_COLORS = {
-  LOW: 'bg-green-100 text-green-800',
-  MEDIUM: 'bg-yellow-100 text-yellow-800',
-  HIGH: 'bg-orange-100 text-orange-800',
-  CRITICAL: 'bg-red-100 text-red-800',
-  BLOCKER: 'bg-purple-100 text-purple-800'
-};
-
-const STATUS_COLORS = {
-  OPEN: 'bg-blue-100 text-blue-800',
-  IN_PROGRESS: 'bg-yellow-100 text-yellow-800',
-  RESOLVED: 'bg-green-100 text-green-800',
-  CLOSED: 'bg-gray-100 text-gray-800',
-  REOPENED: 'bg-red-100 text-red-800'
-};
-
 export default function BugsPage() {
   const [bugs, setBugs] = useState<BugReport[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
@@ -94,21 +85,59 @@ export default function BugsPage() {
   const [testCases, setTestCases] = useState<TestCase[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreateForm, setShowCreateForm] = useState(false);
-  const [activeTab, setActiveTab] = useState('list');
-  
+  const [activeTab, setActiveTab] = useState("list");
+
   // Filters
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedProject, setSelectedProject] = useState<string>('all');
-  const [selectedSeverity, setSelectedSeverity] = useState<string>('all');
-  const [selectedStatus, setSelectedStatus] = useState<string>('all');
-  const [selectedAssignee, setSelectedAssignee] = useState<string>('all');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedProject, setSelectedProject] = useState<string>("all");
+  const [selectedSeverity, setSelectedSeverity] = useState<string>("all");
+  const [selectedStatus, setSelectedStatus] = useState<string>("all");
+  const [selectedAssignee, setSelectedAssignee] = useState<string>("all");
   const [showRegressionOnly, setShowRegressionOnly] = useState(false);
-  
+
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalBugs, setTotalBugs] = useState(0);
   const itemsPerPage = 20;
+
+  // Declarar fetchBugs antes de useEffect
+  const fetchBugs = useCallback(async () => {
+    setLoading(true);
+    try {
+      const params = new URLSearchParams({
+        page: currentPage.toString(),
+        limit: itemsPerPage.toString(),
+        ...(searchTerm && { search: searchTerm }),
+        ...(selectedProject !== "all" && { project_id: selectedProject }),
+        ...(selectedSeverity !== "all" && { severity: selectedSeverity }),
+        ...(selectedStatus !== "all" && { status: selectedStatus }),
+        ...(selectedAssignee !== "all" && { assignee_id: selectedAssignee }),
+        ...(showRegressionOnly && { is_regression: "true" }),
+      });
+
+      const response = await fetch(`/api/bugs?${params}`);
+      if (!response.ok) throw new Error("Failed to fetch bugs");
+
+      const data = await response.json();
+      setBugs(data.bugs);
+      setTotalBugs(data.total);
+      setTotalPages(Math.ceil(data.total / itemsPerPage));
+    } catch (error) {
+      console.error("Error fetching bugs:", error);
+      toast.error("Failed to load bugs");
+    } finally {
+      setLoading(false);
+    }
+  }, [
+    currentPage,
+    searchTerm,
+    selectedProject,
+    selectedSeverity,
+    selectedStatus,
+    selectedAssignee,
+    showRegressionOnly,
+  ]);
 
   useEffect(() => {
     fetchInitialData();
@@ -116,22 +145,14 @@ export default function BugsPage() {
 
   useEffect(() => {
     fetchBugs();
-  }, [
-    currentPage, 
-    searchTerm, 
-    selectedProject, 
-    selectedSeverity, 
-    selectedStatus, 
-    selectedAssignee,
-    showRegressionOnly
-  ]);
+  }, [fetchBugs]);
 
   const fetchInitialData = async () => {
     try {
       const [projectsRes, usersRes, testCasesRes] = await Promise.all([
-        fetch('/api/projects'),
-        fetch('/api/users'),
-        fetch('/api/test-cases')
+        fetch("/api/projects"),
+        fetch("/api/users"),
+        fetch("/api/test-cases"),
       ]);
 
       if (projectsRes.ok) {
@@ -149,149 +170,100 @@ export default function BugsPage() {
         setTestCases(testCasesData);
       }
     } catch (error) {
-      console.error('Error fetching initial data:', error);
-      toast.error('Failed to load initial data');
+      console.error("Error fetching initial data:", error);
+      toast.error("Failed to load initial data");
     }
   };
 
-  const fetchBugs = async () => {
-    setLoading(true);
-    try {
-      const params = new URLSearchParams({
-        page: currentPage.toString(),
-        limit: itemsPerPage.toString(),
-        ...(searchTerm && { search: searchTerm }),
-        ...(selectedProject !== 'all' && { project_id: selectedProject }),
-        ...(selectedSeverity !== 'all' && { severity: selectedSeverity }),
-        ...(selectedStatus !== 'all' && { status: selectedStatus }),
-        ...(selectedAssignee !== 'all' && { assignee_id: selectedAssignee }),
-        ...(showRegressionOnly && { is_regression: 'true' })
-      });
-
-      const response = await fetch(`/api/bugs?${params}`);
-      if (!response.ok) throw new Error('Failed to fetch bugs');
-
-      const data = await response.json();
-      setBugs(data.bugs);
-      setTotalBugs(data.total);
-      setTotalPages(Math.ceil(data.total / itemsPerPage));
-    } catch (error) {
-      console.error('Error fetching bugs:', error);
-      toast.error('Failed to load bugs');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleCreateBug = async (bugData: any) => {
+  const handleCreateBug = async (bugData: Record<string, unknown>) => {
     try {
       const formData = new FormData();
-      
+
       // Add basic bug data
-      Object.keys(bugData).forEach(key => {
-        if (key !== 'attachments' && key !== 'screenshots') {
-          if (Array.isArray(bugData[key])) {
-            formData.append(key, JSON.stringify(bugData[key]));
-          } else {
-            formData.append(key, bugData[key]);
+      Object.keys(bugData).forEach((key) => {
+        if (key !== "attachments" && key !== "screenshots") {
+          const value = bugData[key as keyof typeof bugData];
+          if (Array.isArray(value)) {
+            formData.append(key, JSON.stringify(value));
+          } else if (value !== null && value !== undefined) {
+            formData.append(key, String(value));
           }
         }
       });
-      
+
       // Add files
-      bugData.attachments?.forEach((file: File) => {
-        formData.append('attachments', file);
+      (bugData.attachments as File[])?.forEach((file: File) => {
+        formData.append("attachments", file);
       });
-      
-      bugData.screenshots?.forEach((file: File) => {
-        formData.append('screenshots', file);
-      });
-
-      const response = await fetch('/api/bugs', {
-        method: 'POST',
-        body: formData
+      (bugData.screenshots as File[])?.forEach((file: File) => {
+        formData.append("screenshots", file);
       });
 
-      if (!response.ok) throw new Error('Failed to create bug');
+      const response = await fetch("/api/bugs", {
+        method: "POST",
+        body: formData,
+      });
 
-      toast.success('Bug report created successfully!');
+      if (!response.ok) throw new Error("Failed to create bug");
+
+      toast.success("Bug report created successfully!");
       setShowCreateForm(false);
       fetchBugs();
     } catch (error) {
-      console.error('Error creating bug:', error);
-      toast.error('Failed to create bug report');
-    }
-  };
-
-  const handleDeleteBug = async (bugId: string) => {
-    if (!confirm('Are you sure you want to delete this bug report?')) {
-      return;
-    }
-
-    try {
-      const response = await fetch(`/api/bugs/${bugId}`, {
-        method: 'DELETE'
-      });
-
-      if (!response.ok) throw new Error('Failed to delete bug');
-
-      toast.success('Bug report deleted successfully!');
-      fetchBugs();
-    } catch (error) {
-      console.error('Error deleting bug:', error);
-      toast.error('Failed to delete bug report');
+      console.error("Error creating bug:", error);
+      toast.error("Failed to create bug report");
     }
   };
 
   const exportBugs = async () => {
     try {
       const params = new URLSearchParams({
-        export: 'true',
+        export: "true",
         ...(searchTerm && { search: searchTerm }),
-        ...(selectedProject !== 'all' && { project_id: selectedProject }),
-        ...(selectedSeverity !== 'all' && { severity: selectedSeverity }),
-        ...(selectedStatus !== 'all' && { status: selectedStatus }),
-        ...(selectedAssignee !== 'all' && { assignee_id: selectedAssignee }),
-        ...(showRegressionOnly && { is_regression: 'true' })
+        ...(selectedProject !== "all" && { project_id: selectedProject }),
+        ...(selectedSeverity !== "all" && { severity: selectedSeverity }),
+        ...(selectedStatus !== "all" && { status: selectedStatus }),
+        ...(selectedAssignee !== "all" && { assignee_id: selectedAssignee }),
+        ...(showRegressionOnly && { is_regression: "true" }),
       });
 
       const response = await fetch(`/api/bugs/export?${params}`);
-      if (!response.ok) throw new Error('Failed to export bugs');
+      if (!response.ok) throw new Error("Failed to export bugs");
 
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
+      const a = document.createElement("a");
       a.href = url;
-      a.download = `bugs-export-${new Date().toISOString().split('T')[0]}.csv`;
+      a.download = `bugs-export-${new Date().toISOString().split("T")[0]}.csv`;
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
 
-      toast.success('Bugs exported successfully!');
+      toast.success("Bugs exported successfully!");
     } catch (error) {
-      console.error('Error exporting bugs:', error);
-      toast.error('Failed to export bugs');
+      console.error("Error exporting bugs:", error);
+      toast.error("Failed to export bugs");
     }
   };
 
   const clearFilters = () => {
-    setSearchTerm('');
-    setSelectedProject('all');
-    setSelectedSeverity('all');
-    setSelectedStatus('all');
-    setSelectedAssignee('all');
+    setSearchTerm("");
+    setSelectedProject("all");
+    setSelectedSeverity("all");
+    setSelectedStatus("all");
+    setSelectedAssignee("all");
     setShowRegressionOnly(false);
     setCurrentPage(1);
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
+    return new Date(dateString).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     });
   };
 
@@ -301,18 +273,16 @@ export default function BugsPage() {
         <div className="flex items-start justify-between mb-3">
           <div className="flex-1">
             <h3 className="font-semibold text-lg mb-1">{bug.title}</h3>
-            <p className="text-gray-600 text-sm line-clamp-2">{bug.description}</p>
+            <p className="text-gray-600 text-sm line-clamp-2">
+              {bug.description}
+            </p>
           </div>
           <div className="flex items-center gap-2 ml-4">
-            <Badge className={SEVERITY_COLORS[bug.severity]}>
-              {bug.severity}
-            </Badge>
-            <Badge className={STATUS_COLORS[bug.status]}>
-              {bug.status.replace('_', ' ')}
-            </Badge>
+            <Badge label={bug.severity} variant="outline" />
+            <Badge label={bug.status.replace("_", " ")} variant="outline" />
           </div>
         </div>
-        
+
         <div className="flex items-center justify-between text-sm text-gray-500">
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-1">
@@ -330,12 +300,10 @@ export default function BugsPage() {
               <span>{formatDate(bug.created_at)}</span>
             </div>
           </div>
-          
+
           <div className="flex items-center gap-2">
             {bug.is_regression && (
-              <Badge variant="destructive" className="text-xs">
-                Regression
-              </Badge>
+              <Badge label="Regression" variant="warning" className="text-xs" />
             )}
             <div className="flex items-center gap-1 text-xs">
               <span>{bug._count.bug_comments} comments</span>
@@ -347,13 +315,16 @@ export default function BugsPage() {
             </Button>
           </div>
         </div>
-        
+
         {bug.labels.length > 0 && (
           <div className="flex flex-wrap gap-1 mt-3">
-            {bug.labels.map(label => (
-              <Badge key={label} variant="outline" className="text-xs">
-                {label}
-              </Badge>
+            {bug.labels.map((label) => (
+              <Badge
+                key={label}
+                label={label}
+                variant="outline"
+                className="text-xs"
+              />
             ))}
           </div>
         )}
@@ -423,22 +394,28 @@ export default function BugsPage() {
                     className="pl-10"
                   />
                 </div>
-                
-                <Select value={selectedProject} onValueChange={setSelectedProject}>
+
+                <Select
+                  value={selectedProject}
+                  onValueChange={setSelectedProject}
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="All Projects" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All Projects</SelectItem>
-                    {projects.map(project => (
+                    {projects.map((project) => (
                       <SelectItem key={project.id} value={project.id}>
                         {project.name}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
-                
-                <Select value={selectedSeverity} onValueChange={setSelectedSeverity}>
+
+                <Select
+                  value={selectedSeverity}
+                  onValueChange={setSelectedSeverity}
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="All Severities" />
                   </SelectTrigger>
@@ -451,8 +428,11 @@ export default function BugsPage() {
                     <SelectItem value="BLOCKER">Blocker</SelectItem>
                   </SelectContent>
                 </Select>
-                
-                <Select value={selectedStatus} onValueChange={setSelectedStatus}>
+
+                <Select
+                  value={selectedStatus}
+                  onValueChange={setSelectedStatus}
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="All Statuses" />
                   </SelectTrigger>
@@ -465,25 +445,28 @@ export default function BugsPage() {
                     <SelectItem value="REOPENED">Reopened</SelectItem>
                   </SelectContent>
                 </Select>
-                
-                <Select value={selectedAssignee} onValueChange={setSelectedAssignee}>
+
+                <Select
+                  value={selectedAssignee}
+                  onValueChange={setSelectedAssignee}
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="All Assignees" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All Assignees</SelectItem>
                     <SelectItem value="unassigned">Unassigned</SelectItem>
-                    {users.map(user => (
+                    {users.map((user) => (
                       <SelectItem key={user.id} value={user.id}>
                         {user.name}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
-                
+
                 <div className="flex gap-2">
                   <Button
-                    variant={showRegressionOnly ? "default" : "outline"}
+                    variant={showRegressionOnly ? "primary" : "outline"}
                     size="sm"
                     onClick={() => setShowRegressionOnly(!showRegressionOnly)}
                   >
@@ -532,9 +515,9 @@ export default function BugsPage() {
                     </Button>
                   </div>
                 </div>
-                
+
                 <div className="space-y-3">
-                  {bugs.map(bug => (
+                  {bugs.map((bug) => (
                     <BugCard key={bug.id} bug={bug} />
                   ))}
                 </div>
@@ -547,7 +530,8 @@ export default function BugsPage() {
                     No bugs found
                   </h3>
                   <p className="text-gray-500 mb-4">
-                    No bugs match your current filters. Try adjusting your search criteria.
+                    No bugs match your current filters. Try adjusting your
+                    search criteria.
                   </p>
                   <Button onClick={clearFilters} variant="outline">
                     Clear Filters

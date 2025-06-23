@@ -21,8 +21,8 @@ export async function GET(req: NextRequest) {
     if (assigneeId) where.assignee_id = assigneeId;
     if (search) {
       where.OR = [
-        { title: { contains: search, mode: "insensitive" } },
-        { description: { contains: search, mode: "insensitive" } },
+        { title: { contains: search } },
+        { description: { contains: search } },
       ];
     }
 
@@ -169,11 +169,10 @@ async function checkForRegression(
       where: {
         status: { in: ["RESOLVED", "CLOSED"] },
         OR: [
-          { title: { contains: title.split(" ")[0], mode: "insensitive" } },
+          { title: { contains: title.split(" ")[0] } },
           {
             description: {
               contains: description.substring(0, 50),
-              mode: "insensitive",
             },
           },
         ],
@@ -202,7 +201,7 @@ async function autoAssignBug(bugId: string, labels: string[]) {
         // Find available team member with matching role
         const assignee = await prisma.users.findFirst({
           where: {
-            role: { contains: rule.role, mode: "insensitive" },
+            role: { contains: rule.role },
             status: "active",
           },
         });

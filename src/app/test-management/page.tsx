@@ -1,11 +1,12 @@
-'use client';
+/* eslint-disable react/jsx-key */
+"use client";
 
-import React, { useState, useMemo } from 'react';
-import DashboardLayout from '@/components/layout/DashboardLayout';
-import Button from '@/components/ui/Button';
-import Card from '@/components/ui/Card';
-import Badge from '@/components/ui/Badge';
-import { useEnhancedQAStore, TestCase, TestPlan, TestStep } from '@/store/enhancedStore';
+import React, { useState, useMemo } from "react";
+import DashboardLayout from "@/components/layout/DashboardLayout";
+import Button from "@/components/ui/Button";
+import Card from "@/components/ui/Card";
+import Badge from "@/components/ui/Badge";
+import { useEnhancedQAStore, TestCase, TestStep } from "@/store/enhancedStore";
 import {
   PlusIcon,
   DocumentTextIcon,
@@ -14,110 +15,141 @@ import {
   CheckCircleIcon,
   XCircleIcon,
   ClockIcon,
-  EyeIcon,
   PencilIcon,
   TrashIcon,
-  ArrowDownTrayIcon
-} from '@heroicons/react/24/outline';
+  ArrowDownTrayIcon,
+} from "@heroicons/react/24/outline";
 
-type TabType = 'test-cases' | 'test-plans' | 'execution';
+type TabType = "test-cases" | "test-plans" | "execution";
+type TestPriority = "Low" | "Medium" | "High" | "Critical";
+type TestType = "Manual" | "Automated" | "Exploratory" | "Regression";
+type TestStatus = "Passed" | "Failed" | "Blocked" | "Not Executed";
 
 interface TestCaseFormData {
   title: string;
   description: string;
-  priority: 'Low' | 'Medium' | 'High' | 'Critical';
-  type: 'Functional' | 'Integration' | 'Performance' | 'Security' | 'Usability' | 'Regression';
-  preconditions: string;
+  priority: TestPriority;
+  type: "Manual" | "Automated" | "Exploratory" | "Regression";
   steps: TestStep[];
   expectedResult: string;
+  preconditions: string[];
   ticketId?: string;
   tags: string[];
+  status?: TestStatus;
+  environment?: string;
+  linkedTicketIds?: string[];
+  estimatedTime?: number;
+  prerequisites?: string[];
+  automationScript?: string;
 }
 
-interface TestPlanFormData {
-  name: string;
-  description: string;
-  objective: string;
-  scope: string;
-  testCaseIds: string[];
-  sprintId?: string;
-  startDate: string;
-  endDate: string;
-  status: 'Draft' | 'Active' | 'Completed' | 'Cancelled';
-}
-
-function TestCaseForm({ 
-  testCase, 
-  onSuccess, 
-  onCancel 
-}: { 
-  testCase?: TestCase; 
-  onSuccess: () => void; 
-  onCancel: () => void; 
+function TestCaseForm({
+  testCase,
+  onSuccess,
+  onCancel,
+}: {
+  testCase?: TestCase;
+  onSuccess: () => void;
+  onCancel: () => void;
 }) {
   const { addTestCase, updateTestCase, tickets } = useEnhancedQAStore();
   const [formData, setFormData] = useState<TestCaseFormData>({
-    title: testCase?.title || '',
-    description: testCase?.description || '',
-    priority: testCase?.priority || 'Medium',
-    type: testCase?.type || 'Functional',
-    preconditions: testCase?.preconditions || '',
-    steps: testCase?.steps || [{ stepNumber: 1, action: '', expectedResult: '' }],
-    expectedResult: testCase?.expectedResult || '',
-    ticketId: testCase?.ticketId || '',
-    tags: testCase?.tags || []
+    title: testCase?.title || "",
+    description: testCase?.description || "",
+    priority: testCase?.priority || "Medium",
+    type: testCase?.type || "Manual",
+    preconditions: testCase?.preconditions ? [testCase.preconditions] : [],
+    steps: testCase?.steps || [
+      {
+        id: Date.now().toString(), // Agregar id si es requerido
+        stepNumber: 1,
+        action: "",
+        expectedResult: "",
+      },
+    ],
+    expectedResult: testCase?.expectedResult || "",
+    ticketId: testCase?.ticketId || "",
+    tags: testCase?.tags || [],
+    environment: testCase?.environment || "",
+    linkedTicketIds: testCase?.linkedTicketIds || [],
+    estimatedTime: testCase?.estimatedTime || 0,
+    automationScript: testCase?.automationScript || "",
   });
-  const [newTag, setNewTag] = useState('');
+  const [newTag, setNewTag] = useState("");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
+    // Convert formData to match TestCase interface
+    const testCaseData = {
+      ...formData,
+      preconditions: formData.preconditions.join('\n'),
+      prerequisites: formData.prerequisites?.join('\n') || '',
+      status: formData.status || 'Not Executed',
+      environment: formData.environment || 'Development',
+      ticketId: formData.ticketId || '',
+      estimatedTime: formData.estimatedTime || 0,
+      linkedTicketIds: formData.linkedTicketIds || []
+    };
+
     if (testCase) {
-      updateTestCase(testCase.id, formData);
+      updateTestCase(testCase.id, testCaseData);
     } else {
-      addTestCase(formData);
+      addTestCase(testCaseData);
     }
-    
+
     onSuccess();
   };
 
   const addStep = () => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      steps: [...prev.steps, { 
-        stepNumber: prev.steps.length + 1, 
-        action: '', 
-        expectedResult: '' 
-      }]
+      steps: [
+        ...prev.steps,
+        {
+          id: Date.now().toString(), // Agregar id si es requerido
+          stepNumber: prev.steps.length + 1,
+          action: "",
+          expectedResult: "",
+        },
+      ],
     }));
   };
 
-  const updateStep = (index: number, field: keyof TestStep, value: string | number) => {
-    setFormData(prev => ({
+  const updateStep = (
+    index: number,
+    field: keyof TestStep,
+    value: string | number
+  ) => {
+    setFormData((prev) => ({
       ...prev,
-      steps: prev.steps.map((step, i) => 
+      steps: prev.steps.map((step, i) =>
         i === index ? { ...step, [field]: value } : step
-      )
+      ),
     }));
   };
 
   const removeStep = (index: number) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      steps: prev.steps.filter((_, i) => i !== index)
-        .map((step, i) => ({ ...step, stepNumber: i + 1 }))
+      steps: prev.steps
+        .filter((_, i) => i !== index)
+        .map((step, i) => ({ ...step, stepNumber: i + 1 })),
     }));
   };
 
   const addTag = () => {
     if (newTag.trim() && !formData.tags.includes(newTag.trim())) {
-      setFormData(prev => ({ ...prev, tags: [...prev.tags, newTag.trim()] }));
-      setNewTag('');
+      setFormData((prev) => ({ ...prev, tags: [...prev.tags, newTag.trim()] }));
+      setNewTag("");
     }
   };
 
   const removeTag = (tag: string) => {
-    setFormData(prev => ({ ...prev, tags: prev.tags.filter(t => t !== tag) }));
+    setFormData((prev) => ({
+      ...prev,
+      tags: prev.tags.filter((t) => t !== tag),
+    }));
   };
 
   return (
@@ -130,7 +162,9 @@ function TestCaseForm({
           <input
             type="text"
             value={formData.title}
-            onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
+            onChange={(e) =>
+              setFormData((prev) => ({ ...prev, title: e.target.value }))
+            }
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
             required
           />
@@ -142,7 +176,12 @@ function TestCaseForm({
           </label>
           <select
             value={formData.priority}
-            onChange={(e) => setFormData(prev => ({ ...prev, priority: e.target.value as any }))}
+            onChange={(e) =>
+              setFormData((prev) => ({
+                ...prev,
+                priority: e.target.value as TestPriority,
+              }))
+            }
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
           >
             <option value="Low">Low</option>
@@ -158,14 +197,17 @@ function TestCaseForm({
           </label>
           <select
             value={formData.type}
-            onChange={(e) => setFormData(prev => ({ ...prev, type: e.target.value as any }))}
+            onChange={(e) =>
+              setFormData((prev) => ({
+                ...prev,
+                type: e.target.value as TestType,
+              }))
+            }
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
           >
-            <option value="Functional">Functional</option>
-            <option value="Integration">Integration</option>
-            <option value="Performance">Performance</option>
-            <option value="Security">Security</option>
-            <option value="Usability">Usability</option>
+            <option value="Manual">Manual</option>
+            <option value="Automated">Automated</option>
+            <option value="Exploratory">Exploratory</option>
             <option value="Regression">Regression</option>
           </select>
         </div>
@@ -176,12 +218,16 @@ function TestCaseForm({
           </label>
           <select
             value={formData.ticketId}
-            onChange={(e) => setFormData(prev => ({ ...prev, ticketId: e.target.value }))}
+            onChange={(e) =>
+              setFormData((prev) => ({ ...prev, ticketId: e.target.value }))
+            }
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
           >
             <option value="">No ticket linked</option>
-            {tickets.map(ticket => (
-              <option key={ticket.id} value={ticket.id}>{ticket.title}</option>
+            {tickets.map((ticket) => (
+              <option key={ticket.id} value={ticket.id}>
+                {ticket.title}
+              </option>
             ))}
           </select>
         </div>
@@ -193,7 +239,9 @@ function TestCaseForm({
         </label>
         <textarea
           value={formData.description}
-          onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+          onChange={(e) =>
+            setFormData((prev) => ({ ...prev, description: e.target.value }))
+          }
           rows={3}
           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
         />
@@ -204,8 +252,13 @@ function TestCaseForm({
           Preconditions
         </label>
         <textarea
-          value={formData.preconditions}
-          onChange={(e) => setFormData(prev => ({ ...prev, preconditions: e.target.value }))}
+          value={formData.preconditions.join("\n")}
+          onChange={(e) =>
+            setFormData((prev) => ({
+              ...prev,
+              preconditions: e.target.value.split("\n"),
+            }))
+          }
           rows={2}
           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
           placeholder="Any setup or conditions required before executing this test"
@@ -224,9 +277,14 @@ function TestCaseForm({
         </div>
         <div className="space-y-3">
           {formData.steps.map((step, index) => (
-            <div key={index} className="border border-gray-200 rounded-md p-4">
+            <div
+              key={step.id || index}
+              className="border border-gray-200 rounded-md p-4"
+            >
               <div className="flex justify-between items-center mb-2">
-                <span className="text-sm font-medium text-gray-700">Step {step.stepNumber}</span>
+                <span className="text-sm font-medium text-gray-700">
+                  Step {step.stepNumber}
+                </span>
                 {formData.steps.length > 1 && (
                   <Button
                     type="button"
@@ -245,7 +303,9 @@ function TestCaseForm({
                   </label>
                   <textarea
                     value={step.action}
-                    onChange={(e) => updateStep(index, 'action', e.target.value)}
+                    onChange={(e) =>
+                      updateStep(index, "action", e.target.value)
+                    }
                     rows={2}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-sm"
                     placeholder="Describe the action to perform"
@@ -257,7 +317,9 @@ function TestCaseForm({
                   </label>
                   <textarea
                     value={step.expectedResult}
-                    onChange={(e) => updateStep(index, 'expectedResult', e.target.value)}
+                    onChange={(e) =>
+                      updateStep(index, "expectedResult", e.target.value)
+                    }
                     rows={2}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-sm"
                     placeholder="Describe the expected outcome"
@@ -275,7 +337,9 @@ function TestCaseForm({
         </label>
         <textarea
           value={formData.expectedResult}
-          onChange={(e) => setFormData(prev => ({ ...prev, expectedResult: e.target.value }))}
+          onChange={(e) =>
+            setFormData((prev) => ({ ...prev, expectedResult: e.target.value }))
+          }
           rows={2}
           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
           placeholder="Overall expected outcome of the test case"
@@ -287,17 +351,17 @@ function TestCaseForm({
           Tags
         </label>
         <div className="flex flex-wrap gap-2 mb-2">
-          {formData.tags.map(tag => (
-            <Badge key={tag} className="bg-blue-100 text-blue-800">
-              {tag}
+          {formData.tags.map((tag) => (
+            <div key={tag} className="inline-flex items-center bg-gray-100 text-gray-800 px-3 py-1.5 text-xs font-semibold rounded-full border border-gray-200">
+              <span>{tag}</span>
               <button
                 type="button"
                 onClick={() => removeTag(tag)}
-                className="ml-1 text-blue-600 hover:text-blue-800"
+                className="ml-1 text-current hover:text-red-600"
               >
                 ×
               </button>
-            </Badge>
+            </div>
           ))}
         </div>
         <div className="flex gap-2">
@@ -305,7 +369,9 @@ function TestCaseForm({
             type="text"
             value={newTag}
             onChange={(e) => setNewTag(e.target.value)}
-            onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addTag())}
+            onKeyPress={(e) =>
+              e.key === "Enter" && (e.preventDefault(), addTag())
+            }
             className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
             placeholder="Add a tag"
           />
@@ -320,39 +386,60 @@ function TestCaseForm({
           Cancel
         </Button>
         <Button type="submit">
-          {testCase ? 'Update Test Case' : 'Create Test Case'}
+          {testCase ? "Update Test Case" : "Create Test Case"}
         </Button>
       </div>
     </form>
   );
 }
 
-function TestCaseCard({ testCase, onEdit, onDelete, onExecute }: {
+function TestCaseCard({
+  testCase,
+  onEdit,
+  onDelete,
+  onExecute,
+}: {
   testCase: TestCase;
   onEdit: (id: string) => void;
   onDelete: (id: string) => void;
   onExecute: (id: string) => void;
 }) {
   const { tickets } = useEnhancedQAStore();
-  const linkedTicket = testCase.ticketId ? tickets.find(t => t.id === testCase.ticketId) : null;
-  
-  const getPriorityColor = (priority: string) => {
+  const linkedTicket = testCase.ticketId
+    ? tickets.find((t) => t.id === testCase.ticketId)
+    : null;
+
+  const getPriorityVariant = (
+    priority: string
+  ): "default" | "secondary" | "danger" | "warning" | "success" | "info" => {
     switch (priority) {
-      case 'Critical': return 'bg-red-100 text-red-800';
-      case 'High': return 'bg-orange-100 text-orange-800';
-      case 'Medium': return 'bg-yellow-100 text-yellow-800';
-      case 'Low': return 'bg-green-100 text-green-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case "Critical":
+        return "danger";
+      case "High":
+        return "warning";
+      case "Medium":
+        return "secondary";
+      case "Low":
+        return "info";
+      default:
+        return "default";
     }
   };
 
-  const getStatusColor = (status: string) => {
+  const getStatusVariant = (
+    status: string
+  ): "default" | "secondary" | "danger" | "warning" | "success" | "info" => {
     switch (status) {
-      case 'Passed': return 'bg-green-100 text-green-800';
-      case 'Failed': return 'bg-red-100 text-red-800';
-      case 'Blocked': return 'bg-yellow-100 text-yellow-800';
-      case 'Not Executed': return 'bg-gray-100 text-gray-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case "Passed":
+        return "success";
+      case "Failed":
+        return "danger";
+      case "Blocked":
+        return "warning";
+      case "Not Executed":
+        return "default";
+      default:
+        return "default";
     }
   };
 
@@ -361,27 +448,35 @@ function TestCaseCard({ testCase, onEdit, onDelete, onExecute }: {
       <div className="p-6">
         <div className="flex justify-between items-start mb-4">
           <div className="flex-1">
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">{testCase.title}</h3>
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">
+              {testCase.title}
+            </h3>
             <div className="flex flex-wrap gap-2 mb-2">
-              <Badge className={getPriorityColor(testCase.priority)}>
-                {testCase.priority}
-              </Badge>
-              <Badge className="bg-blue-100 text-blue-800">
-                {testCase.type}
-              </Badge>
-              <Badge className={getStatusColor(testCase.status)}>
-                {testCase.status}
-              </Badge>
+              <Badge label={testCase.priority} variant={getPriorityVariant(testCase.priority)} />
+              <Badge label={testCase.type} variant="secondary" />
+              <Badge label={testCase.status} variant={getStatusVariant(testCase.status)} />
             </div>
           </div>
           <div className="flex space-x-2">
-            <Button variant="ghost" size="sm" onClick={() => onExecute(testCase.id)}>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => onExecute(testCase.id)}
+            >
               <PlayIcon className="h-4 w-4" />
             </Button>
-            <Button variant="ghost" size="sm" onClick={() => onEdit(testCase.id)}>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => onEdit(testCase.id)}
+            >
               <PencilIcon className="h-4 w-4" />
             </Button>
-            <Button variant="ghost" size="sm" onClick={() => onDelete(testCase.id)}>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => onDelete(testCase.id)}
+            >
               <TrashIcon className="h-4 w-4" />
             </Button>
           </div>
@@ -396,28 +491,27 @@ function TestCaseCard({ testCase, onEdit, onDelete, onExecute }: {
             <DocumentTextIcon className="h-4 w-4 mr-2" />
             {testCase.steps.length} test steps
           </div>
-          
+
           {linkedTicket && (
             <div className="flex items-center text-sm text-gray-600">
               <ClipboardDocumentListIcon className="h-4 w-4 mr-2" />
               Linked to: {linkedTicket.title}
             </div>
           )}
-          
-          {testCase.lastExecuted && (
+
+          {testCase.executedAt && (
             <div className="flex items-center text-sm text-gray-600">
               <ClockIcon className="h-4 w-4 mr-2" />
-              Last executed: {new Date(testCase.lastExecuted).toLocaleDateString()}
+              Last executed:{" "}
+              {new Date(testCase.executedAt).toLocaleDateString()}
             </div>
           )}
         </div>
 
         {testCase.tags.length > 0 && (
           <div className="flex flex-wrap gap-1">
-            {testCase.tags.map(tag => (
-              <Badge key={tag} className="bg-gray-100 text-gray-700 text-xs">
-                {tag}
-              </Badge>
+            {testCase.tags.map((tag) => (
+              <Badge key={tag} label={tag} variant="outline" className="text-xs" />
             ))}
           </div>
         )}
@@ -427,12 +521,10 @@ function TestCaseCard({ testCase, onEdit, onDelete, onExecute }: {
 }
 
 export default function TestManagementPage() {
-  const { testCases, testPlans, deleteTestCase, deleteTestPlan } = useEnhancedQAStore();
-  const [activeTab, setActiveTab] = useState<TabType>('test-cases');
+  const { testCases, deleteTestCase } = useEnhancedQAStore();
+  const [activeTab, setActiveTab] = useState<TabType>("test-cases");
   const [showTestCaseForm, setShowTestCaseForm] = useState(false);
-  const [showTestPlanForm, setShowTestPlanForm] = useState(false);
   const [editingTestCase, setEditingTestCase] = useState<TestCase | null>(null);
-  const [editingTestPlan, setEditingTestPlan] = useState<TestPlan | null>(null);
 
   const handleAddTestCase = () => {
     setEditingTestCase(null);
@@ -440,20 +532,20 @@ export default function TestManagementPage() {
   };
 
   const handleEditTestCase = (testCaseId: string) => {
-    const testCase = testCases.find(tc => tc.id === testCaseId);
+    const testCase = testCases.find((tc) => tc.id === testCaseId);
     setEditingTestCase(testCase || null);
     setShowTestCaseForm(true);
   };
 
   const handleDeleteTestCase = (testCaseId: string) => {
-    if (window.confirm('Are you sure you want to delete this test case?')) {
+    if (window.confirm("Are you sure you want to delete this test case?")) {
       deleteTestCase(testCaseId);
     }
   };
 
   const handleExecuteTestCase = (testCaseId: string) => {
     // This would open a test execution modal
-    console.log('Execute test case:', testCaseId);
+    console.log("Execute test case:", testCaseId);
   };
 
   const handleTestCaseFormSuccess = () => {
@@ -463,18 +555,20 @@ export default function TestManagementPage() {
 
   const testCaseStats = useMemo(() => {
     const total = testCases.length;
-    const passed = testCases.filter(tc => tc.status === 'Passed').length;
-    const failed = testCases.filter(tc => tc.status === 'Failed').length;
-    const notExecuted = testCases.filter(tc => tc.status === 'Not Executed').length;
-    const blocked = testCases.filter(tc => tc.status === 'Blocked').length;
-    
+    const passed = testCases.filter((tc) => tc.status === "Passed").length;
+    const failed = testCases.filter((tc) => tc.status === "Failed").length;
+    const notExecuted = testCases.filter(
+      (tc) => tc.status === "Not Executed"
+    ).length;
+    const blocked = testCases.filter((tc) => tc.status === "Blocked").length;
+
     return { total, passed, failed, notExecuted, blocked };
   }, [testCases]);
 
   const tabs = [
-    { id: 'test-cases', name: 'Test Cases', icon: DocumentTextIcon },
-    { id: 'test-plans', name: 'Test Plans', icon: ClipboardDocumentListIcon },
-    { id: 'execution', name: 'Test Execution', icon: PlayIcon }
+    { id: "test-cases", name: "Test Cases", icon: DocumentTextIcon },
+    { id: "test-plans", name: "Test Plans", icon: ClipboardDocumentListIcon },
+    { id: "execution", name: "Test Execution", icon: PlayIcon },
   ];
 
   return (
@@ -483,25 +577,26 @@ export default function TestManagementPage() {
       <div className="mb-6">
         <div className="flex justify-between items-start mb-4">
           <div>
-            <h1 className="text-2xl font-semibold text-gray-900">Test Management</h1>
+            <h1 className="text-2xl font-semibold text-gray-900">
+              Test Management
+            </h1>
             <p className="mt-1 text-sm text-gray-500">
               Create, manage, and execute test cases and test plans
             </p>
           </div>
           <div className="flex space-x-2">
-            {activeTab === 'test-cases' && (
-              <Button
-                onClick={handleAddTestCase}
-                leftIcon={<PlusIcon className="h-5 w-5" />}
-              >
+            {activeTab === "test-cases" && (
+              <Button onClick={handleAddTestCase} className="flex items-center">
+                <PlusIcon className="h-5 w-5 mr-2" />
                 Create Test Case
               </Button>
             )}
-            {activeTab === 'test-plans' && (
+            {activeTab === "test-plans" && (
               <Button
-                onClick={() => setShowTestPlanForm(true)}
-                leftIcon={<PlusIcon className="h-5 w-5" />}
+                onClick={() => console.log("Create test plan")}
+                className="flex items-center"
               >
+                <PlusIcon className="h-5 w-5 mr-2" />
                 Create Test Plan
               </Button>
             )}
@@ -517,13 +612,17 @@ export default function TestManagementPage() {
                   <DocumentTextIcon className="h-8 w-8 text-blue-600" />
                 </div>
                 <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-500">Total Tests</p>
-                  <p className="text-2xl font-semibold text-gray-900">{testCaseStats.total}</p>
+                  <p className="text-sm font-medium text-gray-500">
+                    Total Tests
+                  </p>
+                  <p className="text-2xl font-semibold text-gray-900">
+                    {testCaseStats.total}
+                  </p>
                 </div>
               </div>
             </div>
           </Card>
-          
+
           <Card>
             <div className="p-4">
               <div className="flex items-center">
@@ -532,12 +631,14 @@ export default function TestManagementPage() {
                 </div>
                 <div className="ml-4">
                   <p className="text-sm font-medium text-gray-500">Passed</p>
-                  <p className="text-2xl font-semibold text-gray-900">{testCaseStats.passed}</p>
+                  <p className="text-2xl font-semibold text-gray-900">
+                    {testCaseStats.passed}
+                  </p>
                 </div>
               </div>
             </div>
           </Card>
-          
+
           <Card>
             <div className="p-4">
               <div className="flex items-center">
@@ -546,12 +647,14 @@ export default function TestManagementPage() {
                 </div>
                 <div className="ml-4">
                   <p className="text-sm font-medium text-gray-500">Failed</p>
-                  <p className="text-2xl font-semibold text-gray-900">{testCaseStats.failed}</p>
+                  <p className="text-2xl font-semibold text-gray-900">
+                    {testCaseStats.failed}
+                  </p>
                 </div>
               </div>
             </div>
           </Card>
-          
+
           <Card>
             <div className="p-4">
               <div className="flex items-center">
@@ -560,12 +663,14 @@ export default function TestManagementPage() {
                 </div>
                 <div className="ml-4">
                   <p className="text-sm font-medium text-gray-500">Blocked</p>
-                  <p className="text-2xl font-semibold text-gray-900">{testCaseStats.blocked}</p>
+                  <p className="text-2xl font-semibold text-gray-900">
+                    {testCaseStats.blocked}
+                  </p>
                 </div>
               </div>
             </div>
           </Card>
-          
+
           <Card>
             <div className="p-4">
               <div className="flex items-center">
@@ -573,8 +678,12 @@ export default function TestManagementPage() {
                   <ArrowDownTrayIcon className="h-8 w-8 text-gray-600" />
                 </div>
                 <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-500">Not Executed</p>
-                  <p className="text-2xl font-semibold text-gray-900">{testCaseStats.notExecuted}</p>
+                  <p className="text-sm font-medium text-gray-500">
+                    Not Executed
+                  </p>
+                  <p className="text-2xl font-semibold text-gray-900">
+                    {testCaseStats.notExecuted}
+                  </p>
                 </div>
               </div>
             </div>
@@ -592,8 +701,8 @@ export default function TestManagementPage() {
                   onClick={() => setActiveTab(tab.id as TabType)}
                   className={`${
                     activeTab === tab.id
-                      ? 'border-primary-500 text-primary-600'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                      ? "border-primary-500 text-primary-600"
+                      : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
                   } whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm flex items-center`}
                 >
                   <Icon className="h-5 w-5 mr-2" />
@@ -608,18 +717,23 @@ export default function TestManagementPage() {
       {/* Forms */}
       {showTestCaseForm && (
         <div className="mb-6">
-          <Card title={editingTestCase ? 'Edit Test Case' : 'Create New Test Case'}>
-            <TestCaseForm
-              testCase={editingTestCase || undefined}
-              onSuccess={handleTestCaseFormSuccess}
-              onCancel={() => setShowTestCaseForm(false)}
-            />
+          <Card>
+            <div className="p-6">
+              <h2 className="text-lg font-semibold mb-4">
+                {editingTestCase ? "Edit Test Case" : "Create New Test Case"}
+              </h2>
+              <TestCaseForm
+                testCase={editingTestCase || undefined}
+                onSuccess={handleTestCaseFormSuccess}
+                onCancel={() => setShowTestCaseForm(false)}
+              />
+            </div>
           </Card>
         </div>
       )}
 
       {/* Content */}
-      {activeTab === 'test-cases' && (
+      {activeTab === "test-cases" && (
         <div>
           {testCases.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -636,8 +750,12 @@ export default function TestManagementPage() {
           ) : (
             <div className="text-center py-12">
               <DocumentTextIcon className="mx-auto h-12 w-12 text-gray-400" />
-              <h3 className="mt-2 text-sm font-medium text-gray-900">No test cases</h3>
-              <p className="mt-1 text-sm text-gray-500">Get started by creating your first test case.</p>
+              <h3 className="mt-2 text-sm font-medium text-gray-900">
+                No test cases
+              </h3>
+              <p className="mt-1 text-sm text-gray-500">
+                Get started by creating your first test case.
+              </p>
               <div className="mt-6">
                 <Button onClick={handleAddTestCase}>
                   <PlusIcon className="h-5 w-5 mr-2" />
@@ -649,19 +767,25 @@ export default function TestManagementPage() {
         </div>
       )}
 
-      {activeTab === 'test-plans' && (
+      {activeTab === "test-plans" && (
         <div className="text-center py-12">
           <ClipboardDocumentListIcon className="mx-auto h-12 w-12 text-gray-400" />
           <h3 className="mt-2 text-sm font-medium text-gray-900">Test Plans</h3>
-          <p className="mt-1 text-sm text-gray-500">Test plan management coming soon...</p>
+          <p className="mt-1 text-sm text-gray-500">
+            Test plan management coming soon...
+          </p>
         </div>
       )}
 
-      {activeTab === 'execution' && (
+      {activeTab === "execution" && (
         <div className="text-center py-12">
           <PlayIcon className="mx-auto h-12 w-12 text-gray-400" />
-          <h3 className="mt-2 text-sm font-medium text-gray-900">Test Execution</h3>
-          <p className="mt-1 text-sm text-gray-500">Test execution interface coming soon...</p>
+          <h3 className="mt-2 text-sm font-medium text-gray-900">
+            Test Execution
+          </h3>
+          <p className="mt-1 text-sm text-gray-500">
+            Test execution interface coming soon...
+          </p>
         </div>
       )}
     </DashboardLayout>

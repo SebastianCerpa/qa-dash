@@ -219,7 +219,6 @@ class NotificationService {
   ): Promise<void> {
     try {
       // This would integrate with your WebSocket/SSE implementation
-      // For now, we'll just log it
       console.log("Real-time notification would be sent:", {
         userId: notification.user_id,
         type: notification.type,

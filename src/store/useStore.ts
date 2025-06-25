@@ -1,27 +1,27 @@
-'use client';
+"use client";
 
-import { create } from 'zustand';
-import { persist, createJSONStorage } from 'zustand/middleware';
+import { create } from "zustand";
+import { persist, createJSONStorage } from "zustand/middleware";
 
 // Define test types
 export type TestType =
-  | 'Positive'
-  | 'Negative'
-  | 'Functional'
-  | 'Non-functional'
-  | 'Regression'
-  | 'API'
-  | 'Exploratory'
-  | 'Boundary'
-  | 'Smoke'
-  | 'Stress'
-  | 'Accessibility';
+  | "Positive"
+  | "Negative"
+  | "Functional"
+  | "Non-functional"
+  | "Regression"
+  | "API"
+  | "Exploratory"
+  | "Boundary"
+  | "Smoke"
+  | "Stress"
+  | "Accessibility";
 
 // Define task status
-export type TaskStatus = 'Todo' | 'In Progress' | 'Review' | 'Done';
+export type TaskStatus = "Todo" | "In Progress" | "Review" | "Done";
 
 // Define task priority
-export type TaskPriority = 'Low' | 'Medium' | 'High' | 'Critical';
+export type TaskPriority = "Low" | "Medium" | "High" | "Critical";
 
 // Define comment interface
 export interface Comment {
@@ -75,23 +75,28 @@ interface StoreState {
   teamMembers: TeamMember[];
   currentUser: TeamMember | null;
   // Actions
-  addTask: (task: Omit<Task, 'id' | 'createdAt' | 'updatedAt'>) => void;
+  addTask: (task: Omit<Task, "id" | "createdAt" | "updatedAt">) => void;
   updateTask: (id: string, task: Partial<Task>) => void;
   deleteTask: (id: string) => void;
-  addWorkflow: (workflow: Omit<Workflow, 'id' | 'createdAt' | 'updatedAt'>) => void;
+  addWorkflow: (
+    workflow: Omit<Workflow, "id" | "createdAt" | "updatedAt">
+  ) => void;
   updateWorkflow: (id: string, workflow: Partial<Workflow>) => void;
   deleteWorkflow: (id: string) => void;
-  addTeamMember: (member: Omit<TeamMember, 'id'>) => void;
+  addTeamMember: (member: Omit<TeamMember, "id">) => void;
   updateTeamMember: (id: string, member: Partial<TeamMember>) => void;
   deleteTeamMember: (id: string) => void;
   setCurrentUser: (user: TeamMember | null) => void;
-  addComment: (taskId: string, comment: Omit<Comment, 'id' | 'createdAt'>) => void;
+  addComment: (
+    taskId: string,
+    comment: Omit<Comment, "id" | "createdAt">
+  ) => void;
 }
 
 // Create the store
 export const useStore = create<StoreState>()(
   persist(
-    (set, get) => ({
+    (set) => ({
       tasks: [],
       workflows: [],
       teamMembers: [],
@@ -210,10 +215,12 @@ export const useStore = create<StoreState>()(
         })),
     }),
     {
-      name: 'qa-dashboard-storage',
+      name: "qa-dashboard-storage",
       // 💡 Este check asegura que localStorage solo se use en el cliente
-      storage: typeof window !== 'undefined' ? createJSONStorage(() => localStorage) : undefined,
-
+      storage:
+        typeof window !== "undefined"
+          ? createJSONStorage(() => localStorage)
+          : undefined,
     }
   )
 );

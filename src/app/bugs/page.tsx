@@ -31,7 +31,7 @@ import {
   MoreHorizontal,
 } from "lucide-react";
 import { toast } from "sonner";
-import BugReportForm from "@/components/BugReportForm";
+import BugReportForm, { BugReportData } from "@/components/BugReportForm";
 import AnalyticsDashboard from "@/components/AnalyticsDashboard";
 
 interface BugReport {
@@ -175,7 +175,7 @@ export default function BugsPage() {
     }
   };
 
-  const handleCreateBug = async (bugData: Record<string, unknown>) => {
+  const handleCreateBug = async (bugData: BugReportData) => {
     try {
       const formData = new FormData();
 
@@ -192,10 +192,10 @@ export default function BugsPage() {
       });
 
       // Add files
-      (bugData.attachments as File[])?.forEach((file: File) => {
+      bugData.attachments?.forEach((file: File) => {
         formData.append("attachments", file);
       });
-      (bugData.screenshots as File[])?.forEach((file: File) => {
+      bugData.screenshots?.forEach((file: File) => {
         formData.append("screenshots", file);
       });
 

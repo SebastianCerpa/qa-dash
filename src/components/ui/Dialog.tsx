@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import React, { useState, createContext, useContext, useEffect } from 'react';
-import { X } from 'lucide-react';
+import React, { useState, createContext, useContext, useEffect } from "react";
+import { X } from "lucide-react";
 
 interface DialogContextType {
   open: boolean;
@@ -40,7 +40,7 @@ interface DialogTitleProps {
 function Dialog({ open, defaultOpen, onOpenChange, children }: DialogProps) {
   const [internalOpen, setInternalOpen] = useState(defaultOpen || false);
   const isOpen = open !== undefined ? open : internalOpen;
-  
+
   const handleOpenChange = (newOpen: boolean) => {
     if (open === undefined) {
       setInternalOpen(newOpen);
@@ -49,7 +49,9 @@ function Dialog({ open, defaultOpen, onOpenChange, children }: DialogProps) {
   };
 
   return (
-    <DialogContext.Provider value={{ open: isOpen, onOpenChange: handleOpenChange }}>
+    <DialogContext.Provider
+      value={{ open: isOpen, onOpenChange: handleOpenChange }}
+    >
       {children}
     </DialogContext.Provider>
   );
@@ -58,12 +60,13 @@ function Dialog({ open, defaultOpen, onOpenChange, children }: DialogProps) {
 function DialogTrigger({ children, asChild = false }: DialogTriggerProps) {
   const context = useContext(DialogContext);
   if (!context) {
-    throw new Error('DialogTrigger must be used within a Dialog component');
+    throw new Error("DialogTrigger must be used within a Dialog component");
   }
 
   const { onOpenChange } = context;
 
   if (asChild) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const child = children as React.ReactElement<any>;
     return React.cloneElement(child, {
       onClick: (e: React.MouseEvent) => {
@@ -72,39 +75,35 @@ function DialogTrigger({ children, asChild = false }: DialogTriggerProps) {
         }
         onOpenChange(true);
       },
-    } as any);
+    } as never);
   }
 
-  return (
-    <button onClick={() => onOpenChange(true)}>
-      {children}
-    </button>
-  );
+  return <button onClick={() => onOpenChange(true)}>{children}</button>;
 }
 
-function DialogContent({ children, className = '' }: DialogContentProps) {
+function DialogContent({ children, className = "" }: DialogContentProps) {
   const context = useContext(DialogContext);
   if (!context) {
-    throw new Error('DialogContent must be used within a Dialog component');
+    throw new Error("DialogContent must be used within a Dialog component");
   }
 
   const { open, onOpenChange } = context;
 
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
+      if (e.key === "Escape") {
         onOpenChange(false);
       }
     };
 
     if (open) {
-      document.addEventListener('keydown', handleEscape);
-      document.body.style.overflow = 'hidden';
+      document.addEventListener("keydown", handleEscape);
+      document.body.style.overflow = "hidden";
     }
 
     return () => {
-      document.removeEventListener('keydown', handleEscape);
-      document.body.style.overflow = 'unset';
+      document.removeEventListener("keydown", handleEscape);
+      document.body.style.overflow = "unset";
     };
   }, [open, onOpenChange]);
 
@@ -115,13 +114,15 @@ function DialogContent({ children, className = '' }: DialogContentProps) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       {/* Backdrop */}
-      <div 
+      <div
         className="fixed inset-0 bg-black/50 backdrop-blur-sm"
         onClick={() => onOpenChange(false)}
       />
-      
+
       {/* Content */}
-      <div className={`relative bg-white rounded-lg shadow-lg max-w-lg w-full mx-4 max-h-[90vh] overflow-y-auto ${className}`}>
+      <div
+        className={`relative bg-white rounded-lg shadow-lg max-w-lg w-full mx-4 max-h-[90vh] overflow-y-auto ${className}`}
+      >
         <button
           className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-white transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:pointer-events-none"
           onClick={() => onOpenChange(false)}
@@ -135,26 +136,24 @@ function DialogContent({ children, className = '' }: DialogContentProps) {
   );
 }
 
-function DialogHeader({ children, className = '' }: DialogHeaderProps) {
+function DialogHeader({ children, className = "" }: DialogHeaderProps) {
   return (
-    <div className={`flex flex-col space-y-1.5 text-center sm:text-left p-6 pb-0 ${className}`}>
+    <div
+      className={`flex flex-col space-y-1.5 text-center sm:text-left p-6 pb-0 ${className}`}
+    >
       {children}
     </div>
   );
 }
 
-function DialogTitle({ children, className = '' }: DialogTitleProps) {
+function DialogTitle({ children, className = "" }: DialogTitleProps) {
   return (
-    <h2 className={`text-lg font-semibold leading-none tracking-tight ${className}`}>
+    <h2
+      className={`text-lg font-semibold leading-none tracking-tight ${className}`}
+    >
       {children}
     </h2>
   );
 }
 
-export {
-  Dialog,
-  DialogTrigger,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-};
+export { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle };

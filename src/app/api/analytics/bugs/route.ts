@@ -43,7 +43,7 @@ export async function GET(req: NextRequest) {
     // Get basic metrics
     const [totalBugs, newBugs, resolvedBugs, criticalBugs] = await Promise.all([
       prisma.bug_reports.count({ where: whereClause }),
-      prisma.bug_reports.count({ where: whereClause }), // Fixed: removed redundant date filtering
+      prisma.bug_reports.count({ where: whereClause }),
       prisma.bug_reports.count({
         where: {
           ...whereClause,

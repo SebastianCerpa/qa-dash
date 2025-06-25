@@ -1,39 +1,48 @@
-'use client';
+"use client";
 
-import * as React from 'react';
-import { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/Select';
-import { Badge } from '@/components/ui/Badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/Tabs';
-import { 
-  BarChart, 
-  Bar, 
-  LineChart, 
-  Line, 
-  PieChart, 
-  Pie, 
-  Cell, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
-  ResponsiveContainer 
-} from 'recharts';
+import * as React from "react";
+import { useState, useEffect } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/Select";
+import { Badge } from "@/components/ui/Badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/Tabs";
+import {
+  BarChart,
+  Bar,
+  LineChart,
+  Line,
+  PieChart,
+  Pie,
+  Cell,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
 
 interface MetricCardProps {
   title: string;
   value: string | number;
   change?: string;
-  trend?: 'up' | 'down' | 'neutral';
+  trend?: "up" | "down" | "neutral";
 }
 
 function MetricCard({ title, value, change, trend }: MetricCardProps) {
   const getTrendColor = () => {
     switch (trend) {
-      case 'up': return 'text-green-600';
-      case 'down': return 'text-red-600';
-      default: return 'text-gray-600';
+      case "up":
+        return "text-green-600";
+      case "down":
+        return "text-red-600";
+      default:
+        return "text-gray-600";
     }
   };
 
@@ -46,9 +55,7 @@ function MetricCard({ title, value, change, trend }: MetricCardProps) {
             <p className="text-2xl font-bold">{value}</p>
           </div>
           {change && (
-            <div className={`text-sm ${getTrendColor()}`}>
-              {change}
-            </div>
+            <div className={`text-sm ${getTrendColor()}`}>{change}</div>
           )}
         </div>
       </CardContent>
@@ -91,32 +98,36 @@ interface AnalyticsDashboardProps {
   projects: Array<{ id: string; name: string }>;
 }
 
-export default function AnalyticsDashboard({ projects }: AnalyticsDashboardProps) {
-  const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(null);
+export default function AnalyticsDashboard({
+  projects,
+}: AnalyticsDashboardProps) {
+  const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(
+    null
+  );
   const [loading, setLoading] = useState(true);
-  const [selectedProject, setSelectedProject] = useState('all');
-  const [dateRange, setDateRange] = useState('30d');
-  const [activeTab, setActiveTab] = useState('overview');
+  const [selectedProject, setSelectedProject] = useState("all");
+  const [dateRange, setDateRange] = useState("30d");
+  const [activeTab, setActiveTab] = useState("overview");
 
   useEffect(() => {
     fetchAnalytics();
-  }, [selectedProject, dateRange]);
+  });
 
   const fetchAnalytics = async () => {
     try {
       setLoading(true);
       const params = new URLSearchParams({
         project: selectedProject,
-        range: dateRange
+        range: dateRange,
       });
-      
+
       const response = await fetch(`/api/analytics?${params}`);
-      if (!response.ok) throw new Error('Failed to fetch analytics');
-      
+      if (!response.ok) throw new Error("Failed to fetch analytics");
+
       const data = await response.json();
       setAnalyticsData(data);
     } catch (error) {
-      console.error('Error fetching analytics:', error);
+      console.error("Error fetching analytics:", error);
     } finally {
       setLoading(false);
     }
@@ -124,27 +135,29 @@ export default function AnalyticsDashboard({ projects }: AnalyticsDashboardProps
 
   const formatTrendData = () => {
     if (!analyticsData?.bugTrend) return [];
-    return analyticsData.bugTrend.map(item => ({
+    return analyticsData.bugTrend.map((item) => ({
       ...item,
-      date: new Date(item.date).toLocaleDateString()
+      date: new Date(item.date).toLocaleDateString(),
     }));
   };
 
   const formatSeverityData = () => {
     if (!analyticsData?.severityData) return [];
-    const colors = ['#ef4444', '#f97316', '#eab308', '#22c55e'];
-    return Object.entries(analyticsData.severityData).map(([name, value], index) => ({
-      name,
-      value,
-      color: colors[index % colors.length]
-    }));
+    const colors = ["#ef4444", "#f97316", "#eab308", "#22c55e"];
+    return Object.entries(analyticsData.severityData).map(
+      ([name, value], index) => ({
+        name,
+        value,
+        color: colors[index % colors.length],
+      })
+    );
   };
 
   const formatStatusData = () => {
     if (!analyticsData?.statusData) return [];
     return Object.entries(analyticsData.statusData).map(([name, value]) => ({
       name,
-      value
+      value,
     }));
   };
 
@@ -176,14 +189,14 @@ export default function AnalyticsDashboard({ projects }: AnalyticsDashboardProps
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Projects</SelectItem>
-              {projects.map(project => (
+              {projects.map((project) => (
                 <SelectItem key={project.id} value={project.id}>
                   {project.name}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
-          
+
           <Select value={dateRange} onValueChange={setDateRange}>
             <SelectTrigger className="w-32">
               <SelectValue />
@@ -247,7 +260,12 @@ export default function AnalyticsDashboard({ projects }: AnalyticsDashboardProps
                   <XAxis dataKey="date" />
                   <YAxis />
                   <Tooltip />
-                  <Line type="monotone" dataKey="count" stroke="#3b82f6" strokeWidth={2} />
+                  <Line
+                    type="monotone"
+                    dataKey="count"
+                    stroke="#3b82f6"
+                    strokeWidth={2}
+                  />
                 </LineChart>
               </ResponsiveContainer>
             </CardContent>
@@ -269,7 +287,9 @@ export default function AnalyticsDashboard({ projects }: AnalyticsDashboardProps
                       cx="50%"
                       cy="50%"
                       labelLine={false}
-                      label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                      label={({ name, percent }) =>
+                        `${name} ${(percent * 100).toFixed(0)}%`
+                      }
                       outerRadius={80}
                       fill="#8884d8"
                       dataKey="value"
@@ -337,19 +357,28 @@ export default function AnalyticsDashboard({ projects }: AnalyticsDashboardProps
               <div className="space-y-3">
                 {analyticsData.flakyTests.length > 0 ? (
                   analyticsData.flakyTests.map((test, index) => (
-                    <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
+                    <div
+                      key={index}
+                      className="flex items-center justify-between p-3 border rounded-lg"
+                    >
                       <div>
                         <p className="font-medium">{test.test_case_name}</p>
-                        <p className="text-sm text-gray-500">Suite: {test.test_suite_id}</p>
+                        <p className="text-sm text-gray-500">
+                          Suite: {test.test_suite_id}
+                        </p>
                       </div>
-                      <Badge 
+                      <Badge
                         label={`${Math.round(test.flaky_score * 100)}% flaky`}
-                        variant={test.flaky_score > 0.7 ? "danger" : "secondary"}
+                        variant={
+                          test.flaky_score > 0.7 ? "danger" : "secondary"
+                        }
                       />
                     </div>
                   ))
                 ) : (
-                  <p className="text-gray-500 text-center py-4">No flaky tests detected</p>
+                  <p className="text-gray-500 text-center py-4">
+                    No flaky tests detected
+                  </p>
                 )}
               </div>
             </CardContent>
@@ -382,21 +411,38 @@ export default function AnalyticsDashboard({ projects }: AnalyticsDashboardProps
               <div className="space-y-3">
                 {/* Mock team data - replace with actual data */}
                 {[
-                  { user: { name: 'John Doe', email: 'john@example.com' }, count: 15 },
-                  { user: { name: 'Jane Smith', email: 'jane@example.com' }, count: 12 },
-                  { user: { name: 'Bob Johnson', email: 'bob@example.com' }, count: 8 }
+                  {
+                    user: { name: "John Doe", email: "john@example.com" },
+                    count: 15,
+                  },
+                  {
+                    user: { name: "Jane Smith", email: "jane@example.com" },
+                    count: 12,
+                  },
+                  {
+                    user: { name: "Bob Johnson", email: "bob@example.com" },
+                    count: 8,
+                  },
                 ].map((assignee, index) => (
-                  <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
+                  <div
+                    key={index}
+                    className="flex items-center justify-between p-3 border rounded-lg"
+                  >
                     <div className="flex items-center space-x-3">
                       <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm font-medium">
                         {assignee.user.name.charAt(0)}
                       </div>
                       <div>
                         <p className="font-medium">{assignee.user.name}</p>
-                        <p className="text-sm text-gray-500">{assignee.user.email}</p>
+                        <p className="text-sm text-gray-500">
+                          {assignee.user.email}
+                        </p>
                       </div>
                     </div>
-                    <Badge label={`${assignee.count} assigned`} variant="secondary" />
+                    <Badge
+                      label={`${assignee.count} assigned`}
+                      variant="secondary"
+                    />
                   </div>
                 ))}
               </div>

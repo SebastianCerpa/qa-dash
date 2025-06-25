@@ -1,14 +1,5 @@
-import { prisma } from '../../lib/prisma';
-import { sendNotification } from '@/lib/notifications';
-
-interface WorkflowRule {
-  id: string;
-  name: string;
-  trigger: string;
-  conditions: any;
-  actions: any;
-  is_active: boolean;
-}
+import { prisma } from "../../lib/prisma";
+import { sendNotification } from "@/lib/notifications";
 
 interface BugData {
   id?: string;
@@ -35,8 +26,8 @@ class WorkflowAutomationService {
       const rules = await prisma.workflow_rules.findMany({
         where: {
           trigger: event,
-          is_active: true
-        }
+          is_active: true,
+        },
       });
 
       for (const rule of rules) {
@@ -45,7 +36,7 @@ class WorkflowAutomationService {
         }
       }
     } catch (error) {
-      console.error('Error processing workflow rules:', error);
+      console.error("Error processing workflow rules:", error);
     }
   }
 
@@ -67,11 +58,11 @@ class WorkflowAutomationService {
       let assigneeId: string | null = null;
 
       // Flatten all users from project teams
-      const allUsers = projectTeam.flatMap(team => team.users);
+      const allUsers = projectTeam.flatMap((team) => team.users);
 
       // 1. Check for label-based assignment
       assigneeId = await this.assignByLabels(bugData.labels, allUsers);
-      
+
       if (!assigneeId) {
         // 2. Check for severity-based assignment
         assigneeId = await this.assignBySeverity(bugData.severity, allUsers);
@@ -86,28 +77,28 @@ class WorkflowAutomationService {
         // Update bug with assignee
         await prisma.bug_reports.update({
           where: { id: bugData.id },
-          data: { assignee_id: assigneeId }
+          data: { assignee_id: assigneeId },
         });
 
         // Log activity
-        await this.logActivity(bugData.id, 'AUTO_ASSIGNED', {
+        await this.logActivity(bugData.id, "AUTO_ASSIGNED", {
           assignee_id: assigneeId,
-          reason: 'Automatic assignment by workflow'
+          reason: "Automatic assignment by workflow",
         });
 
         // Send notification
         await sendNotification({
           user_id: assigneeId,
-          type: 'BUG_ASSIGNED',
-          title: 'Bug Assigned to You',
+          type: "BUG_ASSIGNED",
+          title: "Bug Assigned to You",
           message: `Bug "${bugData.title}" has been automatically assigned to you.`,
-          data: { bug_id: bugData.id }
+          data: { bug_id: bugData.id },
         });
       }
 
       return assigneeId;
     } catch (error) {
-      console.error('Error in auto-assignment:', error);
+      console.error("Error in auto-assignment:", error);
       return null;
     }
   }
@@ -117,7 +108,7 @@ class WorkflowAutomationService {
    */
   async sendCriticalBugAlert(bugData: BugData) {
     try {
-      if (!['CRITICAL', 'BLOCKER'].includes(bugData.severity)) {
+      if (!["CRITICAL", "BLOCKER"].includes(bugData.severity)) {
         return;
       }
 
@@ -130,15 +121,17 @@ class WorkflowAutomationService {
       for (const manager of projectManagers) {
         await sendNotification({
           user_id: manager.id,
-          type: 'CRITICAL_BUG_ALERT',
+          type: "CRITICAL_BUG_ALERT",
           title: `🚨 Critical Bug Alert: ${bugData.severity}`,
-          message: `A ${bugData.severity.toLowerCase()} bug has been reported: "${bugData.title}". Immediate attention required.`,
-          data: { 
-            bug_id: bugData.id,
+          message: `A ${bugData.severity.toLowerCase()} bug has been reported: "${
+            bugData.title
+          }". Immediate attention required.`,
+          data: {
+            bug_id: bugData.id || '',
             severity: bugData.severity,
-            project_id: bugData.project_id
+            project_id: bugData.project_id,
           },
-          priority: 'HIGH'
+          priority: "HIGH",
         });
       }
 
@@ -147,13 +140,13 @@ class WorkflowAutomationService {
 
       // Log the alert
       if (bugData.id) {
-        await this.logActivity(bugData.id, 'CRITICAL_ALERT_SENT', {
-          recipients: projectManagers.map(m => m.id),
-          severity: bugData.severity
+        await this.logActivity(bugData.id, "CRITICAL_ALERT_SENT", {
+          recipients: projectManagers.map((m) => m.id),
+          severity: bugData.severity,
         });
       }
     } catch (error) {
-      console.error('Error sending critical bug alert:', error);
+      console.error("Error sending critical bug alert:", error);
     }
   }
 
@@ -172,9 +165,9 @@ class WorkflowAutomationService {
           project_id: bugData.project_id,
           is_regression: true,
           created_at: {
-            gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) // Last 30 days
-          }
-        }
+            gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), // Last 30 days
+          },
+        },
       });
 
       if (similarRegressions.length >= 3) {
@@ -186,43 +179,47 @@ class WorkflowAutomationService {
         for (const user of projectTeam) {
           await sendNotification({
             user_id: user.id,
-            type: 'REGRESSION_PATTERN_ALERT',
-            title: '⚠️ Regression Pattern Detected',
+            type: "REGRESSION_PATTERN_ALERT",
+            title: "⚠️ Regression Pattern Detected",
             message: `Multiple regression bugs detected in the project. This may indicate a quality issue that needs attention.`,
             data: {
               project_id: bugData.project_id,
-              regression_count: similarRegressions.length + 1
-            }
+              regression_count: similarRegressions.length + 1,
+            },
           });
         }
       }
     } catch (error) {
-      console.error('Error checking regression pattern:', error);
+      console.error("Error checking regression pattern:", error);
     }
   }
 
   /**
    * Assign bug based on labels
    */
-  private async assignByLabels(labels: string[], teamMembers: any[]): Promise<string | null> {
+  private async assignByLabels(
+    labels: string[],
+    teamMembers: any[]
+  ): Promise<string | null> {
     // Define label-to-expertise mapping
     const labelExpertise: Record<string, string[]> = {
-      'frontend': ['UI', 'React', 'JavaScript', 'CSS'],
-      'backend': ['API', 'Database', 'Server', 'Node.js'],
-      'mobile': ['iOS', 'Android', 'React Native'],
-      'performance': ['Optimization', 'Performance'],
-      'security': ['Security', 'Authentication'],
-      'database': ['SQL', 'Database', 'Migration']
+      frontend: ["UI", "React", "JavaScript", "CSS"],
+      backend: ["API", "Database", "Server", "Node.js"],
+      mobile: ["iOS", "Android", "React Native"],
+      performance: ["Optimization", "Performance"],
+      security: ["Security", "Authentication"],
+      database: ["SQL", "Database", "Migration"],
     };
 
     for (const label of labels) {
       const expertise = labelExpertise[label.toLowerCase()];
       if (expertise) {
         // Find team member with matching expertise
-        const expert = teamMembers.find(member => 
-          expertise.some(skill => 
-            member.skills?.includes(skill) || 
-            member.bio?.toLowerCase().includes(skill.toLowerCase())
+        const expert = teamMembers.find((member) =>
+          expertise.some(
+            (skill) =>
+              member.skills?.includes(skill) ||
+              member.bio?.toLowerCase().includes(skill.toLowerCase())
           )
         );
         if (expert) {
@@ -237,13 +234,17 @@ class WorkflowAutomationService {
   /**
    * Assign bug based on severity
    */
-  private async assignBySeverity(severity: string, teamMembers: any[]): Promise<string | null> {
-    if (['CRITICAL', 'BLOCKER'].includes(severity)) {
+  private async assignBySeverity(
+    severity: string,
+    teamMembers: any[]
+  ): Promise<string | null> {
+    if (["CRITICAL", "BLOCKER"].includes(severity)) {
       // Assign to senior team members or leads
-      const senior = teamMembers.find(member => 
-        member.role?.includes('Senior') || 
-        member.role?.includes('Lead') ||
-        member.permissions?.some((p: any) => p.permission === 'MANAGE_TEAM')
+      const senior = teamMembers.find(
+        (member) =>
+          member.role?.includes("Senior") ||
+          member.role?.includes("Lead") ||
+          member.permissions?.some((p: any) => p.permission === "MANAGE_TEAM")
       );
       return senior?.id || null;
     }
@@ -262,9 +263,9 @@ class WorkflowAutomationService {
           where: {
             assignee_id: member.id,
             status: {
-              notIn: ['RESOLVED', 'CLOSED']
-            }
-          }
+              notIn: ["RESOLVED", "CLOSED"],
+            },
+          },
         });
         return { member, activeBugs };
       })
@@ -278,39 +279,40 @@ class WorkflowAutomationService {
   /**
    * Evaluate workflow rule conditions
    */
-  private async evaluateConditions(conditions: any, data: any): Promise<boolean> {
+  private async evaluateConditions(
+    conditions: any,
+    data: any
+  ): Promise<boolean> {
     if (!conditions || !conditions.rules) {
       return true;
     }
 
-    const { rules, operator = 'AND' } = conditions;
+    const { rules, operator = "AND" } = conditions;
     const results = rules.map((rule: any) => {
       const { field, operator: ruleOp, value } = rule;
       const dataValue = this.getNestedValue(data, field);
 
       switch (ruleOp) {
-        case 'equals':
+        case "equals":
           return dataValue === value;
-        case 'not_equals':
+        case "not_equals":
           return dataValue !== value;
-        case 'contains':
-          return Array.isArray(dataValue) 
+        case "contains":
+          return Array.isArray(dataValue)
             ? dataValue.includes(value)
             : String(dataValue).includes(value);
-        case 'greater_than':
+        case "greater_than":
           return Number(dataValue) > Number(value);
-        case 'less_than':
+        case "less_than":
           return Number(dataValue) < Number(value);
-        case 'in':
+        case "in":
           return Array.isArray(value) && value.includes(dataValue);
         default:
           return false;
       }
     });
 
-    return operator === 'AND' 
-      ? results.every(Boolean)
-      : results.some(Boolean);
+    return operator === "AND" ? results.every(Boolean) : results.some(Boolean);
   }
 
   /**
@@ -324,46 +326,46 @@ class WorkflowAutomationService {
     for (const action of actions) {
       try {
         switch (action.type) {
-          case 'assign_user':
+          case "assign_user":
             if (data.id) {
               await prisma.bug_reports.update({
                 where: { id: data.id },
-                data: { assignee_id: action.user_id }
+                data: { assignee_id: action.user_id },
               });
             }
             break;
 
-          case 'add_label':
+          case "add_label":
             if (data.id) {
               const bug = await prisma.bug_reports.findUnique({
-                where: { id: data.id }
+                where: { id: data.id },
               });
               if (bug) {
                 const existingLabels = bug.labels ? JSON.parse(bug.labels) : [];
                 const labels = [...existingLabels, action.label];
                 await prisma.bug_reports.update({
                   where: { id: data.id },
-                  data: { labels: JSON.stringify(labels) }
+                  data: { labels: JSON.stringify(labels) },
                 });
               }
             }
             break;
 
-          case 'send_notification':
+          case "send_notification":
             await sendNotification({
               user_id: action.user_id,
-              type: action.notification_type || 'WORKFLOW_ACTION',
+              type: action.notification_type || "WORKFLOW_ACTION",
               title: action.title,
               message: action.message,
-              data: { bug_id: data.id }
+              data: { bug_id: data.id },
             });
             break;
 
-          case 'change_priority':
+          case "change_priority":
             if (data.id) {
               await prisma.bug_reports.update({
                 where: { id: data.id },
-                data: { priority: action.priority }
+                data: { priority: action.priority },
               });
             }
             break;
@@ -382,14 +384,14 @@ class WorkflowAutomationService {
       await prisma.bug_activities.create({
         data: {
           bug_id: bugId,
-          user_id: 'system', // System user for automated actions
+          user_id: "system", // System user for automated actions
           action,
           description: details,
-          created_at: new Date()
-        }
+          created_at: new Date(),
+        },
       });
     } catch (error) {
-      console.error('Error logging activity:', error);
+      console.error("Error logging activity:", error);
     }
   }
 
@@ -399,11 +401,14 @@ class WorkflowAutomationService {
   private async sendEmailAlert(recipients: any[], bugData: BugData) {
     // This would integrate with your email service (SendGrid, AWS SES, etc.)
     // For now, we'll just log it
-    console.log('Email alert would be sent to:', recipients.map(r => r.email));
-    console.log('Bug details:', {
+    console.log(
+      "Email alert would be sent to:",
+      recipients.map((r) => r.email)
+    );
+    console.log("Bug details:", {
       title: bugData.title,
       severity: bugData.severity,
-      description: bugData.description
+      description: bugData.description,
     });
   }
 
@@ -411,7 +416,7 @@ class WorkflowAutomationService {
    * Get nested value from object
    */
   private getNestedValue(obj: any, path: string): any {
-    return path.split('.').reduce((current, key) => current?.[key], obj);
+    return path.split(".").reduce((current, key) => current?.[key], obj);
   }
 }
 

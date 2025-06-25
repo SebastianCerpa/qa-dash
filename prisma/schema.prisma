@@ -3,9 +3,10 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
 
 model audit_logs {
   id          String    @id @default(cuid())
@@ -41,6 +42,7 @@ model documents {
 model notifications {
   id         String    @id @default(cuid())
   user_id    String?
+  type       String?
   message    String
   is_read    Boolean?  @default(false)
   created_at DateTime? @default(now())

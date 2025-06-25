@@ -101,7 +101,6 @@ export default function BugsPage() {
   const [totalBugs, setTotalBugs] = useState(0);
   const itemsPerPage = 20;
 
-  // Declarar fetchBugs antes de useEffect
   const fetchBugs = useCallback(async () => {
     setLoading(true);
     try {

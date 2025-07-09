@@ -50,7 +50,7 @@ export async function GET(req: NextRequest) {
     // Process test cases to handle JSON fields
     const processedTestCases = testCases.map(testCase => ({
       ...testCase,
-      steps: testCase.steps as any,
+      steps: Array.isArray(testCase.steps) ? testCase.steps : [],
       tags: testCase.tags ? JSON.parse(testCase.tags as string) : [],
     }));
 

@@ -82,12 +82,12 @@ const TestCaseForm: React.FC<TestCaseFormProps> = ({
       description: initialData?.description || '',
       priority: initialData?.priority || 'Medium',
       type: initialData?.type || 'Manual',
-      steps: initialData?.steps?.map((step, index) => ({
+      steps: (initialData?.steps && Array.isArray(initialData.steps)) ? initialData.steps.map((step, index) => ({
         id: `step-${index}`,
         stepNumber: index + 1,
         action: typeof step === 'string' ? step : step.action,
         description: typeof step === 'string' ? step : step.action // Keep description for form compatibility
-      })) || [{ id: 'step-1', stepNumber: 1, action: '', description: '' }],
+      })) : [{ id: 'step-1', stepNumber: 1, action: '', description: '' }],
       expectedResult: initialData?.expectedResult || '',
       preconditions: initialData?.preconditions || '',
       tags: initialData?.tags || [],
@@ -154,7 +154,7 @@ const TestCaseForm: React.FC<TestCaseFormProps> = ({
     // Transform steps to the correct format for API
     const formattedData = {
       ...data,
-      steps: data.steps.map(step => ({
+      steps: Array.isArray(data.steps) ? data.steps.map(step => ({
         id: step.id,
         stepNumber: step.stepNumber,
         action: step.action || step.description || "", // Use action if exists, or description as fallback
@@ -162,7 +162,7 @@ const TestCaseForm: React.FC<TestCaseFormProps> = ({
         actualResult: step.actualResult || "",
         status: step.status,
         screenshot: step.screenshot
-      })),
+      })) : [],
       linkedTickets: [] // Ensure required property for TestCase
     };
     onSubmit(formattedData);
@@ -292,7 +292,7 @@ const TestCaseForm: React.FC<TestCaseFormProps> = ({
                 </div>
               ) : (
                 <div className="space-y-3">
-                  {steps.map((step, index) => (
+                  {Array.isArray(steps) ? steps.map((step, index) => (
                     <div key={step.id} className="flex items-start space-x-3 p-3 border rounded-md">
                       <div className="flex-none pt-2">
                         <GripVertical className="h-5 w-5 text-muted-foreground" />
@@ -337,7 +337,7 @@ const TestCaseForm: React.FC<TestCaseFormProps> = ({
                         </Button>
                       </div>
                     </div>
-                  ))}
+                  )) : null}
                 </div>
               )}
             </div>

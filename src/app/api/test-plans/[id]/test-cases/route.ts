@@ -49,7 +49,7 @@ export async function GET(
     // Process test cases to handle JSON fields
     const processedTestCases = testCases.map(testCase => ({
       ...testCase,
-      steps: testCase.steps as any,
+      steps: Array.isArray(testCase.steps) ? testCase.steps : [],
       tags: testCase.tags ? JSON.parse(testCase.tags as string) : [],
     }));
 
@@ -149,7 +149,7 @@ export async function POST(
     // Process test cases to handle JSON fields
     const processedTestCases = updatedTestCases.map(testCase => ({
       ...testCase,
-      steps: testCase.steps as any,
+      steps: Array.isArray(testCase.steps) ? testCase.steps : [],
       tags: testCase.tags ? JSON.parse(testCase.tags as string) : [],
     }));
 

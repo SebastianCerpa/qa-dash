@@ -57,7 +57,7 @@ export async function GET(
       tags: string | null;
     }) => ({
       ...testCase,
-      steps: testCase.steps as any,
+      steps: Array.isArray(testCase.steps) ? testCase.steps : [],
       tags: testCase.tags ? JSON.parse(testCase.tags as string) : [],
     }));
 
@@ -219,7 +219,7 @@ export async function PUT(
       tags: string | null;
     }) => ({
       ...testCase,
-      steps: testCase.steps as any,
+      steps: Array.isArray(testCase.steps) ? testCase.steps : [],
       tags: testCase.tags ? JSON.parse(testCase.tags as string) : [],
     })) || [];
 

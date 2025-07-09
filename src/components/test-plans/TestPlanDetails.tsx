@@ -34,7 +34,6 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import {
   Dialog,
@@ -169,10 +168,10 @@ const TestPlanDetails: React.FC<TestPlanDetailsProps> = ({ testPlanId }) => {
       id: tc.id,
       status: 'PASSED', // Default status
       notes: '',
-      steps: tc.steps.map(step => ({
+      steps: Array.isArray(tc.steps) ? tc.steps.map(step => ({
         ...step,
         status: 'PASSED'
-      }))
+      })) : []
     }));
 
     setExecutionResults(initialResults);
@@ -205,9 +204,9 @@ const TestPlanDetails: React.FC<TestPlanDetailsProps> = ({ testPlanId }) => {
         result.id === testCaseId
           ? {
             ...result,
-            steps: result.steps.map((step: any, idx: number) =>
+            steps: Array.isArray(result.steps) ? result.steps.map((step: any, idx: number) =>
               idx === stepIndex ? { ...step, status } : step
-            )
+            ) : []
           }
           : result
       )
@@ -800,7 +799,7 @@ const TestPlanDetails: React.FC<TestPlanDetailsProps> = ({ testPlanId }) => {
                     </Select>
                   </div>
 
-                  {testCase.steps && testCase.steps.length > 0 && (
+                  {Array.isArray(testCase.steps) && testCase.steps.length > 0 && (
                     <div className="space-y-2">
                       <h4 className="text-sm font-medium">Test Steps</h4>
                       <Table>

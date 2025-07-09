@@ -1,7 +1,7 @@
 import React from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { useStore, TeamMember } from "@/store/useStore";
-import Button from "@/components/ui/Button";
+import { Button } from "@/components/ui/button";
 
 // Definir el tipo para los datos del formulario
 interface TeamMemberFormData {

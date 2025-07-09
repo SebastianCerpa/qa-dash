@@ -2,6 +2,7 @@
 
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
+import { v4 as uuidv4 } from 'uuid';
 
 // Define test types
 export type TestType =
@@ -18,7 +19,7 @@ export type TestType =
   | "Accessibility";
 
 // Define task status
-export type TaskStatus = "Todo" | "In Progress" | "Review" | "Done";
+export type TaskStatus = "Todo" | "In Progress" | "Done";
 
 // Define task priority
 export type TaskPriority = "Low" | "Medium" | "High" | "Critical";
@@ -109,7 +110,7 @@ export const useStore = create<StoreState>()(
             ...state.tasks,
             {
               ...task,
-              id: crypto.randomUUID(),
+              id: uuidv4(),
               createdAt: new Date().toISOString(),
               updatedAt: new Date().toISOString(),
               comments: [],
@@ -142,7 +143,7 @@ export const useStore = create<StoreState>()(
             ...state.workflows,
             {
               ...workflow,
-              id: crypto.randomUUID(),
+              id: uuidv4(),
               createdAt: new Date().toISOString(),
               updatedAt: new Date().toISOString(),
             },
@@ -174,7 +175,7 @@ export const useStore = create<StoreState>()(
             ...state.teamMembers,
             {
               ...member,
-              id: crypto.randomUUID(),
+              id: uuidv4(),
             },
           ],
         })),
@@ -205,7 +206,7 @@ export const useStore = create<StoreState>()(
                     ...(task.comments || []),
                     {
                       ...comment,
-                      id: crypto.randomUUID(),
+                      id: uuidv4(),
                       createdAt: new Date().toISOString(),
                     },
                   ],

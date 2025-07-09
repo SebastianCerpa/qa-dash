@@ -23,14 +23,14 @@ class NotificationService {
    */
   async sendNotification(notificationData: NotificationData): Promise<void> {
     try {
-      // Create notification in database
-      await prisma.notifications.create({
-        data: {
-          user_id: notificationData.user_id,
-          message: `${notificationData.title}: ${notificationData.message}`,
-          is_read: false,
-        },
-      });
+      // TODO: Create notification in database when notifications model is added
+      // await prisma.notifications.create({
+      //   data: {
+      //     user_id: notificationData.user_id,
+      //     message: `${notificationData.title}: ${notificationData.message}`,
+      //     is_read: false,
+      //   },
+      // });
 
       // Send real-time notification if user is online
       await this.sendRealTimeNotification(notificationData);
@@ -54,14 +54,14 @@ class NotificationService {
     notifications: NotificationData[]
   ): Promise<void> {
     try {
-      // Create all notifications in database
-      await prisma.notifications.createMany({
-        data: notifications.map((notification) => ({
-          user_id: notification.user_id,
-          message: `${notification.title}: ${notification.message}`,
-          is_read: false,
-        })),
-      });
+      // TODO: Create all notifications in database when notifications model is added
+      // await prisma.notifications.createMany({
+      //   data: notifications.map((notification) => ({
+      //     user_id: notification.user_id,
+      //     message: `${notification.title}: ${notification.message}`,
+      //     is_read: false,
+      //   })),
+      // });
 
       // Send real-time and email notifications
       for (const notification of notifications) {
@@ -91,36 +91,15 @@ class NotificationService {
     try {
       const { limit = 20, offset = 0, unreadOnly = false, type } = options;
 
-      const where: Prisma.notificationsWhereInput = {
-        user_id: userId,
-      };
+      // TODO: Implement notifications model in schema
+      // const where: Prisma.NotificationsWhereInput = {
+      //   user_id: userId,
+      // };
 
-      if (unreadOnly) {
-        where.is_read = false;
-      }
-
-      if (type) {
-        where.type = {
-          contains: type,
-        };
-      }
-
-      const notifications = await prisma.notifications.findMany({
-        where,
-        orderBy: {
-          created_at: "desc",
-        },
-        take: limit,
-        skip: offset,
-      });
-
-      const total = await prisma.notifications.count({ where });
-      const unreadCount = await prisma.notifications.count({
-        where: {
-          user_id: userId,
-          is_read: false,
-        },
-      });
+      // Temporary implementation - return empty data until notifications model is added
+      const notifications: any[] = [];
+      const total = 0;
+      const unreadCount = 0;
 
       return {
         notifications,
@@ -144,15 +123,16 @@ class NotificationService {
    */
   async markAsRead(notificationId: string, userId: string): Promise<void> {
     try {
-      await prisma.notifications.updateMany({
-        where: {
-          id: notificationId,
-          user_id: userId,
-        },
-        data: {
-          is_read: true,
-        },
-      });
+      // TODO: Implement when notifications model is added
+      // await prisma.notifications.updateMany({
+      //   where: {
+      //     id: notificationId,
+      //     user_id: userId,
+      //   },
+      //   data: {
+      //     is_read: true,
+      //   },
+      // });
     } catch (error) {
       console.error("Error marking notification as read:", error);
     }
@@ -163,15 +143,16 @@ class NotificationService {
    */
   async markAllAsRead(userId: string): Promise<void> {
     try {
-      await prisma.notifications.updateMany({
-        where: {
-          user_id: userId,
-          is_read: false,
-        },
-        data: {
-          is_read: true,
-        },
-      });
+      // TODO: Implement when notifications model is added
+      // await prisma.notifications.updateMany({
+      //   where: {
+      //     user_id: userId,
+      //     is_read: false,
+      //   },
+      //   data: {
+      //     is_read: true,
+      //   },
+      // });
     } catch (error) {
       console.error("Error marking all notifications as read:", error);
     }
@@ -185,12 +166,13 @@ class NotificationService {
     userId: string
   ): Promise<void> {
     try {
-      await prisma.notifications.deleteMany({
-        where: {
-          id: notificationId,
-          user_id: userId,
-        },
-      });
+      // TODO: Implement when notifications model is added
+      // await prisma.notifications.deleteMany({
+      //   where: {
+      //     id: notificationId,
+      //     user_id: userId,
+      //   },
+      // });
     } catch (error) {
       console.error("Error deleting notification:", error);
     }

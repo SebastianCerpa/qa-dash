@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
-import Card from '@/components/ui/Card';
+import { Card } from '@/components/ui/card';
 import TestTypeChart from '@/components/dashboard/TestTypeChart';
 import TaskStatusChart from '@/components/dashboard/TaskStatusChart';
 import { useStore } from '@/store/useStore';

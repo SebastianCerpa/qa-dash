@@ -4,8 +4,8 @@ import React, { useState } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import TeamMemberCard from '@/components/team/TeamMemberCard';
 import TeamMemberForm from '@/components/forms/TeamMemberForm';
-import Button from '@/components/ui/Button';
-import Card from '@/components/ui/Card';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
 import { useStore } from '@/store/useStore';
 import { PlusIcon } from '@heroicons/react/24/outline';
 

@@ -3,8 +3,8 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { signIn, getSession } from "next-auth/react";
-import Button from "@/components/ui/Button";
-import Card from "@/components/ui/Card";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 
 interface FormData {
   email: string;
@@ -71,23 +71,37 @@ export default function LoginPage() {
     setErrors({});
 
     try {
+      console.log('Attempting to sign in with:', { email: formData.email });
+
       const result = await signIn("credentials", {
         email: formData.email,
         password: formData.password,
         redirect: false,
       });
 
+      console.log('Sign in result:', {
+        ok: result?.ok,
+        error: result?.error,
+        status: result?.status,
+        url: result?.url
+      });
+
       if (result?.error) {
-        setErrors({ general: "Invalid email or password. Please try again." });
-      } else {
+        setErrors({ general: `Authentication failed: ${result.error}` });
+      } else if (result?.ok) {
         // Check session and redirect
         const session = await getSession();
+        console.log('Session after login:', session);
+
         if (session) {
           router.push("/");
+        } else {
+          setErrors({ general: "Session could not be established. Please try again." });
         }
       }
-    } catch {
-      setErrors({ general: "An unexpected error occurred. Please try again." });
+    } catch (error) {
+      console.error('Login error:', error);
+      setErrors({ general: `An unexpected error occurred: ${error instanceof Error ? error.message : 'Unknown error'}` });
     } finally {
       setIsLoading(false);
     }
@@ -140,7 +154,7 @@ export default function LoginPage() {
       </div>
 
       <div className="relative w-full max-w-md">
-        <Card variant="elevated" className="backdrop-blur-sm bg-white/90">
+        <Card className="backdrop-blur-sm bg-white/90 border border-gray-200 shadow-md">
           {/* Header */}
           <div className="px-8 pt-8 pb-6 text-center">
             <div className="flex justify-center mb-4">
@@ -193,11 +207,10 @@ export default function LoginPage() {
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                     <svg
-                      className={`w-5 h-5 transition-colors duration-200 ${
-                        focusedField === "email"
-                          ? "text-blue-500"
-                          : "text-gray-400"
-                      }`}
+                      className={`w-5 h-5 transition-colors duration-200 ${focusedField === "email"
+                        ? "text-blue-500"
+                        : "text-gray-400"
+                        }`}
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"
@@ -257,11 +270,10 @@ export default function LoginPage() {
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                     <svg
-                      className={`w-5 h-5 transition-colors duration-200 ${
-                        focusedField === "password"
-                          ? "text-blue-500"
-                          : "text-gray-400"
-                      }`}
+                      className={`w-5 h-5 transition-colors duration-200 ${focusedField === "password"
+                        ? "text-blue-500"
+                        : "text-gray-400"
+                        }`}
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"
@@ -313,7 +325,7 @@ export default function LoginPage() {
               {/* Sign In Button */}
               <Button
                 type="submit"
-                variant="primary"
+                variant="secondary"
                 size="lg"
                 fullWidth
                 isLoading={isLoading}
@@ -413,7 +425,7 @@ export default function LoginPage() {
                   Sign up
                 </Button>
               </p>
-              <p className="mt-2 text-xs text-gray-500">
+              <p className="mt-2 text-sm text-gray-500">
                 <button
                   type="button"
                   className="hover:text-gray-700 transition-colors duration-200"
@@ -428,7 +440,7 @@ export default function LoginPage() {
 
         {/* Footer */}
         <div className="mt-8 text-center">
-          <p className="text-xs text-gray-500">
+          <p className="text-sm text-gray-500">
             © 2024 QA Dashboard. All rights reserved.
           </p>
         </div>

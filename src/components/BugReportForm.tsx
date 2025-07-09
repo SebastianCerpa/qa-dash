@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useState, useRef } from "react";
-import Button from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/Textarea";
 import {
   Select,
@@ -10,13 +10,15 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/Select";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
-import { Badge } from "@/components/ui/Badge";
+} from "@/components/ui/select-radix";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/Label";
 import { Checkbox } from "@/components/ui/Checkbox";
 import { AlertTriangle, Upload, X, Plus } from "lucide-react";
 import { toast } from "sonner";
+import UserSelector from "@/components/tickets/UserSelector";
+import { useForm } from "react-hook-form";
 
 export interface BugReportData {
   title: string;
@@ -65,6 +67,30 @@ export default function BugReportForm({
   users,
   testCases = [],
 }: BugReportFormProps) {
+  const form = useForm({
+    defaultValues: {
+      title: "",
+      description: "",
+      severity: "MEDIUM",
+      priority: "MEDIUM",
+      project_id: "",
+      assignee_id: "",
+      environment: "",
+      browser: "",
+      os: "",
+      version: "",
+      steps_to_reproduce: "",
+      expected_behavior: "",
+      actual_behavior: "",
+      labels: [] as string[],
+      is_regression: false,
+      related_test_case_id: "",
+      regression_version: "",
+    }
+  });
+  
+  const { control, watch, setValue, handleSubmit: formSubmit } = form;
+  
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -196,13 +222,11 @@ export default function BugReportForm({
     setCustomFields((prev) => prev.filter((field) => field.id !== id));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
+  const onFormSubmit = async (data: any) => {
     if (
-      !formData.title.trim() ||
-      !formData.description.trim() ||
-      !formData.project_id
+      !data.title.trim() ||
+      !data.description.trim() ||
+      !data.project_id
     ) {
       toast.error("Please fill in all required fields.");
       return;
@@ -212,6 +236,7 @@ export default function BugReportForm({
 
     try {
       const submitData = {
+        ...data,
         ...formData,
         custom_fields: customFields.filter((field) => field.name.trim()),
         attachments,
@@ -236,7 +261,7 @@ export default function BugReportForm({
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={formSubmit(onFormSubmit)} className="space-y-6">
           {/* Basic Information */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="md:col-span-2">
@@ -273,23 +298,15 @@ export default function BugReportForm({
 
             <div>
               <Label htmlFor="assignee">Assignee</Label>
-              <Select
-                value={formData.assignee_id}
-                onValueChange={(value) =>
-                  handleInputChange("assignee_id", value)
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Assign to..." />
-                </SelectTrigger>
-                <SelectContent>
-                  {users.map((user) => (
-                    <SelectItem key={user.id} value={user.id}>
-                      {user.name} ({user.email})
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <div className="mt-1">
+                <UserSelector
+                  control={form.control}
+                  name="assignee_id"
+                  label=""
+                  required={false}
+                  className=""
+                />
+              </div>
             </div>
 
             <div>
@@ -304,7 +321,7 @@ export default function BugReportForm({
                 <SelectContent>
                   {severityOptions.map((option) => (
                     <SelectItem key={option.value} value={option.value}>
-                      <Badge label={option.label} className={option.color} />
+                      <Badge className={option.color}>{option.label}</Badge>
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -490,7 +507,7 @@ export default function BugReportForm({
               {formData.labels.map((label) => (
                 <div
                   key={label}
-                  className="inline-flex items-center gap-1 bg-gray-100 text-gray-800 px-3 py-1.5 text-xs font-semibold rounded-full border border-gray-200"
+                  className="inline-flex items-center gap-1 bg-gray-100 text-gray-800 px-3 py-1.5 text-sm font-semibold rounded-full border border-gray-200"
                 >
                   {label}
                   <X

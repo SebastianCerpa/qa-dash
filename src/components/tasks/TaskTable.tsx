@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Task, useStore } from '@/store/useStore';
-import Badge from '@/components/ui/Badge';
+import { Badge } from '@/components/ui/badge';
 import { PencilIcon, TrashIcon, EyeIcon } from '@heroicons/react/24/outline';
 
 interface TaskTableProps {
@@ -64,7 +64,7 @@ export default function TaskTable({ tasks, onView, onEdit, onDelete }: TaskTable
                 <tr>
                   <th
                     scope="col"
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+                    className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
                     onClick={() => handleSort('title')}
                   >
                     Title
@@ -74,7 +74,7 @@ export default function TaskTable({ tasks, onView, onEdit, onDelete }: TaskTable
                   </th>
                   <th
                     scope="col"
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+                    className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
                     onClick={() => handleSort('testType')}
                   >
                     Test Type
@@ -84,7 +84,7 @@ export default function TaskTable({ tasks, onView, onEdit, onDelete }: TaskTable
                   </th>
                   <th
                     scope="col"
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+                    className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
                     onClick={() => handleSort('status')}
                   >
                     Status
@@ -94,7 +94,7 @@ export default function TaskTable({ tasks, onView, onEdit, onDelete }: TaskTable
                   </th>
                   <th
                     scope="col"
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+                    className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
                     onClick={() => handleSort('priority')}
                   >
                     Priority
@@ -104,7 +104,7 @@ export default function TaskTable({ tasks, onView, onEdit, onDelete }: TaskTable
                   </th>
                   <th
                     scope="col"
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+                    className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
                     onClick={() => handleSort('assignee')}
                   >
                     Assignee
@@ -114,7 +114,7 @@ export default function TaskTable({ tasks, onView, onEdit, onDelete }: TaskTable
                   </th>
                   <th
                     scope="col"
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+                    className="px-6 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
                     onClick={() => handleSort('dueDate')}
                   >
                     Due Date
@@ -134,13 +134,13 @@ export default function TaskTable({ tasks, onView, onEdit, onDelete }: TaskTable
                       <div className="text-sm font-medium text-gray-900">{task.title}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <Badge label={task.testType} variant="testType" />
+                      <Badge variant="secondary">{task.testType}</Badge>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <Badge label={task.status} variant="status" />
+                      <Badge variant="default">{task.status}</Badge>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <Badge label={task.priority} variant="priority" />
+                      <Badge variant="outline">{task.priority}</Badge>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-900">{getAssigneeName(task.assignee)}</div>

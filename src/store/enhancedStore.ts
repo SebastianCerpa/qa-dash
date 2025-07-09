@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { v4 as uuidv4 } from 'uuid';
 
 // Enhanced interfaces for comprehensive QA management
 export interface QATicket {
@@ -7,7 +8,7 @@ export interface QATicket {
   title: string;
   description: string;
   acceptanceCriteria: string; // Markdown or BDD format
-  status: "Open" | "In Progress" | "Testing" | "Review" | "Closed";
+  status: "Open" | "In Progress" | "Testing" | "Review" | "Passed" | "Failed" | "Closed";
   priority: "Low" | "Medium" | "High" | "Critical";
   tags: string[];
   sprintId?: string;
@@ -47,6 +48,8 @@ export interface ProductSpecification {
 }
 
 export interface TestCase {
+  linkedTickets: string[];
+  last_executed?: Date;
   id: string;
   title: string;
   description: string;
@@ -67,12 +70,17 @@ export interface TestCase {
   prerequisites: string;
   tags: string[];
   ticketId: string;
+  testPlanId?: string;
   automationScript?: string;
   ciIntegration?: {
     buildId: string;
     pipelineUrl: string;
     executionTime: number;
   };
+  executions?: TestExecution[];
+  createdAt?: Date;
+  updatedAt?: Date;
+  lastExecutedAt?: Date;
 }
 
 export interface TestStep {
@@ -94,6 +102,18 @@ export interface TestPlan {
   status: "Draft" | "Active" | "Completed";
   createdBy: string;
   createdAt: Date;
+  startDate?: Date;
+  endDate?: Date;
+  projectInfo: string; // Project information including name, version, stakeholders
+  objectives: string; // Test objectives
+  scope: string; // What is in and out of scope
+  testStrategy: string; // Overall approach to testing
+  environment: string; // Hardware, software, network requirements
+  acceptanceCriteria: string; // Criteria for test completion
+  riskManagement: string; // Potential risks and mitigation strategies
+  resources: string; // Human resources, tools, etc.
+  schedule: string; // Timeline for testing activities
+  deliverables: string; // Documents, reports, artifacts
   executionSummary?: {
     totalTests: number;
     passed: number;
@@ -109,13 +129,13 @@ export interface Task {
   title: string;
   description: string;
   type:
-    | "Testing"
-    | "Bug Fix"
-    | "Documentation"
-    | "Review"
-    | "Planning"
-    | "Other";
-  status: "Todo" | "In Progress" | "Review" | "Done";
+  | "Testing"
+  | "Bug Fix"
+  | "Documentation"
+
+  | "Planning"
+  | "Other";
+  status: "Todo" | "In Progress" | "Done";
   priority: "Low" | "Medium" | "High" | "Critical";
   assigneeId?: string;
   reporterId: string;
@@ -133,24 +153,19 @@ export interface User {
   name: string;
   email: string;
   role:
-    | "QA Engineer"
-    | "Senior QA Engineer"
-    | "QA Lead"
-    | "QA Manager"
-    | "Developer"
-    | "Product Manager"
-    | "Admin";
+  | "QA Engineer"
+  | "Senior QA Engineer"
+  | "QA Lead"
+  | "QA Manager"
+  | "Developer"
+  | "Product Manager"
+  | "Admin";
   avatar?: string;
   permissions: Permission[];
   isActive: boolean;
   lastLogin?: Date;
   preferences: {
     theme: "light" | "dark";
-    notifications: {
-      email: boolean;
-      inApp: boolean;
-      slack: boolean;
-    };
     timezone: string;
   };
 }
@@ -194,10 +209,10 @@ export interface Integration {
 export interface AIInsight {
   id: string;
   type:
-    | "Acceptance Criteria"
-    | "Test Cases"
-    | "Bug Pattern"
-    | "Sprint Prediction";
+  | "Acceptance Criteria"
+  | "Test Cases"
+  | "Bug Pattern"
+  | "Sprint Prediction";
   content: string;
   confidence: number;
   relatedResourceId: string;
@@ -286,20 +301,27 @@ export interface BugActivity {
 
 export interface TestExecution {
   id: string;
-  test_case_name: string;
-  test_suite_id: string;
-  status: "PASSED" | "FAILED" | "SKIPPED";
-  duration: number;
-  executed_at: Date;
+  test_case_name?: string;
+  test_suite_id?: string;
+  status: "PASSED" | "FAILED" | "SKIPPED" | string;
+  notes?: string;
+  executedAt: Date;
+  executedBy?: string;
+  duration?: number;
   build_id?: string;
   branch?: string;
   commit_hash?: string;
   environment?: string;
   error_message?: string;
   stack_trace?: string;
-  is_flaky: boolean;
-  flaky_score: number;
-  retry_count: number;
+  is_flaky?: boolean;
+  flaky_score?: number;
+  retry_count?: number;
+  bugReport?: {
+    id: string;
+    title: string;
+    status: string;
+  };
 }
 
 export interface BugAnalytics {
@@ -317,32 +339,7 @@ export interface BugAnalytics {
   top_assignees: Array<{ user_id: string; count: number }>;
 }
 
-export interface WorkflowRule {
-  id: string;
-  name: string;
-  description?: string;
-  trigger_event: string;
-  conditions: Record<string, number>;
-  actions: Record<string, number>;
-  is_active: boolean;
-  created_by: string;
-  created_at: Date;
-  updated_at: Date;
-}
-
-export interface Notification {
-  id: string;
-  user_id: string;
-  type: string;
-  title: string;
-  message: string;
-  data: Record<string, number>;
-  priority: "LOW" | "MEDIUM" | "HIGH" | "URGENT";
-  is_read: boolean;
-  read_at?: Date;
-  expires_at?: Date;
-  created_at: Date;
-}
+// WorkflowRule and Notification interfaces removed
 
 interface EnhancedQAStore {
   // State
@@ -363,8 +360,6 @@ interface EnhancedQAStore {
   bugReports: BugReport[];
   testExecutions: TestExecution[];
   bugAnalytics: BugAnalytics[];
-  workflowRules: WorkflowRule[];
-  notifications: Notification[];
 
   // Ticket Management
   addTicket: (ticket: Omit<QATicket, "id" | "createdAt" | "updatedAt">) => void;
@@ -373,7 +368,7 @@ interface EnhancedQAStore {
   linkTestCaseToTicket: (ticketId: string, testCaseId: string) => void;
 
   // Sprint Management
-  addSprint: (sprint: Omit<Sprint, "id">) => void;
+  addSprint: (sprint: Omit<Sprint, "id">) => Sprint;
   updateSprint: (id: string, updates: Partial<Sprint>) => void;
   deleteSprint: (id: string) => void;
   addTicketToSprint: (sprintId: string, ticketId: string) => void;
@@ -394,7 +389,7 @@ interface EnhancedQAStore {
   deleteTask: (id: string) => void;
 
   // User Management
-  addUser: (user: Omit<User, "id">) => void;
+  addUser: (user: Omit<User, "id">) => User;
   updateUser: (id: string, updates: Partial<User>) => void;
   deleteUser: (id: string) => void;
   setCurrentUser: (user: User) => void;
@@ -447,20 +442,7 @@ interface EnhancedQAStore {
     endDate: Date
   ) => BugAnalytics[];
 
-  // Workflow Rules
-  addWorkflowRule: (
-    rule: Omit<WorkflowRule, "id" | "created_at" | "updated_at">
-  ) => void;
-  updateWorkflowRule: (id: string, updates: Partial<WorkflowRule>) => void;
-  toggleWorkflowRule: (id: string) => void;
-
-  // Notifications
-  addNotification: (
-    notification: Omit<Notification, "id" | "created_at">
-  ) => void;
-  markNotificationAsRead: (id: string) => void;
-  deleteNotification: (id: string) => void;
-  getUnreadNotifications: () => Notification[];
+  // Workflow Rules and Notifications removed
 }
 
 export const useEnhancedQAStore = create<EnhancedQAStore>()(
@@ -484,14 +466,12 @@ export const useEnhancedQAStore = create<EnhancedQAStore>()(
       bugReports: [],
       testExecutions: [],
       bugAnalytics: [],
-      workflowRules: [],
-      notifications: [],
 
       // Ticket Management
       addTicket: (ticketData) => {
         const ticket: QATicket = {
           ...ticketData,
-          id: crypto.randomUUID(),
+          id: uuidv4(),
           createdAt: new Date(),
           updatedAt: new Date(),
         };
@@ -541,9 +521,9 @@ export const useEnhancedQAStore = create<EnhancedQAStore>()(
           tickets: state.tickets.map((ticket) =>
             ticket.id === ticketId
               ? {
-                  ...ticket,
-                  linkedTestCases: [...ticket.linkedTestCases, testCaseId],
-                }
+                ...ticket,
+                linkedTestCases: [...ticket.linkedTestCases, testCaseId],
+              }
               : ticket
           ),
         }));
@@ -553,9 +533,10 @@ export const useEnhancedQAStore = create<EnhancedQAStore>()(
       addSprint: (sprintData) => {
         const sprint: Sprint = {
           ...sprintData,
-          id: crypto.randomUUID(),
+          id: uuidv4(),
         };
         set((state) => ({ sprints: [...state.sprints, sprint] }));
+        return sprint;
       },
 
       updateSprint: (id, updates) => {
@@ -587,7 +568,7 @@ export const useEnhancedQAStore = create<EnhancedQAStore>()(
       addTestCase: (testCaseData) => {
         const testCase: TestCase = {
           ...testCaseData,
-          id: crypto.randomUUID(),
+          id: uuidv4(),
         };
         set((state) => ({ testCases: [...state.testCases, testCase] }));
       },
@@ -611,11 +592,11 @@ export const useEnhancedQAStore = create<EnhancedQAStore>()(
           testCases: state.testCases.map((testCase) =>
             testCase.id === id
               ? {
-                  ...testCase,
-                  ...result,
-                  executedBy: get().currentUser?.id,
-                  executedAt: new Date(),
-                }
+                ...testCase,
+                ...result,
+                executedBy: get().currentUser?.id,
+                executedAt: new Date(),
+              }
               : testCase
           ),
         }));
@@ -624,7 +605,7 @@ export const useEnhancedQAStore = create<EnhancedQAStore>()(
       addTestPlan: (testPlanData) => {
         const testPlan: TestPlan = {
           ...testPlanData,
-          id: crypto.randomUUID(),
+          id: uuidv4(),
         };
         set((state) => ({ testPlans: [...state.testPlans, testPlan] }));
       },
@@ -647,7 +628,7 @@ export const useEnhancedQAStore = create<EnhancedQAStore>()(
       addTask: (taskData) => {
         const task: Task = {
           ...taskData,
-          id: crypto.randomUUID(),
+          id: uuidv4(),
           createdAt: new Date(),
           updatedAt: new Date(),
         };
@@ -672,9 +653,10 @@ export const useEnhancedQAStore = create<EnhancedQAStore>()(
       addUser: (userData) => {
         const user: User = {
           ...userData,
-          id: crypto.randomUUID(),
+          id: uuidv4(),
         };
         set((state) => ({ users: [...state.users, user] }));
+        return user;
       },
 
       updateUser: (id, updates) => {
@@ -697,7 +679,7 @@ export const useEnhancedQAStore = create<EnhancedQAStore>()(
       logActivity: (activityData) => {
         const activity: ActivityLog = {
           ...activityData,
-          id: crypto.randomUUID(),
+          id: uuidv4(),
           timestamp: new Date(),
         };
         set((state) => ({ activityLogs: [...state.activityLogs, activity] }));
@@ -707,7 +689,7 @@ export const useEnhancedQAStore = create<EnhancedQAStore>()(
       addMetric: (metricData) => {
         const metric: Metric = {
           ...metricData,
-          id: crypto.randomUUID(),
+          id: uuidv4(),
         };
         set((state) => ({ metrics: [...state.metrics, metric] }));
       },
@@ -729,7 +711,7 @@ export const useEnhancedQAStore = create<EnhancedQAStore>()(
       addAIInsight: (insightData) => {
         const insight: AIInsight = {
           ...insightData,
-          id: crypto.randomUUID(),
+          id: uuidv4(),
           createdAt: new Date(),
         };
         set((state) => ({ aiInsights: [...state.aiInsights, insight] }));
@@ -747,7 +729,7 @@ export const useEnhancedQAStore = create<EnhancedQAStore>()(
       addIntegration: (integrationData) => {
         const integration: Integration = {
           ...integrationData,
-          id: crypto.randomUUID(),
+          id: uuidv4(),
         };
         set((state) => ({
           integrations: [...state.integrations, integration],
@@ -776,7 +758,7 @@ export const useEnhancedQAStore = create<EnhancedQAStore>()(
       addBugReport: (bugData) => {
         const bug: BugReport = {
           ...bugData,
-          id: crypto.randomUUID(),
+          id: uuidv4(),
           created_at: new Date(),
           updated_at: new Date(),
           attachments: [],
@@ -825,7 +807,7 @@ export const useEnhancedQAStore = create<EnhancedQAStore>()(
       addBugComment: (bugId, commentData) => {
         const comment: BugComment = {
           ...commentData,
-          id: crypto.randomUUID(),
+          id: uuidv4(),
           bug_id: bugId,
           created_at: new Date(),
           updated_at: new Date(),
@@ -842,7 +824,7 @@ export const useEnhancedQAStore = create<EnhancedQAStore>()(
       addBugActivity: (bugId, activityData) => {
         const activity: BugActivity = {
           ...activityData,
-          id: crypto.randomUUID(),
+          id: uuidv4(),
           bug_id: bugId,
           created_at: new Date(),
         };
@@ -859,7 +841,7 @@ export const useEnhancedQAStore = create<EnhancedQAStore>()(
       addTestExecution: (executionData) => {
         const execution: TestExecution = {
           ...executionData,
-          id: crypto.randomUUID(),
+          id: uuidv4(),
         };
         set((state) => ({
           testExecutions: [...state.testExecutions, execution],
@@ -882,7 +864,7 @@ export const useEnhancedQAStore = create<EnhancedQAStore>()(
       updateBugAnalytics: (analyticsData) => {
         const analytics: BugAnalytics = {
           ...analyticsData,
-          id: crypto.randomUUID(),
+          id: uuidv4(),
         };
         set((state) => ({ bugAnalytics: [...state.bugAnalytics, analytics] }));
       },
@@ -894,70 +876,7 @@ export const useEnhancedQAStore = create<EnhancedQAStore>()(
         );
       },
 
-      // Workflow Rules
-      addWorkflowRule: (ruleData) => {
-        const rule: WorkflowRule = {
-          ...ruleData,
-          id: crypto.randomUUID(),
-          created_at: new Date(),
-          updated_at: new Date(),
-        };
-        set((state) => ({ workflowRules: [...state.workflowRules, rule] }));
-      },
-
-      updateWorkflowRule: (id, updates) => {
-        set((state) => ({
-          workflowRules: state.workflowRules.map((rule) =>
-            rule.id === id
-              ? { ...rule, ...updates, updated_at: new Date() }
-              : rule
-          ),
-        }));
-      },
-
-      toggleWorkflowRule: (id) => {
-        set((state) => ({
-          workflowRules: state.workflowRules.map((rule) =>
-            rule.id === id ? { ...rule, is_active: !rule.is_active } : rule
-          ),
-        }));
-      },
-
-      // Notifications
-      addNotification: (notificationData) => {
-        const notification: Notification = {
-          ...notificationData,
-          id: crypto.randomUUID(),
-          created_at: new Date(),
-        };
-        set((state) => ({
-          notifications: [...state.notifications, notification],
-        }));
-      },
-
-      markNotificationAsRead: (id) => {
-        set((state) => ({
-          notifications: state.notifications.map((notification) =>
-            notification.id === id
-              ? { ...notification, is_read: true, read_at: new Date() }
-              : notification
-          ),
-        }));
-      },
-
-      deleteNotification: (id) => {
-        set((state) => ({
-          notifications: state.notifications.filter(
-            (notification) => notification.id !== id
-          ),
-        }));
-      },
-
-      getUnreadNotifications: () => {
-        return get().notifications.filter(
-          (notification) => !notification.is_read
-        );
-      },
+      // Workflow Rules and Notifications removed
     }),
     {
       name: "enhanced-qa-store",
@@ -975,8 +894,7 @@ export const useEnhancedQAStore = create<EnhancedQAStore>()(
         bugReports: state.bugReports,
         testExecutions: state.testExecutions,
         bugAnalytics: state.bugAnalytics,
-        workflowRules: state.workflowRules,
-        notifications: state.notifications,
+        // workflowRules and notifications removed
       }),
     }
   )

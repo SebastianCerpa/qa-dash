@@ -2,16 +2,14 @@
 
 import React, { useState } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
-import Card from '@/components/ui/Card';
-import Button from '@/components/ui/Button';
+import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { useStore } from '@/store/useStore';
 
 export default function SettingsPage() {
   const { setCurrentUser, currentUser, teamMembers } = useStore();
   const [darkMode, setDarkMode] = useState(false);
-  const [emailNotifications, setEmailNotifications] = useState(true);
-  const [autoAssign, setAutoAssign] = useState(false);
-  
+
   // Test types management
   const [testTypes, setTestTypes] = useState([
     'Positive Test',
@@ -55,7 +53,10 @@ export default function SettingsPage() {
 
       <div className="space-y-6">
         {/* User Preferences */}
-        <Card title="User Preferences">
+        <Card className="border border-gray-200 shadow-md">
+          <div className="p-4 border-b border-gray-100">
+            <h3 className="text-lg font-semibold">User Preferences</h3>
+          </div>
           <div className="p-6 space-y-6">
             <div>
               <label className="text-sm font-medium text-gray-700">Current User</label>
@@ -116,49 +117,20 @@ export default function SettingsPage() {
               </button>
             </div>
 
-            <div className="flex items-center justify-between">
-              <span className="flex-grow flex flex-col">
-                <span className="text-sm font-medium text-gray-900">Email Notifications</span>
-                <span className="text-sm text-gray-500">Receive email notifications for task assignments and updates</span>
-              </span>
-              <button
-                type="button"
-                className={`${emailNotifications ? 'bg-primary-600' : 'bg-gray-200'} relative inline-flex flex-shrink-0 h-6 w-11 border-2 border-transparent rounded-full cursor-pointer transition-colors ease-in-out duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500`}
-                onClick={() => setEmailNotifications(!emailNotifications)}
-              >
-                <span className="sr-only">Enable notifications</span>
-                <span
-                  className={`${emailNotifications ? 'translate-x-5' : 'translate-x-0'} pointer-events-none relative inline-block h-5 w-5 rounded-full bg-white shadow transform ring-0 transition ease-in-out duration-200`}
-                ></span>
-              </button>
-            </div>
-
-            <div className="flex items-center justify-between">
-              <span className="flex-grow flex flex-col">
-                <span className="text-sm font-medium text-gray-900">Auto-assign Tasks</span>
-                <span className="text-sm text-gray-500">Automatically assign new tasks based on team member workload</span>
-              </span>
-              <button
-                type="button"
-                className={`${autoAssign ? 'bg-primary-600' : 'bg-gray-200'} relative inline-flex flex-shrink-0 h-6 w-11 border-2 border-transparent rounded-full cursor-pointer transition-colors ease-in-out duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500`}
-                onClick={() => setAutoAssign(!autoAssign)}
-              >
-                <span className="sr-only">Auto assign tasks</span>
-                <span
-                  className={`${autoAssign ? 'translate-x-5' : 'translate-x-0'} pointer-events-none relative inline-block h-5 w-5 rounded-full bg-white shadow transform ring-0 transition ease-in-out duration-200`}
-                ></span>
-              </button>
-            </div>
+            {/* Email notifications and auto-assign options removed */}
           </div>
         </Card>
 
         {/* Test Types Management */}
-        <Card title="Test Types Management">
+        <Card className="border border-gray-200 shadow-md">
+          <div className="p-4 border-b border-gray-100">
+            <h3 className="text-lg font-semibold">Test Types Management</h3>
+          </div>
           <div className="p-6">
             <p className="text-sm text-gray-500 mb-4">
               Manage the types of tests available for task creation
             </p>
-            
+
             <div className="mb-4">
               <div className="flex space-x-2">
                 <input
@@ -171,7 +143,7 @@ export default function SettingsPage() {
                 <Button onClick={handleAddTestType}>Add</Button>
               </div>
             </div>
-            
+
             <div className="space-y-2">
               {testTypes.map((type) => (
                 <div key={type} className="flex justify-between items-center p-2 bg-gray-50 rounded-md">
@@ -189,7 +161,7 @@ export default function SettingsPage() {
         </Card>
 
         <div className="flex justify-end">
-          <Button onClick={handleSaveSettings} variant="primary">
+          <Button onClick={handleSaveSettings} variant="secondary">
             Save Settings
           </Button>
         </div>

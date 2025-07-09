@@ -90,26 +90,7 @@ export async function POST(
       },
     });
 
-    // Send notification to bug assignee and reporter (if different from commenter)
-    // 👇 Asegura que los elementos del Set son string
-    const notificationUserIds = new Set<string>();
-
-    if (bug.assignee_id && bug.assignee_id !== user.id) {
-      notificationUserIds.add(bug.assignee_id);
-    }
-    if (bug.reporter_id !== user.id) {
-      notificationUserIds.add(bug.reporter_id);
-    }
-
-    for (const userId of notificationUserIds) {
-      await prisma.notifications.create({
-        data: {
-          user_id: userId,
-          message: `${user.name} commented on bug: ${bug.title}`,
-          is_read: false,
-        },
-      });
-    }
+    // Notifications removed
 
     return NextResponse.json(comment, { status: 201 });
   } catch (error) {

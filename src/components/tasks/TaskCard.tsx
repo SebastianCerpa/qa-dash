@@ -1,7 +1,7 @@
 import React from 'react';
 import { Task, useStore } from '@/store/useStore';
-import Badge from '@/components/ui/Badge';
-import Card from '@/components/ui/Card';
+import { Badge } from '@/components/ui/badge';
+import { Card } from '@/components/ui/card';
 import { PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
 
 interface TaskCardProps {
@@ -23,7 +23,7 @@ export default function TaskCard({ task, onEdit, onDelete }: TaskCardProps) {
   return (
     <Card className="h-full flex flex-col">
       <div className="flex justify-between items-start">
-        <h3 className="text-lg font-medium text-gray-900 truncate">{task.title}</h3>
+        <h3 className="text-base font-medium text-gray-900 truncate">{task.title}</h3>
         <div className="flex space-x-2">
           {onEdit && (
             <button
@@ -45,9 +45,9 @@ export default function TaskCard({ task, onEdit, onDelete }: TaskCardProps) {
       </div>
       
       <div className="mt-2 flex flex-wrap gap-2">
-        <Badge label={task.testType} variant="testType" />
-        <Badge label={task.status} variant="status" />
-        <Badge label={task.priority} variant="priority" />
+        <Badge variant="secondary">{task.testType}</Badge>
+        <Badge variant="default">{task.status}</Badge>
+        <Badge variant="outline">{task.priority}</Badge>
       </div>
       
       <p className="mt-3 text-sm text-gray-500 line-clamp-3">{task.description}</p>

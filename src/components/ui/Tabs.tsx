@@ -113,3 +113,5 @@ export {
   TabsTrigger,
   TabsContent,
 };
+
+export default Tabs;

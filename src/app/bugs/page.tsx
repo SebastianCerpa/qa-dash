@@ -1,25 +1,25 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
-import Button from "../../components/ui/Button";
-import { Input } from "@/components/ui/Input";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/Select";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
-import Badge from "@/components/ui/Badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/Tabs";
+} from "@/components/ui/select-radix";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/Dialog";
+} from "@/components/ui/dialog";
 import {
   Plus,
   Search,
@@ -101,7 +101,6 @@ export default function BugsPage() {
   const [totalBugs, setTotalBugs] = useState(0);
   const itemsPerPage = 20;
 
-  // Declarar fetchBugs antes de useEffect
   const fetchBugs = useCallback(async () => {
     setLoading(true);
     try {
@@ -278,8 +277,8 @@ export default function BugsPage() {
             </p>
           </div>
           <div className="flex items-center gap-2 ml-4">
-            <Badge label={bug.severity} variant="outline" />
-            <Badge label={bug.status.replace("_", " ")} variant="outline" />
+            <Badge variant="outline">{bug.severity}</Badge>
+            <Badge variant="outline">{bug.status.replace("_", " ")}</Badge>
           </div>
         </div>
 
@@ -303,9 +302,9 @@ export default function BugsPage() {
 
           <div className="flex items-center gap-2">
             {bug.is_regression && (
-              <Badge label="Regression" variant="warning" className="text-xs" />
+              <Badge variant="secondary" className="text-sm bg-amber-500 text-white hover:bg-amber-600">Regression</Badge>
             )}
-            <div className="flex items-center gap-1 text-xs">
+            <div className="flex items-center gap-1 text-sm">
               <span>{bug._count.bug_comments} comments</span>
               <span>•</span>
               <span>{bug._count.bug_attachments} files</span>
@@ -321,10 +320,11 @@ export default function BugsPage() {
             {bug.labels.map((label) => (
               <Badge
                 key={label}
-                label={label}
                 variant="outline"
-                className="text-xs"
-              />
+                className="text-sm"
+              >
+                {label}
+              </Badge>
             ))}
           </div>
         )}
@@ -466,7 +466,7 @@ export default function BugsPage() {
 
                 <div className="flex gap-2">
                   <Button
-                    variant={showRegressionOnly ? "primary" : "outline"}
+                    variant={showRegressionOnly ? "default" : "outline"}
                     size="sm"
                     onClick={() => setShowRegressionOnly(!showRegressionOnly)}
                   >

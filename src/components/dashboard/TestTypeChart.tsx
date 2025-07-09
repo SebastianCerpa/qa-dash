@@ -3,7 +3,7 @@
 import React from 'react';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
 import { Pie } from 'react-chartjs-2';
-import Card from '@/components/ui/Card';
+import { Card } from '@/components/ui/card';
 import { useStore, TestType } from '@/store/useStore';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
@@ -85,7 +85,10 @@ export default function TestTypeChart() {
   };
 
   return (
-    <Card title="Test Types Distribution">
+    <Card className="border border-gray-200 shadow-md">
+      <div className="p-4 border-b border-gray-100">
+        <h3 className="text-lg font-semibold">Test Types Distribution</h3>
+      </div>
       <div className="h-64">
         {tasks.length > 0 ? (
           <Pie data={data} options={options} />

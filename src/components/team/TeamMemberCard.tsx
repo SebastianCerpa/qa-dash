@@ -1,6 +1,6 @@
 import React from 'react';
 import { TeamMember } from '@/store/useStore';
-import Card from '@/components/ui/Card';
+import { Card } from '@/components/ui/card';
 import { PencilIcon, TrashIcon, EnvelopeIcon } from '@heroicons/react/24/outline';
 
 interface TeamMemberCardProps {
@@ -14,11 +14,11 @@ export default function TeamMemberCard({ member, onEdit, onDelete }: TeamMemberC
     <Card className="h-full flex flex-col">
       <div className="flex justify-between items-start">
         <div className="flex items-center">
-          <div className="h-12 w-12 rounded-full bg-primary-500 flex items-center justify-center text-white text-lg font-semibold">
+          <div className="h-12 w-12 rounded-full bg-primary-500 flex items-center justify-center text-white text-base font-semibold">
             {member.name.charAt(0)}
           </div>
           <div className="ml-4">
-            <h3 className="text-lg font-medium text-gray-900">{member.name}</h3>
+            <h3 className="text-base font-medium text-gray-900">{member.name}</h3>
             <p className="text-sm text-gray-500">{member.role}</p>
           </div>
         </div>

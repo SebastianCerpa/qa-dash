@@ -1,147 +1,123 @@
 'use client';
 
-import React, { useState, useRef, useEffect } from 'react';
-import { ChevronDown, Check } from 'lucide-react';
+import * as React from 'react';
+import { cn } from '@/lib/utils';
 
-interface SelectProps {
-  value?: string;
-  onValueChange?: (value: string) => void;
-  placeholder?: string;
-  disabled?: boolean;
-  children: React.ReactNode;
+interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
+  label?: string;
+  error?: string;
+  helperText?: string;
+  fullWidth?: boolean;
 }
 
-interface SelectTriggerProps {
-  children: React.ReactNode;
-  className?: string;
-}
-
-interface SelectContentProps {
-  children: React.ReactNode;
-  className?: string;
-}
-
-interface SelectItemProps {
-  value: string;
-  children: React.ReactNode;
-  className?: string;
-}
-
-interface SelectValueProps {
-  placeholder?: string;
-  className?: string;
-}
-
-const SelectContext = React.createContext<{
-  value?: string;
-  onValueChange?: (value: string) => void;
-  isOpen: boolean;
-  setIsOpen: (open: boolean) => void;
-  selectedLabel?: string;
-  setSelectedLabel: (label: string) => void;
-}>({} as any);
-
-function Select({ value, onValueChange, children, disabled }: SelectProps) {
-  const [isOpen, setIsOpen] = useState(false);
-  const [selectedLabel, setSelectedLabel] = useState('');
-
+const Select = React.forwardRef<HTMLSelectElement, SelectProps>((
+  {
+    label,
+    error,
+    helperText,
+    fullWidth = false,
+    className = '',
+    disabled,
+    children,
+    ...rest
+  },
+  ref
+) => {
   return (
-    <SelectContext.Provider value={{
-      value,
-      onValueChange,
-      isOpen,
-      setIsOpen,
-      selectedLabel,
-      setSelectedLabel
-    }}>
-      <div className={`relative ${disabled ? 'opacity-60 cursor-not-allowed' : ''}`}>
+    <div className={cn(fullWidth ? 'w-full' : '')}>
+      {label && (
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+          {label}
+        </label>
+      )}
+      <select
+        ref={ref}
+        className={cn(
+          "block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm",
+          error && "border-red-500 focus:border-red-500 focus:ring-red-500",
+          disabled && "opacity-50 cursor-not-allowed bg-gray-100",
+          className
+        )}
+        disabled={disabled}
+        {...rest}
+      >
         {children}
-      </div>
-    </SelectContext.Provider>
-  );
-}
-
-function SelectTrigger({ children, className = '' }: SelectTriggerProps) {
-  const { isOpen, setIsOpen } = React.useContext(SelectContext);
-  const triggerRef = useRef<HTMLButtonElement>(null);
-
-  return (
-    <button
-      ref={triggerRef}
-      type="button"
-      className={`flex items-center justify-between w-full px-3 py-2 text-left bg-white border border-gray-300 rounded-lg hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 ${className}`}
-      onClick={() => setIsOpen(!isOpen)}
-    >
-      {children}
-      <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
-    </button>
-  );
-}
-
-function SelectValue({ placeholder = 'Select...', className = '' }: SelectValueProps) {
-  const { selectedLabel, value } = React.useContext(SelectContext);
-
-  return (
-    <span className={`block truncate ${!value ? 'text-gray-500' : 'text-gray-900'} ${className}`}>
-      {selectedLabel || placeholder}
-    </span>
-  );
-}
-
-function SelectContent({ children, className = '' }: SelectContentProps) {
-  const { isOpen, setIsOpen } = React.useContext(SelectContext);
-  const contentRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (contentRef.current && !contentRef.current.contains(event.target as Node)) {
-        setIsOpen(false);
-      }
-    }
-
-    if (isOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
-      return () => document.removeEventListener('mousedown', handleClickOutside);
-    }
-  }, [isOpen, setIsOpen]);
-
-  if (!isOpen) return null;
-
-  return (
-    <div
-      ref={contentRef}
-      className={`absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-auto ${className}`}
-    >
-      {children}
+      </select>
+      {error && (
+        <p className="mt-1 text-sm text-red-600">{error}</p>
+      )}
+      {helperText && !error && (
+        <p className="mt-1 text-sm text-gray-500">{helperText}</p>
+      )}
     </div>
   );
-}
+});
 
-function SelectItem({ value, children, className = '' }: SelectItemProps) {
-  const { value: selectedValue, onValueChange, setIsOpen, setSelectedLabel } = React.useContext(SelectContext);
-  const isSelected = selectedValue === value;
+Select.displayName = 'Select';
 
-  const handleClick = () => {
-    onValueChange?.(value);
-    setSelectedLabel(children as string);
-    setIsOpen(false);
-  };
+const SelectTrigger = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
+>(({ className, ...props }, ref) => (
+  <div
+    ref={ref}
+    className={cn(
+      "flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
+      className
+    )}
+    {...props}
+  />
+));
+SelectTrigger.displayName = "SelectTrigger";
 
-  return (
-    <div
-      className={`flex items-center justify-between px-3 py-2 cursor-pointer hover:bg-gray-100 ${isSelected ? 'bg-blue-50 text-blue-600' : 'text-gray-900'} ${className}`}
-      onClick={handleClick}
-    >
-      <span>{children}</span>
-      {isSelected && <Check className="w-4 h-4" />}
-    </div>
-  );
-}
+const SelectValue = React.forwardRef<
+  HTMLSpanElement,
+  React.HTMLAttributes<HTMLSpanElement>
+>(({ className, ...props }, ref) => (
+  <span
+    ref={ref}
+    className={cn("flex-1 text-sm truncate", className)}
+    {...props}
+  />
+));
+SelectValue.displayName = "SelectValue";
+
+const SelectContent = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
+>(({ className, ...props }, ref) => (
+  <div
+    ref={ref}
+    className={cn(
+      "relative z-50 min-w-[8rem] overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-md animate-in fade-in-80",
+      className
+    )}
+    {...props}
+  />
+));
+SelectContent.displayName = "SelectContent";
+
+const SelectItem = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
+>(({ className, ...props }, ref) => (
+  <div
+    ref={ref}
+    className={cn(
+      "relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+      className
+    )}
+    {...props}
+  />
+));
+SelectItem.displayName = "SelectItem";
 
 export {
   Select,
-  SelectContent,
-  SelectItem,
   SelectTrigger,
   SelectValue,
+  SelectContent,
+  SelectItem
 };
+
+export default Select;

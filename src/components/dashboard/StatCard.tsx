@@ -73,7 +73,7 @@ export default function StatCard({
 
   const getCardClasses = () => {
     const baseClasses =
-      "p-6 rounded-2xl transition-all duration-300 hover:shadow-xl group cursor-pointer backdrop-blur-sm";
+      "p-6 rounded-2xl transition-all duration-300 hover:shadow-xl group cursor-pointer backdrop-blur-sm relative z-[10]";
 
     switch (variant) {
       case "gradient":
@@ -89,28 +89,27 @@ export default function StatCard({
     <div className={getCardClasses()}>
       <div className="flex items-start justify-between">
         <div className="flex-1">
-          <h3 className="text-xs font-semibold text-gray-500 mb-2 tracking-wide uppercase">
+          <h3 className="text-sm font-semibold text-gray-500 mb-2 tracking-wide uppercase">
             {title}
           </h3>
           <div className="flex items-baseline space-x-2">
-            <span className="text-3xl font-bold text-gray-900 tracking-tight">
+            <span className="text-2xl font-bold text-gray-900 tracking-tight">
               {value}
             </span>
           </div>
           {change && (
             <div className="flex items-center mt-3 space-x-2">
               <span
-                className={`text-xs font-semibold px-2 py-1 rounded-full ${
-                  change.type === "increase"
-                    ? "text-green-700 bg-green-100/80"
-                    : change.type === "decrease"
+                className={`text-sm font-semibold px-2 py-1 rounded-full ${change.type === "increase"
+                  ? "text-green-700 bg-green-100/80"
+                  : change.type === "decrease"
                     ? "text-red-700 bg-red-100/80"
                     : "text-gray-700 bg-gray-100/80"
-                }`}
+                  }`}
               >
                 {change.value}
               </span>
-              <span className="text-xs text-gray-500 font-medium">
+              <span className="text-sm text-gray-500 font-medium">
                 from last month
               </span>
             </div>
@@ -119,18 +118,16 @@ export default function StatCard({
         {icon && (
           <div className="flex-shrink-0 ml-4">
             <div
-              className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all duration-300 group-hover:scale-110 group-hover:rotate-3 ${
-                variant === "gradient"
-                  ? colorClasses[color].iconBg
-                  : "bg-gradient-to-br from-gray-100/80 to-gray-200/80 backdrop-blur-sm"
-              }`}
+              className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all duration-300 group-hover:scale-110 group-hover:rotate-3 ${variant === "gradient"
+                ? colorClasses[color].iconBg
+                : "bg-gradient-to-br from-gray-100/80 to-gray-200/80 backdrop-blur-sm"
+                }`}
             >
               <div
-                className={`text-xl transition-all duration-300 ${
-                  variant === "gradient"
-                    ? `bg-gradient-to-r ${colorClasses[color].icon} bg-clip-text text-transparent`
-                    : "text-gray-600 group-hover:text-gray-700"
-                }`}
+                className={`text-xl transition-all duration-300 ${variant === "gradient"
+                  ? `bg-gradient-to-r ${colorClasses[color].icon} bg-clip-text text-transparent`
+                  : "text-gray-600 group-hover:text-gray-700"
+                  }`}
               >
                 {icon}
               </div>

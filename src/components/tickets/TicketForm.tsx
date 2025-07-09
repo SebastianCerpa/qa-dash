@@ -3,8 +3,25 @@
 import React, { useState, useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { useEnhancedQAStore, QATicket } from "@/store/enhancedStore";
-import Button from "@/components/ui/Button";
-import { XMarkIcon, PlusIcon, TagIcon } from "@heroicons/react/24/outline";
+import { useStore } from "@/store/useStore";
+import { Button } from "@/components/ui/button";
+import {
+  XMarkIcon,
+  PlusIcon,
+  TagIcon,
+  DocumentTextIcon,
+  UserIcon,
+  CalendarIcon,
+  ExclamationTriangleIcon,
+  CheckCircleIcon,
+  SparklesIcon,
+  TicketIcon,
+  ChevronDownIcon,
+  ClockIcon,
+  EyeIcon,
+  PencilIcon
+} from "@heroicons/react/24/outline";
+import UserSelector from "./UserSelector";
 
 interface TicketFormProps {
   ticketId?: string;
@@ -68,13 +85,14 @@ export default function TicketForm({
   onSuccess,
   onCancel,
 }: TicketFormProps) {
-  const { tickets, addTicket, updateTicket, sprints, users } =
-    useEnhancedQAStore();
+  const { tickets, addTicket, updateTicket, sprints } = useEnhancedQAStore();
+  const { teamMembers } = useStore();
   const [selectedTemplate, setSelectedTemplate] = useState<
     keyof typeof ticketTemplates | "blank"
   >("blank");
   const [newTag, setNewTag] = useState("");
   const [isPreviewMode, setIsPreviewMode] = useState(false);
+  const [focusedField, setFocusedField] = useState<string | null>(null);
 
   const {
     control,
@@ -114,8 +132,15 @@ export default function TicketForm({
           estimatedHours: ticket.estimatedHours,
         });
       }
+    } else {
+      // Para tickets nuevos, asignar automáticamente al primer miembro del equipo disponible
+      // Solo asignamos miembros del equipo registrados en la sección "Teams"
+      const { teamMembers } = useStore.getState();
+      if (teamMembers.length > 0) {
+        setValue('assigneeId', teamMembers[0].id);
+      }
     }
-  }, [ticketId, tickets, reset]);
+  }, [ticketId, tickets, reset, setValue]);
 
   const applyTemplate = (templateKey: keyof typeof ticketTemplates) => {
     const template = ticketTemplates[templateKey];
@@ -144,9 +169,12 @@ export default function TicketForm({
     if (ticketId) {
       updateTicket(ticketId, data);
     } else {
+      // Usar el primer miembro del equipo como reporterId si existe, o 'system' si no hay miembros
+      const reporterId = teamMembers.length > 0 ? teamMembers[0].id : 'system';
+      
       addTicket({
         ...data,
-        reporterId: "current-user", // This should be the actual current user ID
+        reporterId,
         linkedTestCases: [],
         attachments: [],
       });
@@ -185,303 +213,456 @@ export default function TicketForm({
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-      {/* Template Selection */}
-      {!ticketId && (
-        <div className="bg-gray-50 p-4 rounded-lg">
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Start with a template
-          </label>
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
-            <button
-              type="button"
-              onClick={() => setSelectedTemplate("blank")}
-              className={`p-2 text-sm rounded border ${
-                selectedTemplate === "blank"
-                  ? "bg-primary-100 border-primary-500"
-                  : "bg-white border-gray-300"
-              }`}
-            >
-              Blank
-            </button>
-            {Object.keys(ticketTemplates).map((key) => (
-              <button
-                key={key}
-                type="button"
-                onClick={() => {
-                  setSelectedTemplate(key as keyof typeof ticketTemplates);
-                  applyTemplate(key as keyof typeof ticketTemplates);
-                }}
-                className={`p-2 text-sm rounded border capitalize ${
-                  selectedTemplate === key
-                    ? "bg-primary-100 border-primary-500"
-                    : "bg-white border-gray-300"
-                }`}
-              >
-                {key}
-              </button>
-            ))}
+    <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
+      {/* Header */}
+      <div className="bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-4">
+        <div className="flex items-center space-x-3">
+          <div className="p-2 bg-white/20 rounded-lg">
+            <TicketIcon className="h-6 w-6 text-white" />
+          </div>
+          <div>
+            <h3 className="text-lg font-semibold text-white">
+              {ticketId ? "Edit Ticket" : "Create New Ticket"}
+            </h3>
+            <p className="text-blue-100 text-sm">
+              {ticketId
+                ? "Update ticket details and settings"
+                : "Fill in the details to create a new ticket"}
+            </p>
           </div>
         </div>
-      )}
-
-      {/* Title */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Title *
-        </label>
-        <Controller
-          name="title"
-          control={control}
-          rules={{ required: "Title is required" }}
-          render={({ field }) => (
-            <input
-              {...field}
-              type="text"
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-              placeholder="Enter ticket title"
-            />
-          )}
-        />
-        {errors.title && (
-          <p className="mt-1 text-sm text-red-600">{errors.title.message}</p>
-        )}
       </div>
 
-      {/* Description */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Description *
-        </label>
-        <Controller
-          name="description"
-          control={control}
-          rules={{ required: "Description is required" }}
-          render={({ field }) => (
-            <textarea
-              {...field}
-              rows={8}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-              placeholder="Enter detailed description (Markdown supported)"
-            />
-          )}
-        />
-        {errors.description && (
-          <p className="mt-1 text-sm text-red-600">
-            {errors.description.message}
-          </p>
-        )}
-      </div>
-
-      {/* Acceptance Criteria */}
-      <div>
-        <div className="flex justify-between items-center mb-1">
-          <label className="block text-sm font-medium text-gray-700">
-            Acceptance Criteria *
-          </label>
-          <button
-            type="button"
-            onClick={() => setIsPreviewMode(!isPreviewMode)}
-            className="text-sm text-primary-600 hover:text-primary-800"
-          >
-            {isPreviewMode ? "Edit" : "Preview"}
-          </button>
-        </div>
-        {isPreviewMode ? (
-          <div
-            className="w-full min-h-32 px-3 py-2 border border-gray-300 rounded-md bg-gray-50"
-            dangerouslySetInnerHTML={{
-              __html: renderMarkdown(watchedAcceptanceCriteria || ""),
-            }}
-          />
-        ) : (
-          <Controller
-            name="acceptanceCriteria"
-            control={control}
-            rules={{ required: "Acceptance criteria is required" }}
-            render={({ field }) => (
-              <textarea
-                {...field}
-                rows={6}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                placeholder="Enter acceptance criteria (Markdown/BDD format supported)&#10;&#10;Example:&#10;Given [context]&#10;When [action]&#10;Then [outcome]&#10;&#10;- [ ] Criteria 1&#10;- [ ] Criteria 2"
-              />
-            )}
-          />
-        )}
-        {errors.acceptanceCriteria && (
-          <p className="mt-1 text-sm text-red-600">
-            {errors.acceptanceCriteria.message}
-          </p>
-        )}
-      </div>
-
-      {/* Priority, Status and Assignment */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Priority
-          </label>
-          <Controller
-            name="priority"
-            control={control}
-            render={({ field }) => (
-              <select
-                {...field}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-              >
-                <option value="Low">Low</option>
-                <option value="Medium">Medium</option>
-                <option value="High">High</option>
-                <option value="Critical">Critical</option>
-              </select>
-            )}
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Status
-          </label>
-          <Controller
-            name="status"
-            control={control}
-            render={({ field }) => (
-              <select
-                {...field}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-              >
-                <option value="Open">Open</option>
-                <option value="In Progress">In Progress</option>
-                <option value="Testing">Testing</option>
-                <option value="Review">Review</option>
-                <option value="Closed">Closed</option>
-              </select>
-            )}
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Sprint
-          </label>
-          <Controller
-            name="sprintId"
-            control={control}
-            render={({ field }) => (
-              <select
-                {...field}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-              >
-                <option value="">No Sprint</option>
-                {sprints.map((sprint) => (
-                  <option key={sprint.id} value={sprint.id}>
-                    {sprint.name}
-                  </option>
-                ))}
-              </select>
-            )}
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Assignee
-          </label>
-          <Controller
-            name="assigneeId"
-            control={control}
-            render={({ field }) => (
-              <select
-                {...field}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-              >
-                <option value="">Unassigned</option>
-                {users.map((user) => (
-                  <option key={user.id} value={user.id}>
-                    {user.name} ({user.role})
-                  </option>
-                ))}
-              </select>
-            )}
-          />
-        </div>
-      </div>
-
-      {/* Estimated Hours */}
-      <div className="w-full md:w-1/3">
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Estimated Hours
-        </label>
-        <Controller
-          name="estimatedHours"
-          control={control}
-          render={({ field }) => (
-            <input
-              {...field}
-              value={field.value || ""}
-              onChange={(e) =>
-                field.onChange(e.target.value ? Number(e.target.value) : 0)
-              }
-              type="number"
-              min="0"
-              step="0.5"
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-              placeholder="0"
-            />
-          )}
-        />
-      </div>
-
-      {/* Tags */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Tags
-        </label>
-        <div className="flex flex-wrap gap-2 mb-2">
-          {watchedTags.map((tag) => (
-            <span
-              key={tag}
-              className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-primary-100 text-primary-800"
+      <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-8">
+        {/* Template Selection */}
+        {!ticketId && (
+          <div className="space-y-2">
+            <label
+              className="flex items-center text-sm font-semibold text-gray-700"
             >
-              <TagIcon className="h-3 w-3 mr-1" />
-              {tag}
+              <SparklesIcon className="h-4 w-4 mr-2 text-gray-500" />
+              Start with a template
+            </label>
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
               <button
                 type="button"
-                onClick={() => removeTag(tag)}
-                className="ml-1 text-primary-600 hover:text-primary-800"
+                onClick={() => setSelectedTemplate("blank")}
+                className={`p-3 text-sm rounded-lg border-2 transition-all duration-200 ${selectedTemplate === "blank"
+                  ? "bg-blue-50 border-blue-500 text-blue-700 shadow-md"
+                  : "bg-white border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400"
+                  }`}
               >
-                <XMarkIcon className="h-3 w-3" />
+                Blank
               </button>
-            </span>
-          ))}
-        </div>
-        <div className="flex gap-2">
-          <input
-            type="text"
-            value={newTag}
-            onChange={(e) => setNewTag(e.target.value)}
-            onKeyPress={(e) =>
-              e.key === "Enter" && (e.preventDefault(), addTag())
-            }
-            className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-            placeholder="Add tag"
-          />
-          <Button type="button" onClick={addTag} variant="outline" size="sm">
-            <PlusIcon className="h-4 w-4" />
-          </Button>
-        </div>
-      </div>
+              {Object.keys(ticketTemplates).map((key) => (
+                <button
+                  key={key}
+                  type="button"
+                  onClick={() => {
+                    setSelectedTemplate(key as keyof typeof ticketTemplates);
+                    applyTemplate(key as keyof typeof ticketTemplates);
+                  }}
+                  className={`p-3 text-sm rounded-lg border-2 capitalize transition-all duration-200 ${selectedTemplate === key
+                    ? "bg-blue-50 border-blue-500 text-blue-700 shadow-md"
+                    : "bg-white border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400"
+                    }`}
+                >
+                  {key}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
 
-      {/* Form Actions */}
-      <div className="flex justify-end space-x-3 pt-4 border-t">
-        <Button type="button" variant="outline" onClick={onCancel}>
-          Cancel
-        </Button>
-        <Button type="submit" variant="primary">
-          {ticketId ? "Update Ticket" : "Create Ticket"}
-        </Button>
-      </div>
-    </form>
+        {/* Title Section */}
+        <div className="space-y-2">
+          <label
+            htmlFor="title"
+            className="flex items-center text-sm font-semibold text-gray-700"
+          >
+            <DocumentTextIcon className="h-4 w-4 mr-2 text-gray-500" />
+            Ticket Title
+          </label>
+          <div className="relative">
+            <Controller
+              name="title"
+              control={control}
+              rules={{ required: "Title is required" }}
+              render={({ field }) => (
+                <input
+                  {...field}
+                  id="title"
+                  type="text"
+                  placeholder="Enter a descriptive ticket title..."
+                  onFocus={() => setFocusedField("title")}
+                  onBlur={() => setFocusedField(null)}
+                  className={`w-full px-4 py-3 border-2 rounded-lg transition-all duration-200 ${focusedField === "title"
+                      ? "border-blue-500 ring-4 ring-blue-100 shadow-md"
+                      : "border-gray-300 hover:border-gray-400 hover:bg-gray-50"
+                    } focus:outline-none text-gray-900 placeholder-gray-500`}
+                />
+              )}
+            />
+            {errors.title && (
+              <div className="mt-2 flex items-center text-red-600">
+                <ExclamationTriangleIcon className="h-4 w-4 mr-1" />
+                <span className="text-sm">{errors.title.message}</span>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Description Section */}
+        <div className="space-y-2">
+          <label
+            htmlFor="description"
+            className="flex items-center text-sm font-semibold text-gray-700"
+          >
+            <DocumentTextIcon className="h-4 w-4 mr-2 text-gray-500" />
+            Description
+          </label>
+          <div className="relative">
+            <Controller
+              name="description"
+              control={control}
+              rules={{ required: "Description is required" }}
+              render={({ field }) => (
+                <textarea
+                  {...field}
+                  id="description"
+                  rows={8}
+                  placeholder="Provide detailed information about this ticket..."
+                  onFocus={() => setFocusedField("description")}
+                  onBlur={() => setFocusedField(null)}
+                  className={`w-full px-4 py-3 border-2 rounded-lg transition-all duration-200 ${focusedField === "description"
+                      ? "border-blue-500 ring-4 ring-blue-100 shadow-md"
+                      : "border-gray-300 hover:border-gray-400 hover:bg-gray-50"
+                    } focus:outline-none text-gray-900 placeholder-gray-500`}
+                />
+              )}
+            />
+            {errors.description && (
+              <div className="mt-2 flex items-center text-red-600">
+                <ExclamationTriangleIcon className="h-4 w-4 mr-1" />
+                <span className="text-sm">{errors.description.message}</span>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Acceptance Criteria Section */}
+        <div className="space-y-2">
+          <div className="flex justify-between items-center">
+            <label
+              htmlFor="acceptanceCriteria"
+              className="flex items-center text-sm font-semibold text-gray-700"
+            >
+              <CheckCircleIcon className="h-4 w-4 mr-2 text-gray-500" />
+              Acceptance Criteria
+            </label>
+            <button
+              type="button"
+              onClick={() => setIsPreviewMode(!isPreviewMode)}
+              className="text-sm px-3 py-2 bg-white hover:bg-gray-50 text-gray-700 rounded-md transition-all duration-200 flex items-center shadow-md border-2 border-gray-300 hover:border-gray-400"
+            >
+              {isPreviewMode ? (
+                <>
+                  <PencilIcon className="h-3 w-3 mr-1.5" /> Edit
+                </>
+              ) : (
+                <>
+                  <EyeIcon className="h-3 w-3 mr-1.5" /> Preview
+                </>
+              )}
+            </button>
+          </div>
+          <div className="relative">
+            {isPreviewMode ? (
+              <div
+                className="w-full min-h-[150px] px-4 py-3 border-2 border-gray-300 rounded-lg bg-gray-50 prose prose-sm max-w-none"
+                dangerouslySetInnerHTML={{
+                  __html: renderMarkdown(watchedAcceptanceCriteria || ""),
+                }}
+              />
+            ) : (
+              <Controller
+                name="acceptanceCriteria"
+                control={control}
+                rules={{ required: "Acceptance criteria is required" }}
+                render={({ field }) => (
+                  <textarea
+                    {...field}
+                    id="acceptanceCriteria"
+                    rows={6}
+                    placeholder="List the conditions that must be met for this ticket to be considered complete...\n\nExample:\nGiven [context]\nWhen [action]\nThen [outcome]\n\n- [ ] Criteria 1\n- [ ] Criteria 2"
+                    onFocus={() => setFocusedField("acceptanceCriteria")}
+                    onBlur={() => setFocusedField(null)}
+                    className={`w-full px-4 py-3 border-2 rounded-lg transition-all duration-200 ${focusedField === "acceptanceCriteria"
+                        ? "border-blue-500 ring-4 ring-blue-100 shadow-md"
+                        : "border-gray-300 hover:border-gray-400 hover:bg-gray-50"
+                      } focus:outline-none text-gray-900 placeholder-gray-500`}
+                  />
+                )}
+              />
+            )}
+            {errors.acceptanceCriteria && (
+              <div className="mt-2 flex items-center text-red-600">
+                <ExclamationTriangleIcon className="h-4 w-4 mr-1" />
+                <span className="text-sm">{errors.acceptanceCriteria.message}</span>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Priority, Status and Assignment */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="space-y-2">
+            <label
+              htmlFor="priority"
+              className="flex items-center text-sm font-semibold text-gray-700"
+            >
+              <ExclamationTriangleIcon className="h-4 w-4 mr-2 text-gray-500" />
+              Priority
+            </label>
+            <div className="relative">
+              <Controller
+                name="priority"
+                control={control}
+                render={({ field }) => (
+                  <select
+                    {...field}
+                    id="priority"
+                    onFocus={() => setFocusedField("priority")}
+                    onBlur={() => setFocusedField(null)}
+                    className={`w-full px-4 py-3 border-2 rounded-lg appearance-none bg-white transition-all duration-200 ${focusedField === "priority"
+                        ? "border-blue-500 ring-4 ring-blue-100 shadow-md"
+                        : "border-gray-300 hover:border-gray-400 hover:bg-gray-50"
+                      } focus:outline-none text-gray-900`}
+                  >
+                    <option value="Low">Low</option>
+                    <option value="Medium">Medium</option>
+                    <option value="High">High</option>
+                    <option value="Critical">Critical</option>
+                  </select>
+                )}
+              />
+              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                <ChevronDownIcon className="h-5 w-5" />
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <label
+              htmlFor="status"
+              className="flex items-center text-sm font-semibold text-gray-700"
+            >
+              <CheckCircleIcon className="h-4 w-4 mr-2 text-gray-500" />
+              Status
+            </label>
+            <div className="relative">
+              <Controller
+                name="status"
+                control={control}
+                render={({ field }) => (
+                  <select
+                    {...field}
+                    id="status"
+                    onFocus={() => setFocusedField("status")}
+                    onBlur={() => setFocusedField(null)}
+                    className={`w-full px-4 py-3 border-2 rounded-lg appearance-none bg-white transition-all duration-200 ${focusedField === "status"
+                        ? "border-blue-500 ring-4 ring-blue-100 shadow-md"
+                        : "border-gray-300 hover:border-gray-400 hover:bg-gray-50"
+                      } focus:outline-none text-gray-900`}
+                  >
+                    <option value="Open">Open</option>
+                    <option value="In Progress">In Progress</option>
+                    <option value="Review">Review</option>
+                    <option value="Passed">Passed</option>
+                    <option value="Failed">Failed</option>
+                  </select>
+                )}
+              />
+              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                <ChevronDownIcon className="h-5 w-5" />
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <label
+              htmlFor="sprint"
+              className="flex items-center text-sm font-semibold text-gray-700"
+            >
+              <CalendarIcon className="h-4 w-4 mr-2 text-gray-500" />
+              Sprint
+            </label>
+            <div className="relative">
+              <Controller
+                name="sprintId"
+                control={control}
+                render={({ field }) => (
+                  <select
+                    {...field}
+                    id="sprint"
+                    onFocus={() => setFocusedField("sprint")}
+                    onBlur={() => setFocusedField(null)}
+                    className={`w-full px-4 py-3 border-2 rounded-lg appearance-none bg-white transition-all duration-200 ${focusedField === "sprint"
+                        ? "border-blue-500 ring-4 ring-blue-100 shadow-md"
+                        : "border-gray-300 hover:border-gray-400 hover:bg-gray-50"
+                      } focus:outline-none text-gray-900`}
+                  >
+                    <option value="">No Sprint</option>
+                    {sprints.map((sprint) => (
+                      <option key={sprint.id} value={sprint.id}>
+                        {sprint.name}
+                      </option>
+                    ))}
+                  </select>
+                )}
+              />
+              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                <ChevronDownIcon className="h-5 w-5" />
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <label
+              htmlFor="assignee"
+              className="flex items-center text-sm font-semibold text-gray-700"
+            >
+              <UserIcon className="h-4 w-4 mr-2 text-gray-500" />
+              Assignee
+            </label>
+            <UserSelector
+              control={control}
+              name="assigneeId"
+              label=""
+              className=""
+            />
+          </div>
+        </div>
+
+        {/* Estimated Hours */}
+        <div className="space-y-2">
+          <label
+            htmlFor="estimatedHours"
+            className="flex items-center text-sm font-semibold text-gray-700"
+          >
+            <ClockIcon className="h-4 w-4 mr-2 text-gray-500" />
+            Estimated Hours
+          </label>
+          <div className="relative">
+            <Controller
+              name="estimatedHours"
+              control={control}
+              render={({ field }) => (
+                <input
+                  {...field}
+                  id="estimatedHours"
+                  type="number"
+                  min="0"
+                  step="0.5"
+                  placeholder="Enter time estimate in hours"
+                  onFocus={() => setFocusedField("estimatedHours")}
+                  onBlur={() => setFocusedField(null)}
+                  className={`w-full px-4 py-3 border-2 rounded-lg transition-all duration-200 ${focusedField === "estimatedHours"
+                      ? "border-blue-500 ring-4 ring-blue-100 shadow-md"
+                      : "border-gray-300 hover:border-gray-400 hover:bg-gray-50"
+                    } focus:outline-none text-gray-900 placeholder-gray-500`}
+                />
+              )}
+            />
+          </div>
+        </div>
+
+        {/* Tags */}
+        <div className="space-y-2">
+          <label
+            htmlFor="tags"
+            className="flex items-center text-sm font-semibold text-gray-700"
+          >
+            <TagIcon className="h-4 w-4 mr-2 text-gray-500" />
+            Tags
+          </label>
+          <div className="flex flex-wrap gap-2 mb-2">
+            {watchedTags.map((tag, index) => (
+              <div
+                key={index}
+                className="flex items-center bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium"
+              >
+                <span>{tag}</span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const newTags = [...watchedTags];
+                    newTags.splice(index, 1);
+                    setValue("tags", newTags);
+                  }}
+                  className="ml-1.5 text-blue-600 hover:text-blue-800 focus:outline-none"
+                >
+                  <XMarkIcon className="h-4 w-4" />
+                </button>
+              </div>
+            ))}
+          </div>
+          <div className="flex">
+            <input
+              type="text"
+              id="tags"
+              value={newTag}
+              onChange={(e) => setNewTag(e.target.value)}
+              onFocus={() => setFocusedField("tags")}
+              onBlur={() => setFocusedField(null)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && newTag.trim()) {
+                  e.preventDefault();
+                  const updatedTags = [...watchedTags, newTag.trim()];
+                  setValue("tags", updatedTags);
+                  setNewTag("");
+                }
+              }}
+              className={`flex-grow px-4 py-3 border-2 rounded-l-lg transition-all duration-200 ${focusedField === "tags"
+                  ? "border-blue-500 ring-4 ring-blue-100 shadow-md"
+                  : "border-gray-300 hover:border-gray-400 hover:bg-gray-50"
+                } focus:outline-none text-gray-900 placeholder-gray-500`}
+              placeholder="Add a tag and press Enter"
+            />
+            <button
+              type="button"
+              onClick={() => {
+                if (newTag.trim()) {
+                  const updatedTags = [...watchedTags, newTag.trim()];
+                  setValue("tags", updatedTags);
+                  setNewTag("");
+                }
+              }}
+              className="px-4 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-r-lg shadow-md hover:shadow-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+            >
+              Add
+            </button>
+          </div>
+        </div>
+
+        {/* Form Actions */}
+        <div className="flex flex-col sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-4 pt-6 border-t border-gray-200">
+          <button
+            type="button"
+            onClick={onCancel}
+            className="w-full sm:w-auto px-6 py-3 text-gray-700 border-2 border-gray-300 rounded-lg hover:bg-gray-50 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            className="w-full sm:w-auto px-8 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+          >
+            <SparklesIcon className="h-4 w-4 mr-2" />
+            {ticketId ? "Update Ticket" : "Create Ticket"}
+          </button>
+        </div>
+      </form>
+    </div>
   );
 }

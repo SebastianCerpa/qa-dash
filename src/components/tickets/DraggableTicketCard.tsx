@@ -33,7 +33,9 @@ export default function DraggableTicketCard({
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
-    opacity: isDragging ? 0.5 : 1,
+    opacity: isDragging ? 0.85 : 1,
+    zIndex: isDragging ? 50 : 'auto',
+    boxShadow: isDragging ? '0 8px 16px rgba(0, 0, 0, 0.12)' : 'none',
   };
 
   return (
@@ -42,17 +44,19 @@ export default function DraggableTicketCard({
       style={style}
       {...attributes}
       {...listeners}
-      className={`cursor-grab active:cursor-grabbing ${
-        isDragging ? 'z-50' : ''
+      className={`cursor-grab active:cursor-grabbing transition-all duration-200 ${
+        isDragging ? 'z-50 scale-[1.02]' : ''
       }`}
     >
-      <TicketCard
-        ticket={ticket}
-        onEdit={onEdit}
-        onDelete={onDelete}
-        onView={onView}
-        isDragging={isDragging}
-      />
+      <div className={`${isDragging ? 'animate-pulse' : ''}`}>
+        <TicketCard
+          ticket={ticket}
+          onEdit={onEdit}
+          onDelete={onDelete}
+          onView={onView}
+          isDragging={isDragging}
+        />
+      </div>
     </div>
   );
 }

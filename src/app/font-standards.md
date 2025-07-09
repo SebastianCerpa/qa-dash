@@ -1,97 +1,97 @@
-# Estándares de Fuentes para QA Dashboard
+# Font Standards for QA Dashboard
 
-## Introducción
+## Introduction
 
-Este documento establece los estándares de fuentes para todo el proyecto QA Dashboard, con el objetivo de mantener una consistencia visual en toda la aplicación. Estos estándares se aplican a todos los componentes y páginas.
+This document establishes font standards for the entire QA Dashboard project, with the goal of maintaining visual consistency throughout the application. These standards apply to all components and pages.
 
-## Tamaños de Fuente
+## Font Sizes
 
-### Jerarquía de Tamaños
+### Size Hierarchy
 
-Utilizaremos las siguientes clases de Tailwind CSS para los tamaños de fuente:
+We will use the following Tailwind CSS classes for font sizes:
 
-| Clase Tailwind | Uso recomendado |
+| Tailwind Class | Recommended Use |
 |----------------|------------------|
-| `text-sm` | Texto de interfaz general, etiquetas, descripciones, información secundaria, metadatos |
-| `text-base` | Texto principal, contenido de párrafos, títulos de tarjetas |
-| `text-lg` | Subtítulos, encabezados de secciones |
-| `text-xl` | Títulos de secciones secundarias |
-| `text-xl` | Títulos de secciones secundarias |
-| `text-2xl` | Títulos de página, estadísticas principales |
-| `text-3xl` | Títulos destacados |
+| `text-sm` | General interface text, labels, descriptions, secondary information, metadata |
+| `text-base` | Main text, paragraph content, card titles |
+| `text-lg` | Subtitles, section headers |
+| `text-xl` | Secondary section titles |
+| `text-xl` | Secondary section titles |
+| `text-2xl` | Page titles, main statistics |
+| `text-3xl` | Featured titles |
 
-### Reglas de Aplicación
+### Application Rules
 
-1. **Encabezados de Página**: Usar `text-2xl` con `font-bold`
-2. **Títulos de Sección**: Usar `text-xl` con `font-semibold`
-3. **Títulos de Tarjetas**: Usar `text-base` con `font-medium` o `font-semibold`
-4. **Texto de Interfaz**: Usar `text-sm` para la mayoría de los elementos de la interfaz
-5. **Etiquetas y Badges**: Usar `text-sm` para consistencia
-6. **Metadatos y Texto Secundario**: Usar `text-sm`
+1. **Page Headers**: Use `text-2xl` with `font-bold`
+2. **Section Titles**: Use `text-xl` with `font-semibold`
+3. **Card Titles**: Use `text-base` with `font-medium` or `font-semibold`
+4. **Interface Text**: Use `text-sm` for most interface elements
+5. **Labels and Badges**: Use `text-sm` for consistency
+6. **Metadata and Secondary Text**: Use `text-sm`
 
-## Estilos de Fuente
+## Font Styles
 
-### Pesos de Fuente
+### Font Weights
 
-| Clase Tailwind | Uso recomendado |
+| Tailwind Class | Recommended Use |
 |----------------|------------------|
-| `font-normal` | Texto regular de párrafos |
-| `font-medium` | Énfasis moderado, etiquetas |
-| `font-semibold` | Títulos, elementos destacados |
-| `font-bold` | Títulos principales, elementos muy destacados |
+| `font-normal` | Regular paragraph text |
+| `font-medium` | Moderate emphasis, labels |
+| `font-semibold` | Titles, highlighted elements |
+| `font-bold` | Main titles, very highlighted elements |
 
-### Colores de Texto
+### Text Colors
 
-| Clase Tailwind | Uso recomendado |
+| Tailwind Class | Recommended Use |
 |----------------|------------------|
-| `text-gray-900` | Texto principal |
-| `text-gray-700` | Texto secundario |
-| `text-gray-500` | Texto terciario, descripciones |
-| `text-blue-600` | Enlaces, acciones primarias |
-| `text-red-600` | Errores, alertas |
+| `text-gray-900` | Main text |
+| `text-gray-700` | Secondary text |
+| `text-gray-500` | Tertiary text, descriptions |
+| `text-blue-600` | Links, primary actions |
+| `text-red-600` | Errors, alerts |
 
-## Posicionamiento
+## Positioning
 
-### Espaciado
+### Spacing
 
-1. **Margen entre Título y Contenido**: `mb-2` o `mb-3`
-2. **Margen entre Párrafos**: `mb-2`
-3. **Margen entre Secciones**: `mb-4` o `mb-6`
-4. **Padding en Contenedores de Texto**: `px-4 py-2` o `p-4`
+1. **Margin between Title and Content**: `mb-2` or `mb-3`
+2. **Margin between Paragraphs**: `mb-2`
+3. **Margin between Sections**: `mb-4` or `mb-6`
+4. **Padding in Text Containers**: `px-4 py-2` or `p-4`
 
-### Alineación
+### Alignment
 
-1. **Títulos**: Generalmente alineados a la izquierda (`text-left`)
-2. **Texto de Párrafos**: Alineado a la izquierda (`text-left`)
-3. **Etiquetas en Formularios**: Alineadas a la izquierda, encima de los campos
+1. **Titles**: Generally left-aligned (`text-left`)
+2. **Paragraph Text**: Left-aligned (`text-left`)
+3. **Form Labels**: Left-aligned, above fields
 
-## Componentes Específicos
+## Specific Components
 
-### Botones
+### Buttons
 
-- **Pequeño (sm)**: `text-sm`
-- **Mediano (md)**: `text-sm` (predeterminado)
-- **Grande (lg)**: `text-base`
-- **Extra Grande (xl)**: `text-lg`
+- **Small (sm)**: `text-sm`
+- **Medium (md)**: `text-sm` (default)
+- **Large (lg)**: `text-base`
+- **Extra Large (xl)**: `text-lg`
 
-### Etiquetas (Badges)
+### Labels (Badges)
 
-- **Pequeño (sm)**: `text-sm`
-- **Mediano (md)**: `text-sm` (predeterminado)
-- **Grande (lg)**: `text-sm`
+- **Small (sm)**: `text-sm`
+- **Medium (md)**: `text-sm` (default)
+- **Large (lg)**: `text-sm`
 
-### Formularios
+### Forms
 
-- **Etiquetas**: `text-sm` con `font-medium`
-- **Campos de entrada**: `text-sm`
-- **Mensajes de error**: `text-sm` con `text-red-600`
-- **Texto de ayuda**: `text-sm` con `text-gray-500`
+- **Labels**: `text-sm` with `font-medium`
+- **Input fields**: `text-sm`
+- **Error messages**: `text-sm` with `text-red-600`
+- **Help text**: `text-sm` with `text-gray-500`
 
-### Tablas
+### Tables
 
-- **Encabezados**: `text-sm` con `font-medium` y `uppercase`
-- **Contenido de celdas**: `text-sm`
+- **Headers**: `text-sm` with `font-medium` and `uppercase`
+- **Cell content**: `text-sm`
 
-## Implementación
+## Implementation
 
-Para implementar estos estándares, se deben revisar y actualizar todos los componentes existentes para asegurar que sigan estas directrices. Los nuevos componentes deben crearse siguiendo estos estándares desde el principio.
+To implement these standards, all existing components should be reviewed and updated to ensure they follow these guidelines. New components should be created following these standards from the beginning.

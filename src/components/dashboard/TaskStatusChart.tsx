@@ -31,54 +31,97 @@ export default function TaskStatusChart() {
         label: 'Number of Tasks',
         data: labels.map(status => statusCounts[status as TaskStatus]),
         backgroundColor: [
-          'rgba(209, 213, 219, 0.6)', // Todo - Gray
-          'rgba(59, 130, 246, 0.6)',  // In Progress - Blue
-          'rgba(16, 185, 129, 0.6)',  // Done - Green
+          'rgba(148, 163, 184, 0.7)', // Todo - Slate
+          'rgba(59, 130, 246, 0.7)',  // In Progress - Blue
+          'rgba(16, 185, 129, 0.7)',  // Done - Emerald
         ],
         borderColor: [
-          'rgb(209, 213, 219)',
-          'rgb(59, 130, 246)',
-          'rgb(16, 185, 129)',
+          'rgba(148, 163, 184, 0.9)',
+          'rgba(59, 130, 246, 0.9)',
+          'rgba(16, 185, 129, 0.9)',
         ],
-        borderWidth: 1,
+        borderWidth: 2,
+        borderRadius: 6,
+        borderSkipped: false,
+        hoverBackgroundColor: [
+          'rgba(148, 163, 184, 0.8)',
+          'rgba(59, 130, 246, 0.8)',
+          'rgba(16, 185, 129, 0.8)',
+        ],
       },
     ],
   };
 
   const options = {
     responsive: true,
+    maintainAspectRatio: false,
     plugins: {
       legend: {
         display: false,
       },
-      title: {
-        display: false,
+      tooltip: {
+        backgroundColor: 'rgba(255, 255, 255, 0.95)',
+        titleColor: '#1e293b',
+        bodyColor: '#475569',
+        borderColor: '#e2e8f0',
+        borderWidth: 1,
+        cornerRadius: 8,
+        titleFont: {
+          family: 'Inter, system-ui, sans-serif',
+          size: 13,
+          weight: 600,
+        },
+        bodyFont: {
+          family: 'Inter, system-ui, sans-serif',
+          size: 12,
+        },
       },
     },
     scales: {
+      x: {
+        grid: {
+          display: false,
+        },
+        ticks: {
+          color: '#64748b',
+          font: {
+            family: 'Inter, system-ui, sans-serif',
+            size: 12,
+          },
+        },
+      },
       y: {
         beginAtZero: true,
+        grid: {
+          color: 'rgba(148, 163, 184, 0.1)',
+          borderDash: [2, 2],
+        },
         ticks: {
           precision: 0,
+          color: '#64748b',
+          font: {
+            family: 'Inter, system-ui, sans-serif',
+            size: 12,
+          },
+        },
+        border: {
+          display: false,
         },
       },
     },
   };
 
   return (
-    <Card className="border border-gray-200 shadow-md">
-      <div className="p-4 border-b border-gray-100">
-        <h3 className="text-lg font-semibold">Task Status Distribution</h3>
-      </div>
-      <div className="h-64">
-        {tasks.length > 0 ? (
+    <div className="h-full flex flex-col">
+      {tasks.length > 0 ? (
+        <div className="flex-1 p-2">
           <Bar data={data} options={options} />
-        ) : (
-          <div className="h-full flex items-center justify-center text-gray-500">
-            No task data available
-          </div>
-        )}
-      </div>
-    </Card>
+        </div>
+      ) : (
+        <div className="h-full flex items-center justify-center text-slate-500 text-body">
+          No task data available
+        </div>
+      )}
+    </div>
   );
 }

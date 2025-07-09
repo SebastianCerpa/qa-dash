@@ -19,21 +19,24 @@ export function ErrorDialog({
     okButtonText = 'OK'
 }: ErrorDialogProps) {
     React.useEffect(() => {
-        const handleEscape = (e: KeyboardEvent) => {
-            if (e.key === 'Escape') {
-                onClose();
+        // Ensure we're on the client side
+        if (typeof document !== 'undefined') {
+            const handleEscape = (e: KeyboardEvent) => {
+                if (e.key === 'Escape') {
+                    onClose();
+                }
+            };
+
+            if (open) {
+                document.addEventListener('keydown', handleEscape);
+                document.body.style.overflow = 'hidden';
             }
-        };
 
-        if (open) {
-            document.addEventListener('keydown', handleEscape);
-            document.body.style.overflow = 'hidden';
+            return () => {
+                document.removeEventListener('keydown', handleEscape);
+                document.body.style.overflow = 'unset';
+            };
         }
-
-        return () => {
-            document.removeEventListener('keydown', handleEscape);
-            document.body.style.overflow = 'unset';
-        };
     }, [open, onClose]);
 
     if (!open) {

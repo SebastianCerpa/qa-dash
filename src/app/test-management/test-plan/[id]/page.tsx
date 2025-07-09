@@ -79,7 +79,7 @@ export default function TestPlanDetailPage() {
   };
 
   const handleExecute = () => {
-    // Implementar la ejecución del test plan
+    // Implement test plan execution
     console.log("Execute test plan:", testPlan?.id);
   };
 

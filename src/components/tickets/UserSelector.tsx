@@ -24,9 +24,9 @@ export default function UserSelector({
   isMulti = false,
   placeholder = "Select a user",
 }: UserSelectorProps) {
-  // Usar exclusivamente los miembros del equipo registrados en la sección "Teams"
+  // Use exclusively team members registered in the "Teams" section
   const { teamMembers } = useStore();
-  // Ya no usamos los usuarios del enhancedStore, solo los miembros del equipo registrados
+  // We no longer use users from enhancedStore, only registered team members
   // const { users } = useEnhancedQAStore();
 
   return (
@@ -63,7 +63,7 @@ export default function UserSelector({
               <p className="mt-1 text-sm text-gray-500">Mantén presionado Ctrl (o Cmd) para seleccionar múltiples usuarios</p>
             )}
             {teamMembers.length === 0 && (
-              <p className="mt-1 text-sm text-amber-600">No hay miembros del equipo disponibles. Añade miembros en la sección "Teams" para poder asignarlos.</p>
+              <p className="mt-1 text-sm text-amber-600">No team members available. Add members in the "Teams" section to assign them.</p>
             )}
           </>
         )}

@@ -73,7 +73,7 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  // Reutilizamos la implementación existente en route.ts
+  // Reuse existing implementation in route.ts
   const response = await fetch(`${req.nextUrl.origin}/api/test-cases`, {
     method: 'POST',
     headers: req.headers,

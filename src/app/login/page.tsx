@@ -21,7 +21,7 @@ export default function LoginPage() {
   const router = useRouter();
   const [formData, setFormData] = useState<FormData>({
     email: "sebastian.cerpa@ridepanda.com",
-    password: "Ride..0106.",
+    password: "Ride..0106",
   });
   const [errors, setErrors] = useState<FormErrors>({});
   const [isLoading, setIsLoading] = useState(false);
@@ -133,39 +133,43 @@ export default function LoginPage() {
 
   const getInputClasses = (fieldName: string, hasError: boolean) => {
     const baseClasses =
-      "w-full px-4 py-3 border rounded-xl transition-all duration-200 text-sm font-medium placeholder-gray-500 focus:outline-none";
+      "w-full px-4 py-4 border rounded-2xl transition-all duration-300 text-sm font-medium placeholder-slate-400 focus:outline-none backdrop-blur-sm";
     const focusedClasses =
       focusedField === fieldName
-        ? "border-blue-300 ring-2 ring-blue-100 bg-white shadow-lg"
+        ? "border-blue-400 ring-4 ring-blue-100/50 bg-white shadow-xl shadow-blue-500/10 scale-[1.02]"
         : "";
     const errorClasses = hasError
-      ? "border-red-300 ring-2 ring-red-100 bg-red-50"
-      : "border-gray-200 hover:border-gray-300 bg-gray-50 focus:bg-white";
+      ? "border-red-400 ring-4 ring-red-100/50 bg-red-50/50 shadow-lg shadow-red-500/10"
+      : "border-slate-200 hover:border-slate-300 bg-slate-50/50 hover:bg-white focus:bg-white hover:shadow-lg hover:shadow-slate-500/5";
 
     return `${baseClasses} ${focusedClasses} ${errorClasses}`;
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center p-4">
-      {/* Background Pattern */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-blue-400 to-purple-600 rounded-full opacity-10 blur-3xl"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-br from-cyan-400 to-blue-600 rounded-full opacity-10 blur-3xl"></div>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 flex items-center justify-center p-4 relative overflow-hidden">
+      {/* Enhanced Background Pattern */}
+      <div className="absolute inset-0">
+        <div className="absolute -top-40 -right-40 w-96 h-96 bg-gradient-to-br from-blue-400/20 to-purple-600/20 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-gradient-to-br from-cyan-400/20 to-blue-600/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-72 h-72 bg-gradient-to-br from-indigo-300/10 to-purple-400/10 rounded-full blur-2xl"></div>
       </div>
 
       <div className="relative w-full max-w-md">
-        <Card className="backdrop-blur-sm bg-white/90 border border-gray-200 shadow-md">
+        <Card className="backdrop-blur-xl bg-white/95 border border-white/20 shadow-2xl shadow-blue-500/10 rounded-3xl overflow-hidden">
           {/* Header */}
-          <div className="px-8 pt-8 pb-6 text-center">
-            <div className="flex justify-center mb-4">
-              <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg">
-                <span className="text-white font-bold text-2xl">Q</span>
+          <div className="px-8 pt-10 pb-8 text-center relative">
+            <div className="flex justify-center mb-6">
+              <div className="relative">
+                <div className="w-20 h-20 bg-gradient-to-br from-blue-500 via-blue-600 to-purple-600 rounded-3xl flex items-center justify-center shadow-2xl shadow-blue-500/25 transform hover:scale-105 transition-all duration-300">
+                  <span className="text-white font-bold text-3xl tracking-tight">Q</span>
+                </div>
+                <div className="absolute -inset-1 bg-gradient-to-br from-blue-400 to-purple-500 rounded-3xl blur opacity-30 group-hover:opacity-50 transition duration-300"></div>
               </div>
             </div>
-            <h1 className="text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent mb-2">
-              Welcome to QA Dashboard
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-slate-800 via-blue-800 to-indigo-800 bg-clip-text text-transparent mb-3 tracking-tight">
+              Welcome to QA Pandash
             </h1>
-            <p className="text-gray-600 text-sm">
+            <p className="text-slate-600 text-base font-medium">
               Sign in to your account to continue
             </p>
           </div>
@@ -197,20 +201,21 @@ export default function LoginPage() {
 
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* Email Field */}
-              <div>
+              <div className="space-y-2">
                 <label
                   htmlFor="email"
-                  className="block text-sm font-semibold text-gray-700 mb-2"
+                  className="block text-sm font-bold text-slate-700 tracking-wide"
                 >
                   Email Address
                 </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                <div className="relative group">
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none z-10">
                     <svg
-                      className={`w-5 h-5 transition-colors duration-200 ${focusedField === "email"
-                        ? "text-blue-500"
-                        : "text-gray-400"
-                        }`}
+                      className={`w-5 h-5 transition-all duration-300 ${
+                        focusedField === "email"
+                          ? "text-blue-500 scale-110"
+                          : "text-slate-400 group-hover:text-slate-500"
+                      }`}
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"
@@ -260,20 +265,21 @@ export default function LoginPage() {
               </div>
 
               {/* Password Field */}
-              <div>
+              <div className="space-y-2">
                 <label
                   htmlFor="password"
-                  className="block text-sm font-semibold text-gray-700 mb-2"
+                  className="block text-sm font-bold text-slate-700 tracking-wide"
                 >
                   Password
                 </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                <div className="relative group">
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none z-10">
                     <svg
-                      className={`w-5 h-5 transition-colors duration-200 ${focusedField === "password"
-                        ? "text-blue-500"
-                        : "text-gray-400"
-                        }`}
+                      className={`w-5 h-5 transition-all duration-300 ${
+                        focusedField === "password"
+                          ? "text-blue-500 scale-110"
+                          : "text-slate-400 group-hover:text-slate-500"
+                      }`}
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"
@@ -323,117 +329,129 @@ export default function LoginPage() {
               </div>
 
               {/* Sign In Button */}
-              <Button
+              <button
                 type="submit"
-                variant="secondary"
-                size="lg"
-                fullWidth
-                isLoading={isLoading}
                 disabled={isLoading || isGoogleLoading}
-                className="mt-6"
+                className="w-full mt-8 px-6 py-4 bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-700 hover:from-blue-700 hover:via-blue-800 hover:to-indigo-800 text-white font-bold text-base rounded-2xl shadow-xl shadow-blue-500/25 hover:shadow-2xl hover:shadow-blue-600/30 transform hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none focus:outline-none focus:ring-4 focus:ring-blue-500/20 relative overflow-hidden group"
               >
-                {isLoading ? "Signing In..." : "Sign In"}
-              </Button>
+                <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/5 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
+                <div className="relative flex items-center justify-center space-x-2">
+                  {isLoading && (
+                    <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                  )}
+                  <span>{isLoading ? "Signing In..." : "Sign In"}</span>
+                </div>
+              </button>
             </form>
 
             {/* Divider */}
-            <div className="my-6 flex items-center">
-              <div className="flex-1 border-t border-gray-200"></div>
-              <span className="px-4 text-sm text-gray-500 font-medium">
+            <div className="my-8 flex items-center">
+              <div className="flex-1 border-t border-slate-200"></div>
+              <span className="px-6 text-sm text-slate-500 font-semibold tracking-wide">
                 or continue with
               </span>
-              <div className="flex-1 border-t border-gray-200"></div>
+              <div className="flex-1 border-t border-slate-200"></div>
             </div>
 
             {/* Google Authentication Buttons */}
-            <div className="space-y-3">
-              <Button
-                variant="outline"
-                size="lg"
-                fullWidth
-                isLoading={isGoogleLoading}
+            <div className="space-y-4">
+              <button
+                type="button"
                 disabled={isLoading || isGoogleLoading}
                 onClick={() => handleGoogleAuth("signin")}
-                leftIcon={
-                  <svg className="w-5 h-5" viewBox="0 0 24 24">
-                    <path
-                      fill="#4285F4"
-                      d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-                    />
-                    <path
-                      fill="#34A853"
-                      d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                    />
-                    <path
-                      fill="#FBBC05"
-                      d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-                    />
-                    <path
-                      fill="#EA4335"
-                      d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-                    />
-                  </svg>
-                }
+                className="w-full px-6 py-4 bg-white border-2 border-slate-200 hover:border-slate-300 text-slate-700 font-semibold text-base rounded-2xl shadow-lg hover:shadow-xl transform hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none focus:outline-none focus:ring-4 focus:ring-slate-500/20 relative overflow-hidden group"
               >
-                Sign in with Google
-              </Button>
+                <div className="absolute inset-0 bg-gradient-to-r from-slate-50/0 via-slate-50/50 to-slate-50/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
+                <div className="relative flex items-center justify-center space-x-3">
+                  {isGoogleLoading ? (
+                    <svg className="animate-spin h-5 w-5 text-slate-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                  ) : (
+                    <svg className="w-5 h-5" viewBox="0 0 24 24">
+                      <path
+                        fill="#4285F4"
+                        d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                      />
+                      <path
+                        fill="#34A853"
+                        d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                      />
+                      <path
+                        fill="#FBBC05"
+                        d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+                      />
+                      <path
+                        fill="#EA4335"
+                        d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                      />
+                    </svg>
+                  )}
+                  <span>Sign in with Google</span>
+                </div>
+              </button>
 
-              <Button
-                variant="ghost"
-                size="lg"
-                fullWidth
-                isLoading={isGoogleLoading}
+              <button
+                type="button"
                 disabled={isLoading || isGoogleLoading}
                 onClick={() => handleGoogleAuth("signup")}
-                leftIcon={
-                  <svg className="w-5 h-5" viewBox="0 0 24 24">
-                    <path
-                      fill="#4285F4"
-                      d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-                    />
-                    <path
-                      fill="#34A853"
-                      d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                    />
-                    <path
-                      fill="#FBBC05"
-                      d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-                    />
-                    <path
-                      fill="#EA4335"
-                      d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-                    />
-                  </svg>
-                }
+                className="w-full px-6 py-4 bg-slate-50 hover:bg-slate-100 border-2 border-slate-200 hover:border-slate-300 text-slate-600 hover:text-slate-700 font-semibold text-base rounded-2xl shadow-md hover:shadow-lg transform hover:scale-[1.01] active:scale-[0.99] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none focus:outline-none focus:ring-4 focus:ring-slate-500/20 relative overflow-hidden group"
               >
-                Sign up with Google
-              </Button>
+                <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/30 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
+                <div className="relative flex items-center justify-center space-x-3">
+                  {isGoogleLoading ? (
+                    <svg className="animate-spin h-5 w-5 text-slate-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                  ) : (
+                    <svg className="w-5 h-5" viewBox="0 0 24 24">
+                      <path
+                        fill="#4285F4"
+                        d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                      />
+                      <path
+                        fill="#34A853"
+                        d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                      />
+                      <path
+                        fill="#FBBC05"
+                        d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+                      />
+                      <path
+                        fill="#EA4335"
+                        d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                      />
+                    </svg>
+                  )}
+                  <span>Sign up with Google</span>
+                </div>
+              </button>
             </div>
 
             {/* Footer Links */}
-            <div className="mt-6 text-center">
-              <p className="text-sm text-gray-600">
-                Dont have an account?{" "}
-                <Button
-                  variant="ghost"
-                  size="lg"
-                  fullWidth
-                  isLoading={false}
-                  disabled={isLoading || isGoogleLoading}
+            <div className="mt-10 text-center space-y-5">
+              <p className="text-sm text-slate-600">
+                Don't have an account?{" "}
+                <button
+                  type="button"
+                  className="font-semibold text-blue-600 hover:text-blue-700 transition-all duration-200 hover:underline underline-offset-4 decoration-2"
                   onClick={() => router.push("/register")}
                 >
                   Sign up
-                </Button>
-              </p>
-              <p className="mt-2 text-sm text-gray-500">
-                <button
-                  type="button"
-                  className="hover:text-gray-700 transition-colors duration-200"
-                  onClick={() => router.push("/forgot-password")}
-                >
-                  Forgot your password?
                 </button>
               </p>
+              <button
+                type="button"
+                className="inline-block text-sm text-slate-500 hover:text-slate-700 font-medium transition-all duration-200 hover:underline underline-offset-4 decoration-1 px-2 py-1 rounded-lg hover:bg-slate-50"
+                onClick={() => router.push("/forgot-password")}
+              >
+                Forgot your password?
+              </button>
             </div>
           </div>
         </Card>

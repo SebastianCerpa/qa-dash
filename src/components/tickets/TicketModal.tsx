@@ -20,25 +20,28 @@ export default function TicketModal({ ticket, onClose, onEdit }: TicketModalProp
   const modalRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // Add overflow hidden to body when modal is open
-    document.body.style.overflow = 'hidden';
+    // Ensure we're on the client side
+    if (typeof document !== 'undefined') {
+      // Add overflow hidden to body when modal is open
+      document.body.style.overflow = 'hidden';
 
-    // Focus trap and escape key handler
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
+      // Focus trap and escape key handler
+      const handleKeyDown = (e: KeyboardEvent) => {
+        if (e.key === 'Escape') onClose();
+      };
 
-    document.addEventListener('keydown', handleKeyDown);
+      document.addEventListener('keydown', handleKeyDown);
 
-    return () => {
-      document.body.style.overflow = '';
-      document.removeEventListener('keydown', handleKeyDown);
-    };
+      return () => {
+        document.body.style.overflow = '';
+        document.removeEventListener('keydown', handleKeyDown);
+      };
+    }
   }, [onClose]);
 
   if (!ticket) return null;
 
-  // Buscar el asignado entre los miembros del equipo registrados
+  // Find assignee among registered team members
   const assignee = teamMembers.find((member) => member.id === ticket.assigneeId);
   const sprint = sprints.find((s) => s.id === ticket.sprintId);
 

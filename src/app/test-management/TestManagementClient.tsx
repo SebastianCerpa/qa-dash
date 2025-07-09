@@ -148,7 +148,7 @@ export default function TestManagementClient() {
   };
 
   const handleViewTestPlan = (id: string) => {
-    router.push(`/test-management/test-plan/${id}`);
+    router.push(`/test-plans/${id}`);
   };
 
   const handleTestCaseFormSuccess = () => {
@@ -157,10 +157,21 @@ export default function TestManagementClient() {
     router.push('/test-management');
   };
 
-  const handleTestPlanFormSuccess = () => {
+  const handleTestPlanFormSuccess = (formData?: any) => {
     setShowTestPlanForm(false);
     setEditingTestPlan(null);
-    router.push('/test-management');
+    
+    // If we have a test plan ID (either from editing or newly created), redirect to its detail page
+    if (editingTestPlan?.id) {
+      // For editing existing test plan - redirect to the detailed view with tabs
+      router.push(`/test-plans/${editingTestPlan.id}`);
+    } else if (formData?.id) {
+      // For newly created test plan (if the API returns the ID) - redirect to the detailed view with tabs
+      router.push(`/test-plans/${formData.id}`);
+    } else {
+      // Fallback to test management page
+      router.push('/test-management');
+    }
   };
 
   const handleTabChange = (tabId: string) => {

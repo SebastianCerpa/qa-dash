@@ -72,16 +72,46 @@ export default function StatCard({
   };
 
   const getCardClasses = () => {
-    const baseClasses =
-      "p-6 rounded-2xl transition-all duration-300 hover:shadow-xl group cursor-pointer backdrop-blur-sm relative z-[10]";
+    const baseClasses = "transition-all duration-200 group cursor-pointer backdrop-blur-sm relative z-[10]";
 
     switch (variant) {
       case "gradient":
-        return `${baseClasses} bg-gradient-to-br ${colorClasses[color].bg} border ${colorClasses[color].border} hover:scale-[1.02] ${colorClasses[color].shadow}`;
+        return `${baseClasses} p-6 rounded-2xl bg-gradient-to-br ${colorClasses[color].bg} border ${colorClasses[color].border} hover:scale-[1.02] ${colorClasses[color].shadow} hover:shadow-xl`;
       case "minimal":
-        return `${baseClasses} bg-white/80 border border-gray-200/50 hover:border-gray-300/50 hover:shadow-lg`;
+        return `${baseClasses} p-4 rounded-xl bg-white/95 border border-slate-200/60 hover:border-slate-300/60 shadow-sm hover:shadow-md`;
       default:
-        return `${baseClasses} bg-white/90 shadow-lg border border-gray-200/50 hover:border-gray-300/50 hover:scale-[1.02]`;
+        return `${baseClasses} p-6 rounded-2xl bg-white/90 shadow-lg border border-gray-200/50 hover:border-gray-300/50 hover:scale-[1.02] hover:shadow-xl`;
+    }
+  };
+
+  const getTitleClasses = () => {
+    switch (variant) {
+      case "minimal":
+        return "text-sm font-medium text-slate-600 mb-2 text-caption";
+      case "gradient":
+        return "text-sm font-semibold text-gray-500 mb-2 tracking-wide uppercase text-caption";
+      default:
+        return "text-sm font-semibold text-gray-500 mb-2 tracking-wide uppercase text-caption";
+    }
+  };
+
+  const getValueClasses = () => {
+    switch (variant) {
+      case "minimal":
+        return "text-xl font-semibold text-slate-800 tracking-tight text-title";
+      case "gradient":
+        return "text-2xl font-bold text-gray-900 tracking-tight text-title";
+      default:
+        return "text-2xl font-bold text-gray-900 tracking-tight text-title";
+    }
+  };
+
+  const getIconSize = () => {
+    switch (variant) {
+      case "minimal":
+        return "w-10 h-10";
+      default:
+        return "w-12 h-12";
     }
   };
 
@@ -89,27 +119,28 @@ export default function StatCard({
     <div className={getCardClasses()}>
       <div className="flex items-start justify-between">
         <div className="flex-1">
-          <h3 className="text-sm font-semibold text-gray-500 mb-2 tracking-wide uppercase">
+          <h3 className={getTitleClasses()}>
             {title}
           </h3>
           <div className="flex items-baseline space-x-2">
-            <span className="text-2xl font-bold text-gray-900 tracking-tight">
+            <span className={getValueClasses()}>
               {value}
             </span>
           </div>
           {change && (
-            <div className="flex items-center mt-3 space-x-2">
+            <div className={`flex items-center space-x-2 ${variant === 'minimal' ? 'mt-2' : 'mt-3'}`}>
               <span
-                className={`text-sm font-semibold px-2 py-1 rounded-full ${change.type === "increase"
-                  ? "text-green-700 bg-green-100/80"
-                  : change.type === "decrease"
-                    ? "text-red-700 bg-red-100/80"
-                    : "text-gray-700 bg-gray-100/80"
+                className={`${variant === 'minimal' ? 'text-xs' : 'text-sm'} font-semibold px-2 py-1 rounded-full text-caption ${
+                  change.type === "increase"
+                    ? "text-emerald-700 bg-emerald-100/80"
+                    : change.type === "decrease"
+                      ? "text-red-700 bg-red-100/80"
+                      : "text-slate-700 bg-slate-100/80"
                   }`}
               >
                 {change.value}
               </span>
-              <span className="text-sm text-gray-500 font-medium">
+              <span className={`${variant === 'minimal' ? 'text-xs' : 'text-sm'} text-slate-500 font-medium text-caption`}>
                 from last month
               </span>
             </div>
@@ -118,15 +149,21 @@ export default function StatCard({
         {icon && (
           <div className="flex-shrink-0 ml-4">
             <div
-              className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all duration-300 group-hover:scale-110 group-hover:rotate-3 ${variant === "gradient"
-                ? colorClasses[color].iconBg
-                : "bg-gradient-to-br from-gray-100/80 to-gray-200/80 backdrop-blur-sm"
+              className={`${getIconSize()} rounded-xl flex items-center justify-center transition-all duration-200 group-hover:scale-110 group-hover:rotate-3 ${
+                variant === "gradient"
+                  ? colorClasses[color].iconBg
+                  : variant === "minimal"
+                    ? "bg-gradient-to-br from-slate-100/80 to-slate-200/80 backdrop-blur-sm"
+                    : "bg-gradient-to-br from-gray-100/80 to-gray-200/80 backdrop-blur-sm"
                 }`}
             >
               <div
-                className={`text-xl transition-all duration-300 ${variant === "gradient"
-                  ? `bg-gradient-to-r ${colorClasses[color].icon} bg-clip-text text-transparent`
-                  : "text-gray-600 group-hover:text-gray-700"
+                className={`transition-all duration-200 ${
+                  variant === "gradient"
+                    ? `bg-gradient-to-r ${colorClasses[color].icon} bg-clip-text text-transparent`
+                    : variant === "minimal"
+                      ? "text-slate-600 group-hover:text-slate-700"
+                      : "text-gray-600 group-hover:text-gray-700"
                   }`}
               >
                 {icon}

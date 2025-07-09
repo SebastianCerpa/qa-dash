@@ -3,7 +3,7 @@ import { useForm, SubmitHandler } from "react-hook-form";
 import { useStore, TeamMember } from "@/store/useStore";
 import { Button } from "@/components/ui/button";
 
-// Definir el tipo para los datos del formulario
+// Define type for form data
 interface TeamMemberFormData {
   name: string;
   email: string;
@@ -34,15 +34,15 @@ export default function TeamMemberForm({
   } = useForm<TeamMemberFormData>({
     defaultValues: existingMember
       ? {
-          name: existingMember.name,
-          email: existingMember.email,
-          role: existingMember.role,
-        }
+        name: existingMember.name,
+        email: existingMember.email,
+        role: existingMember.role,
+      }
       : {
-          name: "",
-          email: "",
-          role: "",
-        },
+        name: "",
+        email: "",
+        role: "",
+      },
   });
 
   const roles = [
@@ -57,11 +57,12 @@ export default function TeamMemberForm({
 
   const onSubmit: SubmitHandler<TeamMemberFormData> = async (data) => {
     try {
-      // Preparar los datos para el store
+      // Prepare data for store
       const memberData: Omit<TeamMember, "id"> = {
         name: data.name,
         email: data.email,
         role: data.role,
+        image: undefined
       };
 
       if (existingMember && memberId) {

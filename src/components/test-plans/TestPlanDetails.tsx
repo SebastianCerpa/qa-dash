@@ -52,8 +52,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select-radix";
-import { Checkbox } from "@/components/ui/Checkbox";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/Label";
 import { Textarea } from "@/components/ui/Textarea";
 import {
@@ -64,9 +62,24 @@ import {
   Loader2,
   Play,
   Plus,
-  Search,
   Trash2,
-  X
+  X,
+  Calendar,
+  User,
+  Target,
+  Settings,
+  FileText,
+  CheckCircle2,
+  XCircle,
+  AlertCircle,
+  Globe,
+  CheckCircle,
+  AlertTriangle,
+  Users,
+  Package,
+  TestTube,
+  History,
+  ListChecks
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { formatDate } from '@/lib/utils';
@@ -286,254 +299,426 @@ const TestPlanDetails: React.FC<TestPlanDetailsProps> = ({ testPlanId }) => {
     : 0;
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center space-x-4">
-        <Button variant="outline" size="icon" onClick={handleBackClick}>
-          <ArrowLeft className="h-4 w-4" />
-        </Button>
-        <div>
-          <h1 className="text-2xl font-bold">{testPlan.name}</h1>
-          <p className="text-muted-foreground">
-            Created by {testPlan.createdBy} on {formatDate(testPlan.createdAt)}
-          </p>
-        </div>
-      </div>
-
-      <div className="flex justify-between items-center">
-        <div className="flex items-center space-x-4">
-          <Badge className={getStatusBadgeColor(testPlan.status)}>
-            {testPlan.status || 'Draft'}
-          </Badge>
-          {testPlan.projectInfo && (
-            <Badge variant="outline">
-              Project: {testPlan.projectInfo}
-            </Badge>
-          )}
-          <Badge variant="outline">
-            <Clock className="mr-1 h-3 w-3" />
-            {testPlan.startDate ? formatDate(testPlan.startDate) : '-'} - {testPlan.endDate ? formatDate(testPlan.endDate) : '-'}
-          </Badge>
-        </div>
-
-        <div className="flex space-x-2">
-          <Button variant="outline" onClick={handleEditClick}>
-            <Edit className="mr-2 h-4 w-4" /> Edit
-          </Button>
-          <Button onClick={handleExecuteClick} disabled={planTestCases.length === 0}>
-            <Play className="mr-2 h-4 w-4" /> Execute
-          </Button>
-        </div>
-      </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Execution Summary</CardTitle>
-          <CardDescription>
-            Overall progress and test case execution status
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
-            <div className="md:col-span-2">
-              <div className="flex flex-col space-y-2">
-                <div className="text-sm font-medium">Progress</div>
-                <div className="flex items-center space-x-2">
-                  <div className="w-full bg-gray-200 rounded-full h-2.5">
-                    <div
-                      className="bg-primary h-2.5 rounded-full"
-                      style={{ width: `${progress}%` }}
-                    ></div>
+    <div className="space-y-8">
+      {/* Enhanced Header Section */}
+      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20 rounded-xl p-6 border border-blue-100 dark:border-blue-800">
+        <div className="flex items-start justify-between">
+          <div className="flex items-start space-x-4">
+            <Button variant="outline" size="icon" onClick={handleBackClick} className="mt-1">
+              <ArrowLeft className="h-4 w-4" />
+            </Button>
+            <div className="space-y-3">
+              <div>
+                <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">{testPlan.name}</h1>
+                <div className="flex items-center space-x-4 text-sm text-muted-foreground">
+                  <div className="flex items-center space-x-1">
+                    <User className="h-4 w-4" />
+                    <span>Created by {testPlan.createdBy}</span>
                   </div>
-                  <span className="text-sm font-medium">{progress}%</span>
+                  <div className="flex items-center space-x-1">
+                    <Calendar className="h-4 w-4" />
+                    <span>{formatDate(testPlan.createdAt)}</span>
+                  </div>
                 </div>
               </div>
+
+              {/* Status and Project Info */}
+              <div className="flex items-center space-x-3">
+                <Badge className={`${getStatusBadgeColor(testPlan.status)} px-3 py-1 text-sm font-medium`}>
+                  {testPlan.status || 'Draft'}
+                </Badge>
+                {testPlan.projectInfo && (
+                  <Badge variant="outline" className="px-3 py-1">
+                    <Settings className="mr-1 h-3 w-3" />
+                    {testPlan.projectInfo}
+                  </Badge>
+                )}
+                <Badge variant="outline" className="px-3 py-1">
+                  <Clock className="mr-1 h-3 w-3" />
+                  {testPlan.startDate ? formatDate(testPlan.startDate) : 'No start'} - {testPlan.endDate ? formatDate(testPlan.endDate) : 'No end'}
+                </Badge>
+              </div>
+            </div>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex space-x-3">
+            <Button variant="outline" onClick={handleEditClick} className="shadow-sm">
+              <Edit className="mr-2 h-4 w-4" /> Edit Plan
+            </Button>
+            <Button onClick={handleExecuteClick} disabled={planTestCases.length === 0} className="shadow-sm bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800">
+              <Play className="mr-2 h-4 w-4" /> Execute Tests
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      {/* Enhanced Execution Summary */}
+      <Card className="shadow-lg border-0 bg-gradient-to-br from-white to-gray-50 dark:from-gray-900 dark:to-gray-800">
+        <CardHeader className="pb-4">
+          <div className="flex items-center space-x-2">
+            <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-lg">
+              <Target className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+            </div>
+            <div>
+              <CardTitle className="text-xl">Execution Summary</CardTitle>
+              <CardDescription className="text-sm">
+                Overall progress and test case execution status
+              </CardDescription>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {/* Progress Bar Section */}
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-100 dark:border-gray-700">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Overall Progress</span>
+              <span className="text-lg font-bold text-blue-600 dark:text-blue-400">{progress}%</span>
+            </div>
+            <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3 overflow-hidden">
+              <div
+                className="bg-gradient-to-r from-blue-500 to-blue-600 h-3 rounded-full transition-all duration-500 ease-out"
+                style={{ width: `${progress}%` }}
+              ></div>
+            </div>
+          </div>
+
+          {/* Stats Grid */}
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+            {/* Total Tests */}
+            <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-100 dark:border-gray-700 text-center">
+              <div className="flex items-center justify-center mb-2">
+                <div className="p-2 bg-gray-100 dark:bg-gray-700 rounded-full">
+                  <FileText className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+                </div>
+              </div>
+              <div className="text-2xl font-bold text-gray-900 dark:text-white">{executionSummary.totalTests}</div>
+              <div className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Total Tests</div>
             </div>
 
-            <div>
-              <div className="text-sm font-medium">Total</div>
-              <div className="text-2xl font-bold">{executionSummary.totalTests}</div>
+            {/* Passed */}
+            <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-green-100 dark:border-green-800 text-center">
+              <div className="flex items-center justify-center mb-2">
+                <div className="p-2 bg-green-100 dark:bg-green-900 rounded-full">
+                  <CheckCircle2 className="h-4 w-4 text-green-600 dark:text-green-400" />
+                </div>
+              </div>
+              <div className="text-2xl font-bold text-green-600 dark:text-green-400">{executionSummary.passed}</div>
+              <div className="text-xs font-medium text-green-600 dark:text-green-400 uppercase tracking-wide">Passed</div>
             </div>
 
-            <div>
-              <div className="text-sm font-medium text-green-600">Passed</div>
-              <div className="text-2xl font-bold text-green-600">{executionSummary.passed}</div>
+            {/* Failed */}
+            <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-red-100 dark:border-red-800 text-center">
+              <div className="flex items-center justify-center mb-2">
+                <div className="p-2 bg-red-100 dark:bg-red-900 rounded-full">
+                  <XCircle className="h-4 w-4 text-red-600 dark:text-red-400" />
+                </div>
+              </div>
+              <div className="text-2xl font-bold text-red-600 dark:text-red-400">{executionSummary.failed}</div>
+              <div className="text-xs font-medium text-red-600 dark:text-red-400 uppercase tracking-wide">Failed</div>
             </div>
 
-            <div>
-              <div className="text-sm font-medium text-red-600">Failed</div>
-              <div className="text-2xl font-bold text-red-600">{executionSummary.failed}</div>
+            {/* Blocked */}
+            <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-orange-100 dark:border-orange-800 text-center">
+              <div className="flex items-center justify-center mb-2">
+                <div className="p-2 bg-orange-100 dark:bg-orange-900 rounded-full">
+                  <AlertCircle className="h-4 w-4 text-orange-600 dark:text-orange-400" />
+                </div>
+              </div>
+              <div className="text-2xl font-bold text-orange-600 dark:text-orange-400">{executionSummary.blocked}</div>
+              <div className="text-xs font-medium text-orange-600 dark:text-orange-400 uppercase tracking-wide">Blocked</div>
             </div>
 
-            <div>
-              <div className="text-sm font-medium text-orange-600">Blocked</div>
-              <div className="text-2xl font-bold text-orange-600">{executionSummary.blocked}</div>
-            </div>
-
-            <div>
-              <div className="text-sm font-medium text-gray-600">Execution Rate</div>
-              <div className="text-2xl font-bold text-gray-600">{executionSummary.executionRate}%</div>
+            {/* Execution Rate */}
+            <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-purple-100 dark:border-purple-800 text-center">
+              <div className="flex items-center justify-center mb-2">
+                <div className="p-2 bg-purple-100 dark:bg-purple-900 rounded-full">
+                  <Target className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                </div>
+              </div>
+              <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">{executionSummary.executionRate}%</div>
+              <div className="text-xs font-medium text-purple-600 dark:text-purple-400 uppercase tracking-wide">Execution Rate</div>
             </div>
           </div>
         </CardContent>
       </Card>
 
       <Tabs defaultValue="details">
-        <TabsList>
-          <TabsTrigger value="details">Details</TabsTrigger>
-          <TabsTrigger value="testcases">Test Cases</TabsTrigger>
-          <TabsTrigger value="execution">Execution History</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-3 bg-gray-100 p-1 rounded-lg">
+          <TabsTrigger
+            value="details"
+            className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:text-blue-700 data-[state=active]:shadow-sm font-medium"
+          >
+            <ListChecks className="h-4 w-4" />
+            Details
+          </TabsTrigger>
+          <TabsTrigger
+            value="testcases"
+            className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:text-blue-700 data-[state=active]:shadow-sm font-medium"
+          >
+            <TestTube className="h-4 w-4" />
+            Test Cases
+          </TabsTrigger>
+          <TabsTrigger
+            value="execution"
+            className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:text-blue-700 data-[state=active]:shadow-sm font-medium"
+          >
+            <History className="h-4 w-4" />
+            Execution History
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="details" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Test Plan Details</CardTitle>
+          {/* Description Section */}
+          <Card className="border-l-4 border-l-blue-500">
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2">
+                <FileText className="h-5 w-5" />
+                Description
+              </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-6">
-              <div>
-                <h3 className="text-lg font-medium">Description</h3>
-                <p className="mt-2">{testPlan.description || 'No description provided.'}</p>
-              </div>
+            <CardContent>
+              <p className="text-gray-700 leading-relaxed">
+                {testPlan.description || 'No description provided.'}
+              </p>
+            </CardContent>
+          </Card>
 
-              <Separator />
+          {/* Objectives and Scope */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <Card className="border-l-4 border-l-green-500">
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center gap-2">
+                  <Target className="h-5 w-5" />
+                  Objectives
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-700 leading-relaxed">
+                  {testPlan.objectives || 'No objectives provided.'}
+                </p>
+              </CardContent>
+            </Card>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <h3 className="text-lg font-medium">Objectives</h3>
-                  <p className="mt-2">{testPlan.objectives || 'No objectives provided.'}</p>
-                </div>
+            <Card className="border-l-4 border-l-purple-500">
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center gap-2">
+                  <Target className="h-5 w-5" />
+                  Scope
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-700 leading-relaxed">
+                  {testPlan.scope || 'No scope provided.'}
+                </p>
+              </CardContent>
+            </Card>
+          </div>
 
-                <div>
-                  <h3 className="text-lg font-medium">Scope</h3>
-                  <p className="mt-2">{testPlan.scope || 'No scope provided.'}</p>
-                </div>
-              </div>
+          {/* Test Strategy and Environment */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <Card className="border-l-4 border-l-orange-500">
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center gap-2">
+                  <Settings className="h-5 w-5" />
+                  Test Strategy
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-700 leading-relaxed">
+                  {testPlan.testStrategy || 'No test strategy provided.'}
+                </p>
+              </CardContent>
+            </Card>
 
-              <Separator />
+            <Card className="border-l-4 border-l-teal-500">
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center gap-2">
+                  <Globe className="h-5 w-5" />
+                  Environment
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-700 leading-relaxed">
+                  {testPlan.environment || 'No environment details provided.'}
+                </p>
+              </CardContent>
+            </Card>
+          </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <h3 className="text-lg font-medium">Test Strategy</h3>
-                  <p className="mt-2">{testPlan.testStrategy || 'No test strategy provided.'}</p>
-                </div>
+          {/* Acceptance Criteria and Risk Management */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <Card className="border-l-4 border-l-emerald-500">
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center gap-2">
+                  <CheckCircle className="h-5 w-5" />
+                  Acceptance Criteria
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-700 leading-relaxed">
+                  {testPlan.acceptanceCriteria || 'No acceptance criteria provided.'}
+                </p>
+              </CardContent>
+            </Card>
 
-                <div>
-                  <h3 className="text-lg font-medium">Environment</h3>
-                  <p className="mt-2">{testPlan.environment || 'No environment details provided.'}</p>
-                </div>
-              </div>
+            <Card className="border-l-4 border-l-red-500">
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center gap-2">
+                  <AlertTriangle className="h-5 w-5" />
+                  Risk Management
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-700 leading-relaxed">
+                  {testPlan.riskManagement || 'No risk management details provided.'}
+                </p>
+              </CardContent>
+            </Card>
+          </div>
 
-              <Separator />
+          {/* Resources and Schedule */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <Card className="border-l-4 border-l-indigo-500">
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center gap-2">
+                  <Users className="h-5 w-5" />
+                  Resources
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-700 leading-relaxed">
+                  {testPlan.resources || 'No resources provided.'}
+                </p>
+              </CardContent>
+            </Card>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <h3 className="text-lg font-medium">Acceptance Criteria</h3>
-                  <p className="mt-2">{testPlan.acceptanceCriteria || 'No acceptance criteria provided.'}</p>
-                </div>
+            <Card className="border-l-4 border-l-pink-500">
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center gap-2">
+                  <Clock className="h-5 w-5" />
+                  Schedule
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-700 leading-relaxed">
+                  {testPlan.schedule || 'No schedule provided.'}
+                </p>
+              </CardContent>
+            </Card>
+          </div>
 
-                <div>
-                  <h3 className="text-lg font-medium">Risk Management</h3>
-                  <p className="mt-2">{testPlan.riskManagement || 'No risk management details provided.'}</p>
-                </div>
-              </div>
-
-              <Separator />
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <h3 className="text-lg font-medium">Resources</h3>
-                  <p className="mt-2">{testPlan.resources || 'No resources provided.'}</p>
-                </div>
-
-                <div>
-                  <h3 className="text-lg font-medium">Schedule</h3>
-                  <p className="mt-2">{testPlan.schedule || 'No schedule provided.'}</p>
-                </div>
-              </div>
-
-              <div>
-                <h3 className="text-lg font-medium">Deliverables</h3>
-                <p className="mt-2">{testPlan.deliverables || 'No deliverables provided.'}</p>
-              </div>
+          {/* Deliverables */}
+          <Card className="border-l-4 border-l-amber-500">
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2">
+                <Package className="h-5 w-5" />
+                Deliverables
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-gray-700 leading-relaxed">
+                {testPlan.deliverables || 'No deliverables provided.'}
+              </p>
             </CardContent>
           </Card>
         </TabsContent>
 
-        <TabsContent value="testcases" className="space-y-4">
-          <div className="flex justify-between items-center">
-            <h3 className="text-lg font-medium">Test Cases ({planTestCases.length})</h3>
-            <Button onClick={handleAddTestCasesClick}>
-              <Plus className="mr-2 h-4 w-4" /> Add Test Cases
-            </Button>
-          </div>
-
-          {planTestCases.length === 0 ? (
-            <Card>
-              <CardContent className="flex flex-col items-center justify-center py-8">
-                <p className="text-muted-foreground mb-4">No test cases have been added to this test plan yet.</p>
-                <Button onClick={handleAddTestCasesClick}>
+        <TabsContent value="testcases" className="space-y-6">
+          <Card className="border-l-4 border-l-blue-500">
+            <CardHeader className="pb-4">
+              <div className="flex justify-between items-center">
+                <CardTitle className="flex items-center gap-2 text-blue-700">
+                  <TestTube className="h-5 w-5" />
+                  Test Cases ({planTestCases.length})
+                </CardTitle>
+                <Button onClick={handleAddTestCasesClick} className="bg-blue-600 hover:bg-blue-700">
                   <Plus className="mr-2 h-4 w-4" /> Add Test Cases
                 </Button>
-              </CardContent>
-            </Card>
-          ) : (
-            <Card>
-              <CardContent className="p-0">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Title</TableHead>
-                      <TableHead>Priority</TableHead>
-                      <TableHead>Type</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {planTestCases.map((testCase) => (
-                      <TableRow key={testCase.id}>
-                        <TableCell className="font-medium">{testCase.title}</TableCell>
-                        <TableCell>
-                          <Badge className={getTestCasePriorityBadgeColor(testCase.priority)}>
-                            {testCase.priority || 'Medium'}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>{testCase.type}</TableCell>
-                        <TableCell>
-                          <Badge className={getTestCaseStatusBadgeColor(testCase.status)}>
-                            {testCase.status || 'Not Executed'}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => handleRemoveTestCase(testCase.id)}
-                          >
-                            <Trash2 className="h-4 w-4 text-destructive" />
-                          </Button>
-                        </TableCell>
+              </div>
+            </CardHeader>
+            <CardContent>
+              {planTestCases.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-12 text-center">
+                  <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-4">
+                    <TestTube className="h-8 w-8 text-blue-600" />
+                  </div>
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">No Test Cases Yet</h3>
+                  <p className="text-gray-500 mb-6 max-w-sm">
+                    Start building your test plan by adding test cases that will validate your application's functionality.
+                  </p>
+                  <Button onClick={handleAddTestCasesClick} className="bg-blue-600 hover:bg-blue-700">
+                    <Plus className="mr-2 h-4 w-4" /> Add Your First Test Case
+                  </Button>
+                </div>
+              ) : (
+                <div className="rounded-lg border border-gray-200 overflow-hidden">
+                  <Table>
+                    <TableHeader className="bg-gray-50">
+                      <TableRow>
+                        <TableHead className="font-semibold text-gray-700">Title</TableHead>
+                        <TableHead className="font-semibold text-gray-700">Priority</TableHead>
+                        <TableHead className="font-semibold text-gray-700">Type</TableHead>
+                        <TableHead className="font-semibold text-gray-700">Status</TableHead>
+                        <TableHead className="text-right font-semibold text-gray-700">Actions</TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
-          )}
+                    </TableHeader>
+                    <TableBody>
+                      {planTestCases.map((testCase, index) => (
+                        <TableRow key={testCase.id} className={index % 2 === 0 ? "bg-white" : "bg-gray-50/50"}>
+                          <TableCell className="font-medium text-gray-900">{testCase.title}</TableCell>
+                          <TableCell>
+                            <Badge className={getTestCasePriorityBadgeColor(testCase.priority)}>
+                              {testCase.priority || 'Medium'}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-gray-700">{testCase.type}</TableCell>
+                          <TableCell>
+                            <Badge className={getTestCaseStatusBadgeColor(testCase.status)}>
+                              {testCase.status || 'Not Executed'}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => handleRemoveTestCase(testCase.id)}
+                              className="hover:bg-red-50 hover:text-red-600"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </TabsContent>
 
-        <TabsContent value="execution" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Execution History</CardTitle>
-              <CardDescription>
-                History of test plan executions
+        <TabsContent value="execution" className="space-y-6">
+          <Card className="border-l-4 border-l-purple-500">
+            <CardHeader className="pb-4">
+              <CardTitle className="flex items-center gap-2 text-purple-700">
+                <History className="h-5 w-5" />
+                Execution History
+              </CardTitle>
+              <CardDescription className="text-gray-600">
+                Track the history of test plan executions and their results
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <p className="text-muted-foreground text-center py-4">
-                No execution history available yet.
-              </p>
+              <div className="flex flex-col items-center justify-center py-12 text-center">
+                <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mb-4">
+                  <History className="h-8 w-8 text-purple-600" />
+                </div>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">No Execution History</h3>
+                <p className="text-gray-500 max-w-sm">
+                  Once you start executing test cases, their history and results will appear here for tracking and analysis.
+                </p>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>

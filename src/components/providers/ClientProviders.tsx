@@ -3,7 +3,7 @@
 import { ReactNode, Suspense } from 'react';
 import dynamic from 'next/dynamic';
 
-// Importación dinámica de los providers para evitar problemas de hidratación
+// Dynamic import of providers to avoid hydration issues
 const SessionProvider = dynamic(() => import('./SessionProvider'), {
   ssr: false,
   loading: () => null

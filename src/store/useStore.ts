@@ -62,6 +62,7 @@ export interface Workflow {
 
 // Define team member interface
 export interface TeamMember {
+  image: string | Blob | undefined;
   id: string;
   name: string;
   email: string;
@@ -155,10 +156,10 @@ export const useStore = create<StoreState>()(
           workflows: state.workflows.map((workflow) =>
             workflow.id === id
               ? {
-                  ...workflow,
-                  ...updatedWorkflow,
-                  updatedAt: new Date().toISOString(),
-                }
+                ...workflow,
+                ...updatedWorkflow,
+                updatedAt: new Date().toISOString(),
+              }
               : workflow
           ),
         })),
@@ -201,23 +202,23 @@ export const useStore = create<StoreState>()(
           tasks: state.tasks.map((task) =>
             task.id === taskId
               ? {
-                  ...task,
-                  comments: [
-                    ...(task.comments || []),
-                    {
-                      ...comment,
-                      id: uuidv4(),
-                      createdAt: new Date().toISOString(),
-                    },
-                  ],
-                }
+                ...task,
+                comments: [
+                  ...(task.comments || []),
+                  {
+                    ...comment,
+                    id: uuidv4(),
+                    createdAt: new Date().toISOString(),
+                  },
+                ],
+              }
               : task
           ),
         })),
     }),
     {
       name: "qa-dashboard-storage",
-      // 💡 Este check asegura que localStorage solo se use en el cliente
+      // 💡 This check ensures localStorage is only used on the client
       storage:
         typeof window !== "undefined"
           ? createJSONStorage(() => localStorage)

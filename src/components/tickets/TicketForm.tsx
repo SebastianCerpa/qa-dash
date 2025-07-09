@@ -133,8 +133,8 @@ export default function TicketForm({
         });
       }
     } else {
-      // Para tickets nuevos, asignar automáticamente al primer miembro del equipo disponible
-      // Solo asignamos miembros del equipo registrados en la sección "Teams"
+      // For new tickets, automatically assign to the first available team member
+// We only assign team members registered in the "Teams" section
       const { teamMembers } = useStore.getState();
       if (teamMembers.length > 0) {
         setValue('assigneeId', teamMembers[0].id);
@@ -169,7 +169,7 @@ export default function TicketForm({
     if (ticketId) {
       updateTicket(ticketId, data);
     } else {
-      // Usar el primer miembro del equipo como reporterId si existe, o 'system' si no hay miembros
+      // Use the first team member as reporterId if exists, or 'system' if no members
       const reporterId = teamMembers.length > 0 ? teamMembers[0].id : 'system';
       
       addTicket({

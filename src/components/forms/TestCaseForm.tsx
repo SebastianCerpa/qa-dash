@@ -16,7 +16,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from "@/components/ui/select-radix";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -217,20 +217,17 @@ const TestCaseForm: React.FC<TestCaseFormProps> = ({
                   control={control}
                   rules={{ required: 'Priority is required' }}
                   render={({ field }) => (
-                    <Select
-  id="priority"
-  value={field.value}
-  onChange={field.onChange}
-  error={errors.priority?.message}
->
-  <option value="" disabled>
-    Select priority
-  </option>
-  <option value="Critical">Critical</option>
-  <option value="High">High</option>
-  <option value="Medium">Medium</option>
-  <option value="Low">Low</option>
-</Select>
+                    <Select value={field.value} onValueChange={field.onChange}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select priority" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Critical">Critical</SelectItem>
+                        <SelectItem value="High">High</SelectItem>
+                        <SelectItem value="Medium">Medium</SelectItem>
+                        <SelectItem value="Low">Low</SelectItem>
+                      </SelectContent>
+                    </Select>
                   )}
                 />
               </div>
@@ -242,20 +239,17 @@ const TestCaseForm: React.FC<TestCaseFormProps> = ({
                   control={control}
                   rules={{ required: 'Type is required' }}
                   render={({ field }) => (
-                    <Select
-  id="type"
-  value={field.value}
-  onChange={field.onChange}
-  error={errors.type?.message}
->
-  <option value="" disabled>
-    Select type
-  </option>
-  <option value="Manual">Manual</option>
-  <option value="Automated">Automated</option>
-  <option value="Exploratory">Exploratory</option>
-  <option value="Regression">Regression</option>
-</Select>
+                    <Select value={field.value} onValueChange={field.onChange}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Manual">Manual</SelectItem>
+                        <SelectItem value="Automated">Automated</SelectItem>
+                        <SelectItem value="Exploratory">Exploratory</SelectItem>
+                        <SelectItem value="Regression">Regression</SelectItem>
+                      </SelectContent>
+                    </Select>
                   )}
                 />
               </div>

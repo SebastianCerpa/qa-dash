@@ -3,8 +3,8 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { signIn } from 'next-auth/react';
-import Button from '@/components/ui/Button';
-import Card from '@/components/ui/Card';
+import { Button } from '@/components/ui/button';
+import { Card } from "@/components/ui/card";
 
 interface FormData {
   firstName: string;
@@ -186,7 +186,7 @@ export default function RegisterPage() {
       </div>
 
       <div className="relative w-full max-w-md">
-        <Card variant="elevated" className="backdrop-blur-sm bg-white/90">
+        <Card className="backdrop-blur-sm bg-white/90 border border-gray-200 shadow-md">
           {/* Header */}
           <div className="px-8 pt-8 pb-6 text-center">
             <div className="flex justify-center mb-4">
@@ -447,7 +447,7 @@ export default function RegisterPage() {
               {/* Sign Up Button */}
               <Button
                 type="submit"
-                variant="primary"
+                variant="default"
                 size="lg"
                 fullWidth
                 isLoading={isLoading}
@@ -497,7 +497,7 @@ export default function RegisterPage() {
                   Sign in here
                 </button>
               </p>
-              <p className="mt-4 text-xs text-gray-500 leading-relaxed">
+              <p className="mt-4 text-sm text-gray-500 leading-relaxed">
                 By creating an account, you agree to our{' '}
                 <button 
                   type="button"
@@ -521,7 +521,7 @@ export default function RegisterPage() {
 
         {/* Footer */}
         <div className="mt-8 text-center">
-          <p className="text-xs text-gray-500">
+          <p className="text-sm text-gray-500">
             © 2024 QA Dashboard. All rights reserved.
           </p>
         </div>

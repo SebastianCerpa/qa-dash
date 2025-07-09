@@ -1,159 +1,124 @@
 "use client";
 
-import React, { useState, createContext, useContext, useEffect } from "react";
+import * as React from "react";
+import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { X } from "lucide-react";
 
-interface DialogContextType {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-}
+import { cn } from "@/lib/utils";
 
-const DialogContext = createContext<DialogContextType | undefined>(undefined);
+const Dialog = DialogPrimitive.Root;
 
-interface DialogProps {
-  open?: boolean;
-  defaultOpen?: boolean;
-  onOpenChange?: (open: boolean) => void;
-  children: React.ReactNode;
-}
+const DialogTrigger = DialogPrimitive.Trigger;
 
-interface DialogTriggerProps {
-  children: React.ReactNode;
-  asChild?: boolean;
-}
+const DialogPortal = DialogPrimitive.Portal;
 
-interface DialogContentProps {
-  children: React.ReactNode;
-  className?: string;
-}
+const DialogClose = DialogPrimitive.Close;
 
-interface DialogHeaderProps {
-  children: React.ReactNode;
-  className?: string;
-}
+const DialogOverlay = React.forwardRef<
+  React.ElementRef<typeof DialogPrimitive.Overlay>,
+  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Overlay>
+>(({ className, ...props }, ref) => (
+  <DialogPrimitive.Overlay
+    ref={ref}
+    className={cn(
+      "fixed inset-0 z-50 bg-black/80 backdrop-blur-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
+      className
+    )}
+    {...props}
+  />
+));
+DialogOverlay.displayName = DialogPrimitive.Overlay.displayName;
 
-interface DialogTitleProps {
-  children: React.ReactNode;
-  className?: string;
-}
-
-function Dialog({ open, defaultOpen, onOpenChange, children }: DialogProps) {
-  const [internalOpen, setInternalOpen] = useState(defaultOpen || false);
-  const isOpen = open !== undefined ? open : internalOpen;
-
-  const handleOpenChange = (newOpen: boolean) => {
-    if (open === undefined) {
-      setInternalOpen(newOpen);
-    }
-    onOpenChange?.(newOpen);
-  };
-
-  return (
-    <DialogContext.Provider
-      value={{ open: isOpen, onOpenChange: handleOpenChange }}
+const DialogContent = React.forwardRef<
+  React.ElementRef<typeof DialogPrimitive.Content>,
+  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content>
+>(({ className, children, ...props }, ref) => (
+  <DialogPortal>
+    <DialogOverlay />
+    <DialogPrimitive.Content
+      ref={ref}
+      className={cn(
+        "fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] sm:rounded-lg",
+        className
+      )}
+      {...props}
     >
       {children}
-    </DialogContext.Provider>
-  );
-}
+      <DialogPrimitive.Close className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground">
+        <X className="h-4 w-4" />
+        <span className="sr-only">Close</span>
+      </DialogPrimitive.Close>
+    </DialogPrimitive.Content>
+  </DialogPortal>
+));
+DialogContent.displayName = DialogPrimitive.Content.displayName;
 
-function DialogTrigger({ children, asChild = false }: DialogTriggerProps) {
-  const context = useContext(DialogContext);
-  if (!context) {
-    throw new Error("DialogTrigger must be used within a Dialog component");
-  }
+const DialogHeader = ({
+  className,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement>) => (
+  <div
+    className={cn(
+      "flex flex-col space-y-1.5 text-center sm:text-left",
+      className
+    )}
+    {...props}
+  />
+);
+DialogHeader.displayName = "DialogHeader";
 
-  const { onOpenChange } = context;
+const DialogFooter = ({
+  className,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement>) => (
+  <div
+    className={cn(
+      "flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2",
+      className
+    )}
+    {...props}
+  />
+);
+DialogFooter.displayName = "DialogFooter";
 
-  if (asChild) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const child = children as React.ReactElement<any>;
-    return React.cloneElement(child, {
-      onClick: (e: React.MouseEvent) => {
-        if (child.props.onClick) {
-          child.props.onClick(e);
-        }
-        onOpenChange(true);
-      },
-    } as never);
-  }
+const DialogTitle = React.forwardRef<
+  React.ElementRef<typeof DialogPrimitive.Title>,
+  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Title>
+>(({ className, ...props }, ref) => (
+  <DialogPrimitive.Title
+    ref={ref}
+    className={cn(
+      "text-lg font-semibold leading-none tracking-tight",
+      className
+    )}
+    {...props}
+  />
+));
+DialogTitle.displayName = DialogPrimitive.Title.displayName;
 
-  return <button onClick={() => onOpenChange(true)}>{children}</button>;
-}
+const DialogDescription = React.forwardRef<
+  React.ElementRef<typeof DialogPrimitive.Description>,
+  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Description>
+>(({ className, ...props }, ref) => (
+  <DialogPrimitive.Description
+    ref={ref}
+    className={cn("text-sm text-muted-foreground", className)}
+    {...props}
+  />
+));
+DialogDescription.displayName = DialogPrimitive.Description.displayName;
 
-function DialogContent({ children, className = "" }: DialogContentProps) {
-  const context = useContext(DialogContext);
-  if (!context) {
-    throw new Error("DialogContent must be used within a Dialog component");
-  }
+export {
+  Dialog,
+  DialogPortal,
+  DialogOverlay,
+  DialogTrigger,
+  DialogClose,
+  DialogContent,
+  DialogHeader,
+  DialogFooter,
+  DialogTitle,
+  DialogDescription,
+};
 
-  const { open, onOpenChange } = context;
-
-  useEffect(() => {
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        onOpenChange(false);
-      }
-    };
-
-    if (open) {
-      document.addEventListener("keydown", handleEscape);
-      document.body.style.overflow = "hidden";
-    }
-
-    return () => {
-      document.removeEventListener("keydown", handleEscape);
-      document.body.style.overflow = "unset";
-    };
-  }, [open, onOpenChange]);
-
-  if (!open) {
-    return null;
-  }
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
-      {/* Backdrop */}
-      <div
-        className="fixed inset-0 bg-black/50 backdrop-blur-sm"
-        onClick={() => onOpenChange(false)}
-      />
-
-      {/* Content */}
-      <div
-        className={`relative bg-white rounded-lg shadow-lg max-w-lg w-full mx-4 max-h-[90vh] overflow-y-auto ${className}`}
-      >
-        <button
-          className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-white transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:pointer-events-none"
-          onClick={() => onOpenChange(false)}
-        >
-          <X className="h-4 w-4" />
-          <span className="sr-only">Close</span>
-        </button>
-        {children}
-      </div>
-    </div>
-  );
-}
-
-function DialogHeader({ children, className = "" }: DialogHeaderProps) {
-  return (
-    <div
-      className={`flex flex-col space-y-1.5 text-center sm:text-left p-6 pb-0 ${className}`}
-    >
-      {children}
-    </div>
-  );
-}
-
-function DialogTitle({ children, className = "" }: DialogTitleProps) {
-  return (
-    <h2
-      className={`text-lg font-semibold leading-none tracking-tight ${className}`}
-    >
-      {children}
-    </h2>
-  );
-}
-
-export { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle };
+export default Dialog;

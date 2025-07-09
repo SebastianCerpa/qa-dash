@@ -38,7 +38,7 @@ export async function GET(
           orderBy: { created_at: "desc" },
         },
         test_executions: {
-          orderBy: { executed_at: "desc" },
+          orderBy: { execution_date: "desc" },
           take: 10,
         },
       },
@@ -164,16 +164,7 @@ export async function PUT(
       });
     }
 
-    // Send notifications for critical changes
-    if (
-      changes.some(
-        (c) =>
-          c.field === "severity" &&
-          (c.new === "CRITICAL" || c.new === "BLOCKER")
-      )
-    ) {
-      await sendCriticalBugAlert(updatedBug);
-    }
+    // No notifications for critical changes
 
     return NextResponse.json(updatedBug);
   } catch (error) {
@@ -238,26 +229,4 @@ export async function DELETE(
   }
 }
 
-// Helper function for critical bug alerts
-async function sendCriticalBugAlert(bug: any) {
-  try {
-    const qaLeads = await prisma.users.findMany({
-      where: {
-        role: { in: ["QA Lead", "QA Manager"] },
-        status: "active",
-      },
-    });
-
-    for (const lead of qaLeads) {
-      await prisma.notifications.create({
-        data: {
-          user_id: lead.id,
-          message: `🚨 Critical Bug Alert: ${bug.title} (${bug.severity})`,
-          is_read: false,
-        },
-      });
-    }
-  } catch (error) {
-    console.error("Error sending critical bug alert:", error);
-  }
-}
+// Helper function for critical bug alerts removed

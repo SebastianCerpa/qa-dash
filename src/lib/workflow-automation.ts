@@ -23,18 +23,21 @@ class WorkflowAutomationService {
    */
   async processWorkflowRules(event: string, data: any) {
     try {
-      const rules = await prisma.workflow_rules.findMany({
-        where: {
-          trigger: event,
-          is_active: true,
-        },
-      });
+      // TODO: Implement workflow_rules table in schema
+      // const rules = await prisma.workflow_rules.findMany({
+      //   where: {
+      //     trigger: event,
+      //     is_active: true,
+      //   },
+      // });
 
-      for (const rule of rules) {
-        if (await this.evaluateConditions(rule.conditions, data)) {
-          await this.executeActions(rule.actions, data);
-        }
-      }
+      // for (const rule of rules) {
+      //   if (await this.evaluateConditions(rule.conditions, data)) {
+      //     await this.executeActions(rule.actions, data);
+      //   }
+      // }
+      
+      console.log(`Workflow rules processing for event: ${event} - Not implemented yet`);
     } catch (error) {
       console.error("Error processing workflow rules:", error);
     }

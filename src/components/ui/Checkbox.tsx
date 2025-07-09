@@ -67,7 +67,7 @@ const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>((
             </label>
           )}
           {description && (
-            <p className={`text-xs ${disabled ? 'text-gray-400' : 'text-gray-500'} mt-1`}>
+            <p className={`text-sm ${disabled ? 'text-gray-400' : 'text-gray-500'} mt-1`}>
               {description}
             </p>
           )}
@@ -100,4 +100,5 @@ const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>((
 Checkbox.displayName = 'Checkbox';
 
 export { Checkbox };
+
 export default Checkbox;

@@ -2,9 +2,9 @@
 
 import React, { useState, useMemo } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
-import Button from '@/components/ui/Button';
-import Card from '@/components/ui/Card';
-import Badge from '@/components/ui/Badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { useEnhancedQAStore, Sprint } from '@/store/enhancedStore';
 import {
   PlusIcon,
@@ -27,14 +27,14 @@ interface SprintFormData {
   status: 'Planning' | 'Active' | 'Completed' | 'Cancelled';
 }
 
-function SprintForm({ 
-  sprint, 
-  onSuccess, 
-  onCancel 
-}: { 
-  sprint?: Sprint; 
-  onSuccess: () => void; 
-  onCancel: () => void; 
+function SprintForm({
+  sprint,
+  onSuccess,
+  onCancel
+}: {
+  sprint?: Sprint;
+  onSuccess: () => void;
+  onCancel: () => void;
 }) {
   const { addSprint, updateSprint } = useEnhancedQAStore();
   const [formData, setFormData] = useState<SprintFormData>({
@@ -48,7 +48,7 @@ function SprintForm({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-  
+
     const sprintData: Omit<Sprint, 'id'> = {
       ...formData,
       startDate: new Date(formData.startDate),
@@ -59,16 +59,16 @@ function SprintForm({
       velocity: 0,
       burndownData: [],
     };
-  
+
     if (sprint) {
       updateSprint(sprint.id, sprintData);
     } else {
       addSprint(sprintData);
     }
-  
+
     onSuccess();
   };
-  
+
 
   const addGoal = () => {
     setFormData(prev => ({ ...prev, goals: [...prev.goals, ''] }));
@@ -213,18 +213,18 @@ function SprintCard({ sprint, onEdit, onDelete, onView }: {
   onView: (id: string) => void;
 }) {
   const { tickets } = useEnhancedQAStore();
-  
+
   const sprintTickets = tickets.filter(ticket => ticket.sprintId === sprint.id);
-  const completedTickets = sprintTickets.filter(ticket => ticket.status === 'Closed');
+  const completedTickets = sprintTickets.filter(ticket => ticket.status === 'Passed');
   const progress = sprintTickets.length > 0 ? (completedTickets.length / sprintTickets.length) * 100 : 0;
-  
+
   const now = new Date();
   const startDate = new Date(sprint.startDate);
   const endDate = new Date(sprint.endDate);
   const totalDays = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
   const daysElapsed = Math.max(0, Math.ceil((now.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)));
   const timeProgress = Math.min(100, (daysElapsed / totalDays) * 100);
-  
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'Planning': return 'bg-gray-100 text-gray-800';
@@ -237,26 +237,26 @@ function SprintCard({ sprint, onEdit, onDelete, onView }: {
 
   return (
     <Card className="hover:shadow-lg transition-shadow">
-      <div className="p-6">
-        <div className="flex justify-between items-start mb-4">
+      <CardHeader>
+        <div className="flex justify-between items-start">
           <div className="flex-1">
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">{sprint.name}</h3>
-            <Badge className={getStatusColor(sprint.status)} label={sprint.status} />
-
+            <CardTitle className="text-lg mb-2">{sprint.name}</CardTitle>
+            <Badge className={getStatusColor(sprint.status)}>{sprint.status}</Badge>
           </div>
           <div className="flex space-x-2">
-            <Button variant='primary' size="sm" onClick={() => onView(sprint.id)}>
+            <Button variant='default' size="sm" onClick={() => onView(sprint.id)}>
               <EyeIcon className="h-4 w-4" />
             </Button>
-            <Button variant='primary' size="sm" onClick={() => onEdit(sprint.id)}>
+            <Button variant='default' size="sm" onClick={() => onEdit(sprint.id)}>
               <PencilIcon className="h-4 w-4" />
             </Button>
-            <Button variant='primary' size="sm" onClick={() => onDelete(sprint.id)}>
+            <Button variant='destructive' size="sm" onClick={() => onDelete(sprint.id)}>
               <TrashIcon className="h-4 w-4" />
             </Button>
           </div>
         </div>
-
+      </CardHeader>
+      <CardContent>
         {sprint.description && (
           <p className="text-gray-600 mb-4 text-sm">{sprint.description}</p>
         )}
@@ -266,7 +266,7 @@ function SprintCard({ sprint, onEdit, onDelete, onView }: {
             <CalendarIcon className="h-4 w-4 mr-2" />
             {startDate.toLocaleDateString()} - {endDate.toLocaleDateString()}
           </div>
-          
+
           <div className="flex items-center text-sm text-gray-600">
             <DocumentTextIcon className="h-4 w-4 mr-2" />
             {sprintTickets.length} tickets
@@ -281,20 +281,20 @@ function SprintCard({ sprint, onEdit, onDelete, onView }: {
               <span>{Math.round(progress)}%</span>
             </div>
             <div className="w-full bg-gray-200 rounded-full h-2">
-              <div 
+              <div
                 className="bg-blue-600 h-2 rounded-full transition-all duration-300"
                 style={{ width: `${progress}%` }}
               />
             </div>
           </div>
-          
+
           <div>
             <div className="flex justify-between text-sm text-gray-600 mb-1">
               <span>Time Progress</span>
               <span>{Math.round(timeProgress)}%</span>
             </div>
             <div className="w-full bg-gray-200 rounded-full h-2">
-              <div 
+              <div
                 className="bg-green-600 h-2 rounded-full transition-all duration-300"
                 style={{ width: `${timeProgress}%` }}
               />
@@ -318,7 +318,7 @@ function SprintCard({ sprint, onEdit, onDelete, onView }: {
             </ul>
           </div>
         )}
-      </div>
+      </CardContent>
     </Card>
   );
 }
@@ -377,8 +377,8 @@ export default function SprintsPage() {
           </div>
           <Button
             onClick={handleAddSprint}
-            leftIcon={<PlusIcon className="h-5 w-5" />}
           >
+            <PlusIcon className="h-5 w-5 mr-2" />
             Create Sprint
           </Button>
         </div>
@@ -386,7 +386,7 @@ export default function SprintsPage() {
         {/* Stats */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
           <Card>
-            <div className="p-4">
+            <CardContent className="p-4">
               <div className="flex items-center">
                 <div className="flex-shrink-0">
                   <ChartBarIcon className="h-8 w-8 text-green-600" />
@@ -396,11 +396,11 @@ export default function SprintsPage() {
                   <p className="text-2xl font-semibold text-gray-900">{activeSprints.length}</p>
                 </div>
               </div>
-            </div>
+            </CardContent>
           </Card>
-          
+
           <Card>
-            <div className="p-4">
+            <CardContent className="p-4">
               <div className="flex items-center">
                 <div className="flex-shrink-0">
                   <ClockIcon className="h-8 w-8 text-yellow-600" />
@@ -410,11 +410,11 @@ export default function SprintsPage() {
                   <p className="text-2xl font-semibold text-gray-900">{planningSprints.length}</p>
                 </div>
               </div>
-            </div>
+            </CardContent>
           </Card>
-          
+
           <Card>
-            <div className="p-4">
+            <CardContent className="p-4">
               <div className="flex items-center">
                 <div className="flex-shrink-0">
                   <DocumentTextIcon className="h-8 w-8 text-blue-600" />
@@ -424,11 +424,11 @@ export default function SprintsPage() {
                   <p className="text-2xl font-semibold text-gray-900">{completedSprints.length}</p>
                 </div>
               </div>
-            </div>
+            </CardContent>
           </Card>
-          
+
           <Card>
-            <div className="p-4">
+            <CardContent className="p-4">
               <div className="flex items-center">
                 <div className="flex-shrink-0">
                   <UserGroupIcon className="h-8 w-8 text-purple-600" />
@@ -438,21 +438,21 @@ export default function SprintsPage() {
                   <p className="text-2xl font-semibold text-gray-900">{sprints.length}</p>
                 </div>
               </div>
-            </div>
+            </CardContent>
           </Card>
         </div>
 
         {/* View Toggle */}
         <div className="flex space-x-2">
           <Button
-            variant={viewMode === 'grid' ? 'primary' : 'outline'}
+            variant={viewMode === 'grid' ? 'default' : 'outline'}
             onClick={() => setViewMode('grid')}
             size="sm"
           >
             Grid View
           </Button>
           <Button
-            variant={viewMode === 'timeline' ? 'primary' : 'outline'}
+            variant={viewMode === 'timeline' ? 'default' : 'outline'}
             onClick={() => setViewMode('timeline')}
             size="sm"
           >
@@ -464,12 +464,17 @@ export default function SprintsPage() {
       {/* Form */}
       {showForm && (
         <div className="mb-6">
-          <Card title={editingSprint ? 'Edit Sprint' : 'Create New Sprint'}>
-            <SprintForm
-              sprint={editingSprint || undefined}
-              onSuccess={handleFormSuccess}
-              onCancel={() => setShowForm(false)}
-            />
+          <Card>
+            <CardHeader>
+              <CardTitle>{editingSprint ? 'Edit Sprint' : 'Create New Sprint'}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <SprintForm
+                sprint={editingSprint || undefined}
+                onSuccess={handleFormSuccess}
+                onCancel={() => setShowForm(false)}
+              />
+            </CardContent>
           </Card>
         </div>
       )}
@@ -548,15 +553,17 @@ export default function SprintsPage() {
       ) : (
         /* Timeline View */
         <Card>
-          <div className="p-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Sprint Timeline</h3>
+          <CardHeader>
+            <CardTitle>Sprint Timeline</CardTitle>
+          </CardHeader>
+          <CardContent>
             <div className="space-y-4">
               {sortedSprints.map((sprint) => {
                 const startDate = new Date(sprint.startDate);
                 const endDate = new Date(sprint.endDate);
                 const isActive = sprint.status === 'Active';
                 const isCompleted = sprint.status === 'Completed';
-                
+
                 return (
                   <div key={sprint.id} className="flex items-center space-x-4">
                     <div className="flex-shrink-0 w-24 text-sm text-gray-500">
@@ -564,27 +571,24 @@ export default function SprintsPage() {
                     </div>
                     <div className="flex-1">
                       <div className="flex items-center space-x-3">
-                        <div className={`w-3 h-3 rounded-full ${
-                          isActive ? 'bg-green-500' : 
-                          isCompleted ? 'bg-blue-500' : 
-                          'bg-gray-300'
-                        }`} />
+                        <div className={`w-3 h-3 rounded-full ${isActive ? 'bg-green-500' :
+                            isCompleted ? 'bg-blue-500' :
+                              'bg-gray-300'
+                          }`} />
                         <div className="flex-1">
                           <div className="flex items-center justify-between">
                             <h4 className="text-sm font-medium text-gray-900">{sprint.name}</h4>
                             <Badge
-  className={`ml-2 ${
-    sprint.status === 'Active' ? 'bg-green-100 text-green-800' :
-    sprint.status === 'Completed' ? 'bg-blue-100 text-blue-800' :
-    sprint.status === 'Planning' ? 'bg-yellow-100 text-yellow-800' :
-    'bg-red-100 text-red-800'
-  }`}
-  label={sprint.status}
-/>
-
-
+                              className={`ml-2 ${sprint.status === 'Active' ? 'bg-green-100 text-green-800' :
+                                  sprint.status === 'Completed' ? 'bg-blue-100 text-blue-800' :
+                                    sprint.status === 'Planning' ? 'bg-yellow-100 text-yellow-800' :
+                                      'bg-red-100 text-red-800'
+                                }`}
+                            >
+                              {sprint.status}
+                            </Badge>
                           </div>
-                          <p className="text-xs text-gray-500 mt-1">
+                          <p className="text-sm text-gray-500 mt-1">
                             {startDate.toLocaleDateString()} - {endDate.toLocaleDateString()}
                           </p>
                         </div>
@@ -594,7 +598,7 @@ export default function SprintsPage() {
                 );
               })}
             </div>
-          </div>
+          </CardContent>
         </Card>
       )}
     </DashboardLayout>

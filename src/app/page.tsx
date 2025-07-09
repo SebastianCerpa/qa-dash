@@ -3,13 +3,14 @@
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import Card from "@/components/ui/Card";
+import { Card } from "@/components/ui/card";
 import StatCard from "@/components/dashboard/StatCard";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import TestTypeChart from "@/components/dashboard/TestTypeChart";
 import TaskStatusChart from "@/components/dashboard/TaskStatusChart";
 import { useStore } from "@/store/useStore";
 import { formatDistanceToNow } from "date-fns";
+import { ChartBarIcon, CheckCircleIcon, XCircleIcon, ArchiveBoxIcon, ArrowPathIcon, DocumentTextIcon } from '@heroicons/react/24/outline';
 
 export default function Dashboard() {
   const { data: session, status } = useSession();
@@ -46,12 +47,7 @@ export default function Dashboard() {
       id: task.id,
       action: `Task "${task.title}" updated`,
       timestamp: new Date(task.updatedAt),
-      icon:
-        task.status === "Done"
-          ? "✅"
-          : task.status === "In Progress"
-          ? "🔄"
-          : "📝",
+      status: task.status,
     }));
 
   // Generate upcoming tasks
@@ -103,28 +99,28 @@ export default function Dashboard() {
             title="Total Tests"
             value={stats.totalTests}
             change={stats.testsChange}
-            icon={<span className="text-2xl">📊</span>}
+            icon={<ChartBarIcon className="w-6 h-6" />}
             color="blue"
           />
           <StatCard
             title="Passed Tests"
             value={stats.passedTests}
             change={stats.passedChange}
-            icon={<span className="text-2xl">✅</span>}
+            icon={<CheckCircleIcon className="w-6 h-6" />}
             color="green"
           />
           <StatCard
             title="Failed Tests"
             value={stats.failedTests}
             change={stats.failedChange}
-            icon={<span className="text-2xl">❌</span>}
+            icon={<XCircleIcon className="w-6 h-6" />}
             color="red"
           />
           <StatCard
             title="Test Coverage"
             value={`${stats.coverage}%`}
             change={stats.coverageChange}
-            icon={<span className="text-2xl">🎯</span>}
+            icon={<ArchiveBoxIcon className="w-6 h-6" />}
             color="purple"
           />
         </div>
@@ -157,12 +153,20 @@ export default function Dashboard() {
                   key={activity.id}
                   className="flex items-center space-x-3 p-3 bg-gray-50/80 rounded-xl hover:bg-gray-100/80 transition-all duration-200"
                 >
-                  <div className="text-lg">{activity.icon}</div>
+                  <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-white/80 shadow-sm">
+                    {activity.status === "Done" ? (
+                      <CheckCircleIcon className="w-5 h-5 text-green-500" />
+                    ) : activity.status === "In Progress" ? (
+                      <ArrowPathIcon className="w-5 h-5 text-blue-500" />
+                    ) : (
+                      <DocumentTextIcon className="w-5 h-5 text-gray-500" />
+                    )}
+                  </div>
                   <div className="flex-1">
                     <p className="text-sm font-semibold text-gray-900">
                       {activity.action}
                     </p>
-                    <p className="text-xs text-gray-500 font-medium">
+                    <p className="text-sm text-gray-500 font-medium">
                       {formatDistanceToNow(activity.timestamp, {
                         addSuffix: true,
                       })}
@@ -187,16 +191,16 @@ export default function Dashboard() {
                     <p className="text-sm font-semibold text-gray-900">
                       {task.title}
                     </p>
-                    <p className="text-xs text-gray-500 font-medium mt-1">
+                    <p className="text-sm text-gray-500 font-medium mt-1">
                       Due:{" "}
                       {formatDistanceToNow(task.dueDate, { addSuffix: true })}
                     </p>
                     <div className="flex items-center space-x-2 mt-2">
-                      <span className="text-xs px-2 py-1 bg-blue-100/80 text-blue-800 rounded-full font-medium">
+                      <span className="text-sm px-2 py-1 bg-blue-100/80 text-blue-800 rounded-full font-medium">
                         {task.testType}
                       </span>
                       <span
-                        className={`text-xs px-2 py-1 rounded-full font-medium ${
+                        className={`text-sm px-2 py-1 rounded-full font-medium ${
                           task.priority === "High"
                             ? "bg-red-100/80 text-red-800"
                             : task.priority === "Medium"

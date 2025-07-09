@@ -19,7 +19,7 @@ function Label({
   
   const variantClasses = {
     default: 'text-sm',
-    small: 'text-xs',
+    small: 'text-sm',
     large: 'text-base',
   };
 
@@ -34,4 +34,5 @@ function Label({
 }
 
 export { Label };
+
 export default Label;

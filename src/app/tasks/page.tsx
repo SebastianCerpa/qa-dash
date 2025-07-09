@@ -5,8 +5,8 @@ import DashboardLayout from '@/components/layout/DashboardLayout';
 import TaskTable from '@/components/tasks/TaskTable';
 import TaskCard from '@/components/tasks/TaskCard';
 import TaskForm from '@/components/forms/TaskForm';
-import Button from '@/components/ui/Button';
-import Card from '@/components/ui/Card';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
 import { useStore } from '@/store/useStore';
 import { PlusIcon, ViewColumnsIcon, TableCellsIcon } from '@heroicons/react/24/outline';
 

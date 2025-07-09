@@ -2,16 +2,16 @@
 
 import * as React from "react";
 import { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/Select";
-import { Badge } from "@/components/ui/Badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/Tabs";
+} from "@/components/ui/select-radix";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   BarChart,
   Bar,
@@ -111,7 +111,7 @@ export default function AnalyticsDashboard({
 
   useEffect(() => {
     fetchAnalytics();
-  });
+  }, [selectedProject, dateRange]);
 
   const fetchAnalytics = async () => {
     try {
@@ -368,11 +368,12 @@ export default function AnalyticsDashboard({
                         </p>
                       </div>
                       <Badge
-                        label={`${Math.round(test.flaky_score * 100)}% flaky`}
                         variant={
-                          test.flaky_score > 0.7 ? "danger" : "secondary"
+                          test.flaky_score > 0.7 ? "destructive" : "secondary"
                         }
-                      />
+                      >
+                        {`${Math.round(test.flaky_score * 100)}% flaky`}
+                      </Badge>
                     </div>
                   ))
                 ) : (
@@ -440,9 +441,10 @@ export default function AnalyticsDashboard({
                       </div>
                     </div>
                     <Badge
-                      label={`${assignee.count} assigned`}
                       variant="secondary"
-                    />
+                    >
+                      {`${assignee.count} assigned`}
+                    </Badge>
                   </div>
                 ))}
               </div>

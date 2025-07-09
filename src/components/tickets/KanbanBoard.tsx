@@ -31,15 +31,30 @@ const STATUSES: QATicket["status"][] = [
   "In Progress",
   "Testing",
   "Review",
+  "Passed",
+  "Failed",
   "Closed",
 ];
 
 const STATUS_COLORS = {
-  Open: "bg-gray-50 border-gray-200",
-  "In Progress": "bg-blue-50 border-blue-200",
-  Testing: "bg-yellow-50 border-yellow-200",
-  Review: "bg-purple-50 border-purple-200",
-  Closed: "bg-green-50 border-green-200",
+  Open: "bg-white border-gray-200",
+  "In Progress": "bg-white border-blue-200",
+  Testing: "bg-white border-yellow-200",
+  Review: "bg-white border-purple-200",
+  Passed: "bg-white border-green-200",
+  Failed: "bg-white border-red-200",
+  Closed: "bg-white border-gray-300",
+};
+
+// Define workflow direction indicators
+const WORKFLOW_INDICATORS = {
+  Open: "→",
+  "In Progress": "→",
+  Testing: "→",
+  Review: "→",
+  Passed: "→",
+  Failed: "→",
+  Closed: "",
 };
 
 export default function KanbanBoard({
@@ -66,6 +81,8 @@ export default function KanbanBoard({
       "In Progress": [],
       Testing: [],
       Review: [],
+      Passed: [],
+      Failed: [],
       Closed: [],
     };
 
@@ -104,26 +121,41 @@ export default function KanbanBoard({
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
     >
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-        {STATUSES.map((status) => {
-          const statusTickets = ticketsByStatus[status];
-          return (
-            <KanbanColumn
-              key={status}
-              status={status}
-              tickets={statusTickets}
-              colorClass={STATUS_COLORS[status]}
-              onEditTicket={onEditTicket}
-              onDeleteTicket={onDeleteTicket}
-              onViewTicket={onViewTicket}
-            />
-          );
-        })}
+      <div className="p-1 bg-gray-50 rounded-xl shadow-inner">
+        <div className="flex flex-col md:flex-row gap-4 p-3 overflow-x-auto">
+          {STATUSES.map((status, index) => {
+            const statusTickets = ticketsByStatus[status];
+            const isLastColumn = index === STATUSES.length - 1;
+            
+            return (
+              <div key={status} className="flex-1 min-w-[280px] flex flex-col">
+                <KanbanColumn
+                  status={status}
+                  tickets={statusTickets}
+                  colorClass={STATUS_COLORS[status]}
+                  onEditTicket={onEditTicket}
+                  onDeleteTicket={onDeleteTicket}
+                  onViewTicket={onViewTicket}
+                />
+                
+                {!isLastColumn && (
+                  <div className="hidden md:flex justify-center mt-2 text-gray-400">
+                    <div className="flex items-center justify-center w-8 h-8 rounded-full bg-white shadow-sm border border-gray-200">
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                      </svg>
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
       </div>
 
       <DragOverlay>
         {activeTicket ? (
-          <div className="transform rotate-3 opacity-90">
+          <div className="transform rotate-2 opacity-95 shadow-xl">
             <TicketCard
               ticket={activeTicket}
               onEdit={() => {}}

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useForm, SubmitHandler } from "react-hook-form";
+import { useForm, SubmitHandler, Controller } from "react-hook-form";
 import {
   useStore,
   TestType,
@@ -7,7 +7,8 @@ import {
   TaskStatus,
   Task,
 } from "@/store/useStore";
-import Button from "@/components/ui/Button";
+import { Button } from "@/components/ui/button";
+import UserSelector from "@/components/tickets/UserSelector";
 
 import {
   ClipboardDocumentListIcon,
@@ -52,6 +53,7 @@ export default function TaskForm({
   const {
     register,
     handleSubmit,
+    control,
     formState: { errors, isSubmitting },
   } = useForm<TaskFormData>({
     defaultValues: existingTask
@@ -91,7 +93,7 @@ export default function TaskForm({
     "Accessibility",
   ];
 
-  const statuses: TaskStatus[] = ["Todo", "In Progress", "Review", "Done"];
+  const statuses: TaskStatus[] = ["Todo", "In Progress", "Done"];
   const priorities: TaskPriority[] = ["Low", "Medium", "High", "Critical"];
 
   const onSubmit: SubmitHandler<TaskFormData> = async (data) => {
@@ -147,7 +149,7 @@ export default function TaskForm({
         return "bg-gray-100 text-gray-800 border-gray-200";
       case "In Progress":
         return "bg-blue-100 text-blue-800 border-blue-200";
-      case "Review":
+      // Review case removed
         return "bg-purple-100 text-purple-800 border-purple-200";
       case "Done":
         return "bg-green-100 text-green-800 border-green-200";
@@ -255,32 +257,28 @@ export default function TaskForm({
               <UserIcon className="h-4 w-4 mr-2 text-gray-500" />
               Assignee
             </label>
-            <div className="relative">
-              <select
-                id="assignee"
-                {...register("assignee", { required: "Assignee is required" })}
-                onFocus={() => setFocusedField("assignee")}
-                onBlur={() => setFocusedField(null)}
-                className={`w-full px-4 py-3 border-2 rounded-lg transition-all duration-200 ${
-                  focusedField === "assignee"
-                    ? "border-blue-500 ring-4 ring-blue-100 shadow-md"
-                    : "border-gray-300 hover:border-gray-400"
-                } focus:outline-none text-gray-900 bg-white`}
-              >
-                <option value="">Select team member...</option>
-                {teamMembers.map((member) => (
-                  <option key={member.id} value={member.id}>
-                    {member.name} - {member.role}
-                  </option>
-                ))}
-              </select>
-              {errors.assignee && (
-                <div className="mt-2 flex items-center text-red-600">
-                  <ExclamationTriangleIcon className="h-4 w-4 mr-1" />
-                  <span className="text-sm">{errors.assignee.message}</span>
-                </div>
+            <Controller
+              name="assignee"
+              control={control}
+              rules={{ required: "Assignee is required" }}
+              render={({ field, fieldState: { error } }) => (
+                <>
+                  <UserSelector
+                    control={control}
+                    name="assignee"
+                    label=""
+                    required={true}
+                    className=""
+                  />
+                  {error && (
+                    <div className="mt-2 flex items-center text-red-600">
+                      <ExclamationTriangleIcon className="h-4 w-4 mr-1" />
+                      <span className="text-sm">{error.message}</span>
+                    </div>
+                  )}
+                </>
               )}
-            </div>
+            />
           </div>
 
           {/* Test Type */}

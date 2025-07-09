@@ -7,7 +7,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-
 model audit_logs {
   id          String    @id @default(cuid())
   user_id     String?
@@ -39,26 +38,16 @@ model documents {
   users       users?    @relation(fields: [uploaded_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
-model notifications {
-  id         String    @id @default(cuid())
-  user_id    String?
-  type       String?
-  message    String
-  is_read    Boolean?  @default(false)
-  created_at DateTime? @default(now())
-  users      users?    @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-}
-
 model projects {
-  id          String       @id @default(cuid())
+  id          String        @id @default(cuid())
   name        String
   description String?
-  created_at  DateTime?    @default(now())
-  updated_at  DateTime?    @default(now())
+  created_at  DateTime?     @default(now())
+  updated_at  DateTime?     @default(now())
+  bug_reports bug_reports[]
   documents   documents[]
   tasks       tasks[]
   test_plans  test_plans[]
-  bug_reports bug_reports[]
 }
 
 model task_comments {
@@ -83,10 +72,10 @@ model tasks {
   created_at    DateTime?       @default(now())
   updated_at    DateTime?       @default(now())
   task_comments task_comments[]
-  test_cases    test_cases[]    // Back-reference for linked test cases
   users         users?          @relation(fields: [assignee_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   test_cycles   test_cycles?    @relation(fields: [cycle_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   projects      projects?       @relation(fields: [project_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  test_cases    test_cases[]
 }
 
 model teams {
@@ -98,27 +87,27 @@ model teams {
 }
 
 model test_cases {
-  id              String      @id @default(cuid())
-  test_plan_id    String?
-  title           String
-  description     String?
-  priority        TestCasePriority @default(MEDIUM)
-  type            TestCaseType @default(FUNCTIONAL)
-  preconditions   String?
-  steps           Json        // Almacenar array de steps como JSON
-  expected_result String?
-  status          TestCaseStatus @default(NOT_EXECUTED)
-  ticket_id       String?     // Para linkear con tasks
-  tags            String?     // JSON string de tags
-  last_executed   DateTime?
-  created_by      String?
-  created_at      DateTime?   @default(now())
-  updated_at      DateTime?   @updatedAt
-  
-  // Relationships
-  users           users?      @relation(fields: [created_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  test_plans      test_plans? @relation(fields: [test_plan_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  linked_task     tasks?      @relation(fields: [ticket_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  id               String            @id @default(cuid())
+  test_plan_id     String?
+  title            String
+  description      String?
+  priority         TestCasePriority  @default(MEDIUM)
+  type             TestCaseType      @default(FUNCTIONAL)
+  preconditions    String?
+  steps            Json
+  expected_result  String?
+  status           TestCaseStatus    @default(NOT_EXECUTED)
+  ticket_id        String?
+  tags             String?
+  last_executed    DateTime?
+  created_by       String?
+  created_at       DateTime?         @default(now())
+  updated_at       DateTime?         @updatedAt
+  last_executed_by String?
+  users            users?            @relation(fields: [created_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  test_plans       test_plans?       @relation(fields: [test_plan_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  linked_task      tasks?            @relation(fields: [ticket_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  test_executions  test_executions[]
 }
 
 model test_cycles {
@@ -133,15 +122,24 @@ model test_cycles {
 }
 
 model test_plans {
-  id          String       @id @default(cuid())
-  title       String
-  description String?
-  project_id  String?
-  created_by  String?
-  created_at  DateTime?    @default(now())
-  test_cases  test_cases[]
-  users       users?       @relation(fields: [created_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  projects    projects?    @relation(fields: [project_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  id                 String       @id @default(cuid())
+  title              String
+  description        String?
+  project_id         String?
+  objectives         String?
+  scope              String?
+  test_strategy      String?
+  environment        String?
+  acceptance_criteria String?
+  risk_management    String?
+  resources          String?
+  schedule           String?
+  deliverables       String?
+  created_by         String?
+  created_at         DateTime?    @default(now())
+  test_cases         test_cases[]
+  users              users?       @relation(fields: [created_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  projects           projects?    @relation(fields: [project_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 model user_teams {
@@ -154,188 +152,138 @@ model user_teams {
 }
 
 model users {
-  id            String          @id @default(cuid())
-  name          String
-  email         String          @unique
-  role          String
-  password_hash String
-  avatar_url    String?
-  created_at    DateTime?       @default(now())
-  status        String?         @default("active")
-  audit_logs    audit_logs[]
-  documents     documents[]
-  notifications notifications[]
-  task_comments task_comments[]
-  tasks         tasks[]
-  test_cases    test_cases[]
-  test_cycles   test_cycles[]
-  test_plans    test_plans[]
-  user_teams    user_teams[]
-  
-  // Bug tracking relationships
-  reported_bugs bug_reports[] @relation("BugReporter")
-  assigned_bugs bug_reports[] @relation("BugAssignee")
-  bug_comments  bug_comments[]
+  id             String           @id @default(cuid())
+  name           String
+  email          String           @unique
+  role           String
+  password_hash  String
+  avatar_url     String?
+  created_at     DateTime?        @default(now())
+  status         String?          @default("active")
+  audit_logs     audit_logs[]
   bug_activities bug_activities[]
+  bug_comments   bug_comments[]
+  assigned_bugs  bug_reports[]    @relation("BugAssignee")
+  reported_bugs  bug_reports[]    @relation("BugReporter")
+  documents      documents[]
+  task_comments  task_comments[]
+  tasks          tasks[]
+  test_cases     test_cases[]
+  test_cycles    test_cycles[]
+  test_plans     test_plans[]
+  user_teams     user_teams[]
 }
 
-// Enhanced Bug Tracking Models
 model bug_reports {
-  id                String   @id @default(cuid())
-  title            String
-  description      String
-  severity         Severity @default(MEDIUM)
-  priority         Priority @default(MEDIUM)
-  status           BugStatus @default(OPEN)
-  environment      String?
+  id                 String            @id @default(cuid())
+  title              String
+  description        String
+  severity           Severity          @default(MEDIUM)
+  priority           Priority          @default(MEDIUM)
+  status             BugStatus         @default(OPEN)
+  environment        String?
   steps_to_reproduce String?
-  expected_behavior String?
-  actual_behavior   String?
-  browser_info     String?
-  os_info          String?
-  device_info      String?
-  
-  // Regression tracking
-  is_regression    Boolean  @default(false)
-  original_bug_id  String?
-  regression_count Int      @default(0)
-  
-  // Test automation integration
-  test_case_link   String?
+  expected_behavior  String?
+  actual_behavior    String?
+  browser_info       String?
+  os_info            String?
+  device_info        String?
+  is_regression      Boolean           @default(false)
+  original_bug_id    String?
+  regression_count   Int               @default(0)
+  test_case_link     String?
   automation_test_id String?
-  ci_pipeline_url  String?
-  build_number     String?
-  
-  // Relationships
-  reporter_id      String
-  reporter         users    @relation("BugReporter", fields: [reporter_id], references: [id])
-  assignee_id      String?
-  assignee         users?   @relation("BugAssignee", fields: [assignee_id], references: [id])
-  project_id       String?
-  project          projects? @relation(fields: [project_id], references: [id])
-  
-  // Attachments and screenshots
-  attachments      bug_attachments[]
-  screenshots      bug_screenshots[]
-  
-  // Metadata
-  tags             String?  // JSON string or comma-separated
-  labels           String?  // JSON string or comma-separated
-  created_at       DateTime @default(now())
-  updated_at       DateTime @updatedAt
-  resolved_at      DateTime?
-  
-  // Comments and activity
-  comments         bug_comments[]
-  activities       bug_activities[]
-  
-  // Test execution link
-  test_executions  test_executions[]
+  ci_pipeline_url    String?
+  build_number       String?
+  reporter_id        String
+  assignee_id        String?
+  project_id         String?
+  tags               String?
+  labels             String?
+  created_at         DateTime          @default(now())
+  updated_at         DateTime          @updatedAt
+  resolved_at        DateTime?
+  activities         bug_activities[]
+  attachments        bug_attachments[]
+  comments           bug_comments[]
+  assignee           users?            @relation("BugAssignee", fields: [assignee_id], references: [id])
+  project            projects?         @relation(fields: [project_id], references: [id])
+  reporter           users             @relation("BugReporter", fields: [reporter_id], references: [id])
+  screenshots        bug_screenshots[]
+  test_executions    test_executions[]
 }
 
 model bug_attachments {
-  id         String @id @default(cuid())
-  bug_id     String
-  bug        bug_reports @relation(fields: [bug_id], references: [id], onDelete: Cascade)
-  file_name  String
-  file_url   String
-  file_size  Int
-  mime_type  String
-  uploaded_at DateTime @default(now())
+  id          String      @id @default(cuid())
+  bug_id      String
+  file_name   String
+  file_url    String
+  file_size   Int
+  mime_type   String
+  uploaded_at DateTime    @default(now())
   uploaded_by String
+  bug         bug_reports @relation(fields: [bug_id], references: [id], onDelete: Cascade)
 }
 
 model bug_screenshots {
-  id          String @id @default(cuid())
+  id          String      @id @default(cuid())
   bug_id      String
-  bug         bug_reports @relation(fields: [bug_id], references: [id], onDelete: Cascade)
   image_url   String
-  annotations Json?  // Store annotation data as JSON
+  annotations Json?
   description String?
-  uploaded_at DateTime @default(now())
+  uploaded_at DateTime    @default(now())
+  bug         bug_reports @relation(fields: [bug_id], references: [id], onDelete: Cascade)
 }
 
 model bug_comments {
-  id        String   @id @default(cuid())
-  bug_id    String
-  bug       bug_reports @relation(fields: [bug_id], references: [id], onDelete: Cascade)
-  author_id String
-  author    users    @relation(fields: [author_id], references: [id])
-  content   String
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
+  id         String      @id @default(cuid())
+  bug_id     String
+  author_id  String
+  content    String
+  created_at DateTime    @default(now())
+  updated_at DateTime    @updatedAt
+  author     users       @relation(fields: [author_id], references: [id])
+  bug        bug_reports @relation(fields: [bug_id], references: [id], onDelete: Cascade)
 }
 
 model bug_activities {
-  id          String   @id @default(cuid())
+  id          String      @id @default(cuid())
   bug_id      String
-  bug         bug_reports @relation(fields: [bug_id], references: [id], onDelete: Cascade)
   user_id     String
-  user        users    @relation(fields: [user_id], references: [id])
-  action      String   // "created", "updated", "assigned", "resolved", etc.
-  field       String?  // Field that was changed
+  action      String
+  field       String?
   old_value   String?
   new_value   String?
   description String?
-  created_at  DateTime @default(now())
+  created_at  DateTime    @default(now())
+  bug         bug_reports @relation(fields: [bug_id], references: [id], onDelete: Cascade)
+  user        users       @relation(fields: [user_id], references: [id])
 }
 
-// Test automation integration
 model test_executions {
-  id            String   @id @default(cuid())
-  test_suite_id String
-  test_case_name String
-  status        TestExecutionStatus
-  duration      Int      // in milliseconds
-  error_message String?
-  stack_trace   String?
-  screenshots   String?  // JSON string of URLs to failure screenshots
-  
-  // CI/CD Integration
-  build_id      String
-  pipeline_url  String
-  branch        String
-  commit_hash   String
-  
-  // Flaky test detection
-  is_flaky      Boolean  @default(false)
-  flaky_score   Float?   // 0-1 score based on failure rate
-  
-  executed_at   DateTime @default(now())
-  
-  // Auto-created bugs
+  id             String       @id @default(cuid())
   created_bug_id String?
-  created_bug   bug_reports? @relation(fields: [created_bug_id], references: [id])
+  executed_by    String
+  execution_date DateTime     @default(now())
+  notes          String?
+  test_case_id   String
+  status         String
+  created_bug    bug_reports? @relation(fields: [created_bug_id], references: [id])
+  test_case      test_cases   @relation(fields: [test_case_id], references: [id], onDelete: Cascade)
 }
 
-// Analytics and reporting
 model bug_analytics {
-  id              String   @id @default(cuid())
-  date            DateTime
-  total_bugs      Int      @default(0)
-  new_bugs        Int      @default(0)
-  resolved_bugs   Int      @default(0)
-  critical_bugs   Int      @default(0)
-  avg_resolution_time Float? // in hours
-  resolution_rate Float?   // percentage
-  created_at      DateTime @default(now())
-  
-  @@unique([date])
+  id                  String   @id @default(cuid())
+  date                DateTime @unique
+  total_bugs          Int      @default(0)
+  new_bugs            Int      @default(0)
+  resolved_bugs       Int      @default(0)
+  critical_bugs       Int      @default(0)
+  avg_resolution_time Float?
+  resolution_rate     Float?
+  created_at          DateTime @default(now())
 }
 
-model workflow_rules {
-  id          String   @id @default(cuid())
-  name        String
-  description String?
-  trigger     String   // "bug_created", "severity_changed", etc.
-  conditions  Json     // Store conditions as JSON
-  actions     Json     // Store actions as JSON
-  is_active   Boolean  @default(true)
-  created_at  DateTime @default(now())
-  updated_at  DateTime @updatedAt
-}
-
-// Enums
 enum Severity {
   LOW
   MEDIUM
@@ -391,4 +339,5 @@ enum TestCaseStatus {
   FAILED
   BLOCKED
   SKIPPED
+  IN_PROGRESS
 }

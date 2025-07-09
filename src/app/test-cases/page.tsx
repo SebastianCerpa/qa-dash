@@ -4,7 +4,7 @@ import TestCasesList from '@/components/test-cases/TestCasesList';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 
 export const metadata: Metadata = {
-  title: 'Test Cases | Enhanced QA Dashboard',
+  title: 'Test Cases | Enhanced QA Pandash',
   description: 'Manage and execute test cases for your projects',
 };
 

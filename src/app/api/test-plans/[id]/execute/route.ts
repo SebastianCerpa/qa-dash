@@ -149,7 +149,7 @@ export async function POST(
     // Process test cases to handle JSON fields
     const processedTestCases = testPlanWithTestCases?.test_cases.map(testCase => ({
       ...testCase,
-      steps: testCase.steps as any,
+      steps: Array.isArray(testCase.steps) ? testCase.steps : [],
       tags: testCase.tags ? JSON.parse(testCase.tags as string) : [],
     })) || [];
 

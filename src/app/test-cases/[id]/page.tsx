@@ -4,7 +4,7 @@ import TestCaseDetails from '@/components/test-cases/TestCaseDetails';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 
 export const metadata: Metadata = {
-  title: 'Test Case Details | Enhanced QA Dashboard',
+  title: 'Test Case Details | Enhanced QA Pandash',
   description: 'View and manage test case details',
 };
 

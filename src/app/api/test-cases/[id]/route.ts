@@ -86,7 +86,18 @@ export async function GET(req: NextRequest) {
     try {
       const processedTestCase = {
         ...testCase,
-        steps: testCase.steps ? (typeof testCase.steps === 'string' ? JSON.parse(testCase.steps) : testCase.steps) : [],
+        steps: (() => {
+          if (!testCase.steps) return [];
+          if (typeof testCase.steps === 'string') {
+            try {
+              const parsed = JSON.parse(testCase.steps);
+              return Array.isArray(parsed) ? parsed : [];
+            } catch {
+              return [];
+            }
+          }
+          return Array.isArray(testCase.steps) ? testCase.steps : [];
+        })(),
         tags: testCase.tags ? (typeof testCase.tags === 'string' ? JSON.parse(testCase.tags) : []) : [],
       };
 
@@ -188,7 +199,18 @@ export async function PUT(req: NextRequest) {
     // Process the test case to handle JSON fields
     const processedTestCase = {
       ...updatedTestCase,
-      steps: updatedTestCase.steps ? (typeof updatedTestCase.steps === 'string' ? JSON.parse(updatedTestCase.steps) : updatedTestCase.steps) : [],
+      steps: (() => {
+        if (!updatedTestCase.steps) return [];
+        if (typeof updatedTestCase.steps === 'string') {
+          try {
+            const parsed = JSON.parse(updatedTestCase.steps);
+            return Array.isArray(parsed) ? parsed : [];
+          } catch {
+            return [];
+          }
+        }
+        return Array.isArray(updatedTestCase.steps) ? updatedTestCase.steps : [];
+      })(),
       tags: updatedTestCase.tags ? JSON.parse(updatedTestCase.tags as string) : [],
     };
 

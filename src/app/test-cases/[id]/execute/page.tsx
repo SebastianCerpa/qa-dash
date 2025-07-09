@@ -154,7 +154,7 @@ export default function ExecuteTestCasePage() {
 
               <div>
                 <h3 className="text-lg font-semibold mb-2">Test Steps</h3>
-                {testCase.steps && testCase.steps.length > 0 ? (
+                {Array.isArray(testCase.steps) && testCase.steps.length > 0 ? (
                   <ol className="list-decimal list-inside space-y-4">
                     {testCase.steps.map((step, index) => (
                       <li key={index} className="pl-2 pb-4 border-b border-gray-100 last:border-0">

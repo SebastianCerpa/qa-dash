@@ -31,7 +31,7 @@ export default function TestCaseDetailPage() {
   const [showErrorDialog, setShowErrorDialog] = useState(false);
   const [testCaseId, setTestCaseId] = useState<string | null>(null);
 
-  // Función auxiliar para formatear los datos del test case
+  // Helper function to format test case data
   const formatTestCaseData = (data: any): TestCase => {
     return {
       ...data,
@@ -53,7 +53,7 @@ export default function TestCaseDetailPage() {
     };
   };
   
-  // Función para obtener los datos del caso de prueba
+  // Function to get test case data
   const fetchTestCase = async () => {
     if (params.id) {
       try {
@@ -67,13 +67,13 @@ export default function TestCaseDetailPage() {
         }
         const data = await response.json();
         
-        // Usar la función auxiliar para formatear los datos
+        // Use helper function to format data
         const formattedTestCase = formatTestCaseData(data);
         setTestCase(formattedTestCase);
       } catch (error: any) {
         console.error('Error fetching test case:', error);
-        // Guardar el mensaje de error y mostrar el diálogo
-        setError(error.message || "Caso de prueba no encontrado");
+        // Save error message and show dialog
+        setError(error.message || "Test case not found");
         setShowErrorDialog(true);
       } finally {
         setLoading(false);
@@ -98,7 +98,7 @@ export default function TestCaseDetailPage() {
   };
 
   const handleDelete = async () => {
-    if (testCase && window.confirm("¿Está seguro de que desea eliminar este caso de prueba?")) {
+    if (testCase && window.confirm("Are you sure you want to delete this test case?")) {
       try {
         setLoading(true);
         setError(null);
@@ -115,7 +115,7 @@ export default function TestCaseDetailPage() {
         router.push("/test-management");
       } catch (error: any) {
         console.error('Error deleting test case:', error);
-        setError(`Error al eliminar el caso de prueba: ${error.message}`);
+        setError(`Error deleting test case: ${error.message}`);
         setShowErrorDialog(true);
         setLoading(false);
       } finally {
@@ -136,11 +136,11 @@ export default function TestCaseDetailPage() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          status: status.toUpperCase(), // Asegurar que el estado esté en mayúsculas
+          status: status.toUpperCase(), // Ensure status is in uppercase
           bug_report: status.toUpperCase() === 'FAILED' ? {
-            title: `Bug en caso de prueba: ${testCase.title}`,
-            description: testCase.actualResult || 'Sin resultado actual',
-          } : null,
+          title: `Bug in test case: ${testCase.title}`,
+          description: testCase.actualResult || 'No actual result',
+        } : undefined,
         }),
       });
 
@@ -150,11 +150,11 @@ export default function TestCaseDetailPage() {
         throw new Error(errorMessage);
       }
 
-      // Actualizar el estado local con los datos actualizados
+      // Update local state with updated data
       await fetchTestCase();
     } catch (error: any) {
       console.error('Error executing test case:', error);
-      setError(`Error al ejecutar el caso de prueba: ${error.message}`);
+      setError(`Error executing test case: ${error.message}`);
       setShowErrorDialog(true);
     } finally {
       setLoading(false);
@@ -203,7 +203,7 @@ export default function TestCaseDetailPage() {
     );
   }
 
-  // Mostrar el ErrorDialog solo cuando hay un error y no hay testCase
+  // Show ErrorDialog only when there is an error and no testCase
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -221,10 +221,10 @@ export default function TestCaseDetailPage() {
             setShowErrorDialog(false);
             router.push('/test-management');
           }} 
-          message={error || "Caso de prueba no encontrado"} 
+          message={error || "Test case not found"} 
         />
         <div className="flex items-center justify-center h-64">
-          <p className="text-gray-500">Caso de prueba no encontrado</p>
+          <p className="text-gray-500">Test case not found</p>
         </div>
       </>
     );

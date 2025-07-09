@@ -52,10 +52,10 @@ export async function GET(req: NextRequest) {
     const pathParts = url.pathname.split('/');
     const id = pathParts[pathParts.length - 1]; // Get the ID from the path
     
-    // Validar que el ID es válido
+    // Validate that the ID is valid
     if (!id || typeof id !== 'string') {
       return NextResponse.json(
-        { error: "ID de caso de prueba inválido" },
+        { error: "Invalid test case ID" },
         { status: 400 }
       );
     }
@@ -77,7 +77,7 @@ export async function GET(req: NextRequest) {
 
     if (!testCase) {
       return NextResponse.json(
-        { error: "Caso de prueba no encontrado" },
+        { error: "Test case not found" },
         { status: 404 }
       );
     }
@@ -94,14 +94,14 @@ export async function GET(req: NextRequest) {
     } catch (parseError) {
       console.error("Error parsing JSON fields:", parseError);
       return NextResponse.json(
-        { error: "Error al procesar los datos del caso de prueba" },
+        { error: "Error processing test case data" },
         { status: 500 }
       );
     }
   } catch (error) {
     console.error("Error fetching test case:", error);
     return NextResponse.json(
-      { error: "Error al obtener el caso de prueba" },
+      { error: "Error fetching test case" },
       { status: 500 }
     );
   }

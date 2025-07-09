@@ -88,9 +88,9 @@ const TestCaseDetails: React.FC<TestCaseDetailsProps> = ({ testCaseId }) => {
       status: executionStatus,
       notes: executionNotes,
       bug_report: createBugReport && testCase ? {
-        title: `Bug en caso de prueba: ${testCase.title}`,
-        description: executionNotes || 'No se proporcionaron detalles adicionales.'
-      } : null
+          title: `Bug in test case: ${testCase.title}`,
+          description: executionNotes || 'No additional details provided.'
+        } : null
     });
     setExecuteDialogOpen(false);
     fetchTestCase(testCaseId); // Refresh the test case data

@@ -83,7 +83,7 @@ const TestPlansList: React.FC<TestPlansListProps> = ({
   };
 
   const handleViewTestPlan = (id: string) => {
-    router.push(`/test-management/test-plan/${id}`);
+    router.push(`/test-plans/${id}`);
   };
 
   const handleEditTestPlan = (id: string) => {

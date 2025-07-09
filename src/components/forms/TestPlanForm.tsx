@@ -1,12 +1,14 @@
 import React, { useState, useEffect, useMemo } from "react";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import { useApiStore } from "@/store/apiStore";
 import { TestPlan, TestCase } from "@/store/enhancedStore";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { 
-  PlusIcon, 
-  TrashIcon, 
-  CheckIcon, 
+import {
+  PlusIcon,
+  TrashIcon,
+  CheckIcon,
   XMarkIcon,
   DocumentTextIcon,
   ClipboardDocumentListIcon,
@@ -46,6 +48,8 @@ interface TestPlanFormProps {
 }
 
 export default function TestPlanForm({ testPlan, onSuccess, onCancel }: TestPlanFormProps) {
+  const { data: session, status } = useSession();
+  const router = useRouter();
   const { addTestPlan, updateTestPlan, testCases } = useApiStore();
   const [formData, setFormData] = useState<TestPlanFormData>({
     name: testPlan?.name || "",
@@ -99,6 +103,27 @@ export default function TestPlanForm({ testPlan, onSuccess, onCancel }: TestPlan
     console.log('TestPlanForm: handleSubmit called');
     console.log('TestPlanForm: formData:', formData);
 
+    // Check authentication status
+    if (status === 'loading') {
+      console.log('TestPlanForm: Session still loading, please wait');
+      alert('Please wait while we verify your authentication...');
+      return;
+    }
+
+    if (status === 'unauthenticated' || !session?.user?.email) {
+      console.error('TestPlanForm: User not authenticated');
+      alert('You must be logged in to create test plans. Redirecting to login...');
+      router.push('/login');
+      return;
+    }
+
+    // Validate required fields
+    if (!formData.name || formData.name.trim() === '') {
+      console.error('TestPlanForm: Name is required');
+      alert('Test Plan Name is required');
+      return;
+    }
+
     const testPlanData = {
       ...formData,
       createdBy: "current-user-id", // Replace with actual user ID
@@ -109,15 +134,21 @@ export default function TestPlanForm({ testPlan, onSuccess, onCancel }: TestPlan
 
     try {
       console.log('TestPlanForm: Starting API call...');
+      let savedTestPlan;
       if (testPlan) {
         console.log('TestPlanForm: Updating existing test plan');
-        await updateTestPlan(testPlan.id, testPlanData);
+        savedTestPlan = await updateTestPlan(testPlan.id, testPlanData);
       } else {
         console.log('TestPlanForm: Creating new test plan');
-        await addTestPlan(testPlanData);
+        savedTestPlan = await addTestPlan(testPlanData);
       }
-      console.log('TestPlanForm: API call successful');
-      onSuccess(testPlanData);
+      console.log('TestPlanForm: API call successful, saved test plan:', savedTestPlan);
+      console.log('TestPlanForm: Calling onSuccess with:', savedTestPlan);
+      if (typeof onSuccess === 'function') {
+        onSuccess(savedTestPlan);
+      } else {
+        console.error('TestPlanForm: onSuccess is not a function:', onSuccess);
+      }
     } catch (error) {
       console.error("TestPlanForm: Error saving test plan:", error);
       // You might want to show an error message to the user here
@@ -145,7 +176,7 @@ export default function TestPlanForm({ testPlan, onSuccess, onCancel }: TestPlan
       tc.title.toLowerCase().includes(searchTerm.toLowerCase())
     );
   }, [availableTestCases, searchTerm]);
-  
+
   // Helper function to handle form field changes
   const handleInputChange = (field: keyof TestPlanFormData, value: any) => {
     setFormData((prev) => ({
@@ -153,6 +184,41 @@ export default function TestPlanForm({ testPlan, onSuccess, onCancel }: TestPlan
       [field]: value,
     }));
   };
+
+  // Show loading state while checking authentication
+  if (status === 'loading') {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Verifying authentication...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show authentication required message if user is not authenticated
+  if (status === 'unauthenticated' || !session?.user?.email) {
+    return (
+      <div className="bg-yellow-50 border border-yellow-200 rounded-md p-6">
+        <div className="flex items-center">
+          <ExclamationTriangleIcon className="h-6 w-6 text-yellow-600 mr-3" />
+          <div>
+            <h3 className="text-lg font-medium text-yellow-800">Authentication Required</h3>
+            <p className="text-yellow-700 mt-1">
+              You must be logged in to create or edit trial plans.
+            </p>
+            <button
+              onClick={() => router.push('/login')}
+              className="mt-3 bg-yellow-600 text-white px-4 py-2 rounded-md hover:bg-yellow-700 transition-colors"
+            >
+              Go to Login
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
@@ -178,10 +244,9 @@ export default function TestPlanForm({ testPlan, onSuccess, onCancel }: TestPlan
               <Tab
                 key={tab.name}
                 className={({ selected }) =>
-                  `py-2 px-3 text-sm font-medium rounded-t-md focus:outline-none ${
-                    selected
-                      ? "text-primary-600 border-b-2 border-primary-500 bg-primary-50"
-                      : "text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                  `py-2 px-3 text-sm font-medium rounded-t-md focus:outline-none ${selected
+                    ? "text-primary-600 border-b-2 border-primary-500 bg-primary-50"
+                    : "text-gray-500 hover:text-gray-700 hover:border-gray-300"
                   }`
                 }
               >
@@ -448,8 +513,8 @@ export default function TestPlanForm({ testPlan, onSuccess, onCancel }: TestPlan
                 <label className="block text-sm font-medium text-gray-700">
                   Selected Test Cases ({selectedTestCases.length})
                 </label>
-                <Badge 
-                  variant="secondary" 
+                <Badge
+                  variant="secondary"
                 >
                   {`${selectedTestCases.length} selected`}
                 </Badge>
@@ -494,8 +559,8 @@ export default function TestPlanForm({ testPlan, onSuccess, onCancel }: TestPlan
                 <label className="block text-sm font-medium text-gray-700">
                   Add Test Cases
                 </label>
-                <Badge 
-                  variant="secondary" 
+                <Badge
+                  variant="secondary"
                 >
                   {`${filteredTestCases.length} available`}
                 </Badge>
@@ -567,18 +632,18 @@ export default function TestPlanForm({ testPlan, onSuccess, onCancel }: TestPlan
       <div className="flex justify-between pt-6 border-t border-gray-200">
         <div className="flex space-x-2">
           {selectedTab > 0 && (
-            <Button 
-              type="button" 
-              variant="outline" 
+            <Button
+              type="button"
+              variant="outline"
               onClick={() => setSelectedTab(selectedTab - 1)}
             >
               Previous
             </Button>
           )}
           {selectedTab < tabs.length - 1 && (
-            <Button 
-              type="button" 
-              variant="outline" 
+            <Button
+              type="button"
+              variant="outline"
               onClick={() => setSelectedTab(selectedTab + 1)}
             >
               Next

@@ -2,6 +2,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "../../../../lib/prisma";
 import { getServerSession } from "next-auth";
+import { authOptions } from "../../../../lib/auth";
 import { Prisma } from "@prisma/client";
 
 export async function GET(req: NextRequest) {
@@ -15,7 +16,7 @@ export async function GET(req: NextRequest) {
 
     const where: any = {};
 
-    // status no existe en el modelo test_plans, se omite esta condición
+    // status does not exist in test_plans model, this condition is omitted
     if (projectId) where.project_id = projectId;
     if (search) {
       where.OR = [
@@ -59,7 +60,7 @@ export async function GET(req: NextRequest) {
       const failed = testCases.filter(tc => tc.status === "FAILED").length;
       const blocked = testCases.filter(tc => tc.status === "BLOCKED").length;
       const skipped = testCases.filter(tc => tc.status === "SKIPPED").length;
-      const executionRate = totalTests > 0 ? 
+      const executionRate = totalTests > 0 ?
         ((passed + failed + blocked + skipped) / totalTests) * 100 : 0;
 
       return {
@@ -95,10 +96,16 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    const session = await getServerSession();
+    console.log('POST /api/test-plans - Starting request');
+    const session = await getServerSession(authOptions);
+    console.log('Session data:', session);
+
     if (!session?.user?.email) {
+      console.log('No session or email found, returning 401');
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+
+    console.log('User authenticated:', session.user.email);
 
     // Get user from database
     const user = await prisma.users.findUnique({
@@ -106,13 +113,20 @@ export async function POST(req: NextRequest) {
     });
 
     if (!user) {
+      console.log('User not found in database:', session.user.email);
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
+    console.log('User found in database:', user.id);
     const data = await req.json();
+    console.log('Request body data:', JSON.stringify(data, null, 2));
+    console.log('Data.title value:', data.title);
+    console.log('Data.title type:', typeof data.title);
 
     // Validate required fields
     if (!data.title) {
+      console.log('Title is missing from request data');
+      console.log('All data keys:', Object.keys(data));
       return NextResponse.json(
         { error: "Title is required" },
         { status: 400 }
@@ -120,21 +134,21 @@ export async function POST(req: NextRequest) {
     }
 
     console.log('Creating test plan with data:', data);
-    
+
     const testPlan = await prisma.test_plans.create({
       data: {
         title: data.title,
-        description: data.description || null,
-        project_id: data.projectId || null,
-        objectives: data.objectives || null,
-        scope: data.scope || null,
-        test_strategy: data.test_strategy || null,
-        environment: data.environment || null,
-        acceptance_criteria: data.acceptance_criteria || null,
-        risk_management: data.risk_management || null,
-        resources: data.resources || null,
-        schedule: data.schedule || null,
-        deliverables: data.deliverables || null,
+        description: data.description,
+        project_id: data.project_id,
+        objectives: data.objectives,
+        scope: data.scope,
+        test_strategy: data.test_strategy,
+        environment: data.environment,
+        acceptance_criteria: data.acceptance_criteria,
+        risk_management: data.risk_management,
+        resources: data.resources,
+        schedule: data.schedule,
+        deliverables: data.deliverables,
         created_by: user.id,
         created_at: new Date(),
       },
@@ -147,7 +161,7 @@ export async function POST(req: NextRequest) {
         },
       },
     });
-    
+
     console.log('Test plan created successfully:', testPlan.id);
 
     // If test case IDs are provided, associate them with the test plan
@@ -187,8 +201,20 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(testPlanWithTestCases, { status: 201 });
   } catch (error) {
     console.error("Error creating test plan:", error);
+    console.error("Error stack:", error instanceof Error ? error.stack : 'No stack trace');
+    console.error("Error message:", error instanceof Error ? error.message : String(error));
+
+    // Check if it's a Prisma error
+    if (error instanceof Prisma.PrismaClientKnownRequestError) {
+      console.error("Prisma error code:", error.code);
+      console.error("Prisma error meta:", error.meta);
+    }
+
     return NextResponse.json(
-      { error: "Failed to create test plan" },
+      {
+        error: "Failed to create test plan",
+        details: error instanceof Error ? error.message : String(error)
+      },
       { status: 500 }
     );
   }

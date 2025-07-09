@@ -40,7 +40,7 @@ export default function TicketCard({
   // Apply the drag ref to our element
   drag(ref);
 
-  // Buscar el asignado entre los miembros del equipo registrados
+  // Find assignee among registered team members
   const assignee = teamMembers.find((member) => member.id === ticket.assigneeId);
   const sprint = sprints.find((s) => s.id === ticket.sprintId);
   const linkedTests = testCases.filter((tc) =>
@@ -87,10 +87,10 @@ export default function TicketCard({
   };
 
   // Extract creation order from ticket ID to create sequential numbering
-  // We'll use the timestamp part of the UUID if available, or fallback to a simple hash
+// We'll use the timestamp part of the UUID if available, or fallback to a simple hash
   const getTicketNumber = () => {
     // Try to extract a numeric value from the ID that can be used for ordering
-    // This is a simplified approach - in a real app, you'd store a sequence number in the database
+// This is a simplified approach - in a real app, you'd store a sequence number in the database
     const idHash = ticket.id
       .split('')
       .reduce((acc, char) => acc + char.charCodeAt(0), 0);

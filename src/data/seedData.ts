@@ -3,8 +3,8 @@ import { initialTeamMembers, initialWorkflows, initialTasks } from './initialDat
 import { useEffect, useState } from 'react';
 
 /**
- * Hook para inicializar datos de prueba en la aplicación
- * Solo se ejecuta en el cliente y cuando el almacenamiento está vacío
+ * Hook to initialize test data in the application
+ * Only runs on the client and when storage is empty
  */
 export function useSeedData() {
   const {
@@ -17,97 +17,97 @@ export function useSeedData() {
     updateWorkflow
   } = useStore();
 
-  // Estado para controlar si ya se han inicializado los datos
+  // State to control if data has already been initialized
   const [initialized, setInitialized] = useState(false);
 
   useEffect(() => {
-    // Evitar inicialización en el servidor
+    // Avoid initialization on server
     if (typeof window === 'undefined') return;
 
-    // Solo inicializar datos si no hay datos existentes y no se han inicializado antes
+    // Only initialize data if no existing data and not initialized before
     const shouldSeedData = !initialized && teamMembers.length === 0 && workflows.length === 0;
 
     if (shouldSeedData) {
-      console.log('Inicializando datos de prueba...', { teamMembers, workflows });
+      console.log('Initializing test data...', { teamMembers, workflows });
 
-      // Paso 1: Agregar miembros del equipo
-      const teamMemberIds: string[] = [];
+      // Step 1: Add team members
       initialTeamMembers.forEach((member) => {
-        // Guardar el ID generado después de agregar el miembro
         addTeamMember(member);
-        // Buscar el miembro recién agregado por su email para obtener su ID
-        const newMember = teamMembers.find(m => m.email === member.email);
-        if (newMember) {
-          teamMemberIds.push(newMember.id);
-        }
       });
+      
+      // Use setTimeout to ensure team members are added before proceeding
+      setTimeout(() => {
+        const currentTeamMembers = useStore.getState().teamMembers;
+        const teamMemberIds = currentTeamMembers.slice(-initialTeamMembers.length).map(m => m.id);
 
-      // Paso 2: Agregar flujos de trabajo con propietarios asignados
-      const workflowIds: string[] = [];
-      initialWorkflows.forEach((workflow, index) => {
-        // Asignar propietario y colaboradores
-        const ownerIndex = index % teamMemberIds.length;
-        const collaboratorIndices = teamMemberIds
-          .map((_, i) => i)
-          .filter((i) => i !== ownerIndex)
-          .slice(0, 2); // Asignar hasta 2 colaboradores
+        // Step 2: Add workflows with assigned owners
+        initialWorkflows.forEach((workflow, index) => {
+          // Assign owner and collaborators
+          const ownerIndex = index % teamMemberIds.length;
+          const collaboratorIndices = teamMemberIds
+            .map((_, i) => i)
+            .filter((i) => i !== ownerIndex)
+            .slice(0, 2); // Assign up to 2 collaborators
 
-        const workflowWithOwner = {
-          ...workflow,
-          owner: teamMemberIds[ownerIndex],
-          collaborators: collaboratorIndices.map((i) => teamMemberIds[i]),
-        };
+          const workflowWithOwner = {
+            ...workflow,
+            owner: teamMemberIds[ownerIndex],
+            collaborators: collaboratorIndices.map((i) => teamMemberIds[i]),
+          };
 
-        // Agregar el flujo de trabajo
-        addWorkflow(workflowWithOwner);
-        // Buscar el flujo de trabajo recién agregado por su nombre para obtener su ID
-        const newWorkflow = workflows.find(w => w.name === workflow.name);
-        if (newWorkflow) {
-          workflowIds.push(newWorkflow.id);
-        }
-      });
+          // Add the workflow
+          addWorkflow(workflowWithOwner);
+        });
 
-      // Paso 3: Agregar tareas y asignarlas a flujos de trabajo
-      initialTasks.forEach((task, index) => {
-        // Asignar a un flujo de trabajo
-        const workflowIndex = index % workflowIds.length;
-        const assigneeIndex = index % teamMemberIds.length;
-
-        const taskWithAssignments = {
-          title: task.title,
-          description: task.description,
-          assignee: teamMemberIds[assigneeIndex],
-          testType: 'Functional' as const,
-          status: task.status as TaskStatus,
-          priority: task.priority as TaskPriority,
-          dueDate: task.dueDate,
-        };
-
-        // Agregar la tarea
-        addTask(taskWithAssignments);
-        
-        // Buscar la tarea recién agregada por su título para obtener su ID
-        // Usar setTimeout para asegurar que el estado se haya actualizado
+        // Step 3: Add tasks and assign them to workflows
         setTimeout(() => {
-          const currentTasks = useStore.getState().tasks;
-          const newTask = currentTasks.find(t => t.title === task.title);
+          const currentWorkflows = useStore.getState().workflows;
+          const workflowIds = currentWorkflows.slice(-initialWorkflows.length).map(w => w.id);
+          
+          initialTasks.forEach((task, index) => {
+            // Assign to a workflow
+            const workflowIndex = index % workflowIds.length;
+            const assigneeIndex = index % teamMemberIds.length;
 
-          // Actualizar el flujo de trabajo para incluir la tarea
-          if (newTask) {
-            const currentWorkflows = useStore.getState().workflows;
-            const workflow = currentWorkflows.find((w) => w.id === workflowIds[workflowIndex]);
-            if (workflow) {
-              updateWorkflow(workflow.id, {
-                ...workflow,
-                tasks: [...workflow.tasks, newTask.id],
-              });
-            }
-          }
+            const taskWithAssignments = {
+              title: task.title,
+              description: task.description,
+              assignee: teamMemberIds[assigneeIndex],
+              testType: 'Functional' as const,
+              status: task.status as TaskStatus,
+              priority: task.priority as TaskPriority,
+              dueDate: task.dueDate,
+            };
+
+            // Add the task
+            addTask(taskWithAssignments);
+          });
+
+          // Step 4: Update workflows to include tasks
+          setTimeout(() => {
+            const currentTasks = useStore.getState().tasks;
+            const taskIds = currentTasks.slice(-initialTasks.length).map(t => t.id);
+            
+            initialTasks.forEach((task, index) => {
+              const workflowIndex = index % workflowIds.length;
+              const taskId = taskIds[index];
+              const workflowId = workflowIds[workflowIndex];
+              
+              const currentWorkflows = useStore.getState().workflows;
+              const workflow = currentWorkflows.find((w) => w.id === workflowId);
+              if (workflow && taskId) {
+                updateWorkflow(workflow.id, {
+                  ...workflow,
+                  tasks: [...workflow.tasks, taskId],
+                });
+              }
+            });
+            
+            // Mark as initialized to avoid multiple initializations
+            setInitialized(true);
+          }, 0);
         }, 0);
-      });
-
-      // Marcar como inicializado para evitar múltiples inicializaciones
-      setInitialized(true);
+      }, 0);
     }
-  }, [teamMembers.length, workflows.length, addTeamMember, addWorkflow, addTask, updateWorkflow, initialized]); // Incluir todas las dependencias
+  }, [teamMembers.length, workflows.length, addTeamMember, addWorkflow, addTask, updateWorkflow, initialized]); // Include all dependencies
 }

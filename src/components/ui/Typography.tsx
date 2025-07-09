@@ -20,7 +20,7 @@ function Typography({
   gutterBottom = false,
   ...rest
 }: TypographyProps & Omit<React.HTMLAttributes<HTMLElement>, 'color'>) {
-  // Definir las clases base para cada variante
+  // Define base classes for each variant
   const variantClasses = {
     h1: 'text-2xl font-bold tracking-tight',
     h2: 'text-xl font-semibold tracking-tight',
@@ -37,7 +37,7 @@ function Typography({
     label: 'text-sm font-medium',
   };
 
-  // Definir las clases de color
+  // Define color classes
   const colorClasses = {
     primary: 'text-gray-900',
     secondary: 'text-gray-700',
@@ -48,7 +48,7 @@ function Typography({
     info: 'text-blue-600',
   };
 
-  // Definir las clases de alineación
+  // Define alignment classes
   const alignClasses = {
     left: 'text-left',
     center: 'text-center',
@@ -56,13 +56,13 @@ function Typography({
     justify: 'text-justify',
   };
 
-  // Definir la clase para el margen inferior
+  // Define class for bottom margin
   const gutterClass = gutterBottom ? 'mb-2' : '';
 
-  // Combinar todas las clases
+  // Combine all classes
   const combinedClasses = `${variantClasses[variant]} ${colorClasses[color]} ${alignClasses[align]} ${gutterClass} ${className}`;
 
-  // Determinar qué elemento HTML usar basado en la variante
+  // Determine which HTML element to use based on variant
   const Component = (() => {
     switch (variant) {
       case 'h1':

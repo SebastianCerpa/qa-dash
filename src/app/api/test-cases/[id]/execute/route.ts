@@ -14,15 +14,15 @@ export async function POST(req: NextRequest) {
 
     if (!session?.user) {
       return NextResponse.json(
-        { error: "No autorizado" },
+        { error: "Unauthorized" },
         { status: 401 }
       );
     }
 
-    // Validar que el ID es válido
+    // Validate that the ID is valid
     if (!id || typeof id !== 'string') {
       return NextResponse.json(
-        { error: "ID de caso de prueba inválido" },
+        { error: "Invalid test case ID" },
         { status: 400 }
       );
     }
@@ -30,7 +30,7 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const { status, bug_report, notes } = body;
 
-    // Validar el estado proporcionado
+    // Validate the provided status
     if (!status || !['PASSED', 'FAILED', 'BLOCKED', 'NOT_EXECUTED'].includes(status)) {
       return NextResponse.json(
         { error: "Invalid State. Must be one of: PASSED, FAILED, BLOCKED, NOT_EXECUTED" },
@@ -38,7 +38,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Verificar que el caso de prueba existe
+    // Verify that the test case exists
     const testCase = await prisma.test_cases.findUnique({
       where: { id },
     });
@@ -50,7 +50,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Actualizar el estado del caso de prueba
+    // Update the test case status
     const updatedTestCase = await prisma.test_cases.update({
       where: { id },
       data: {
@@ -71,7 +71,7 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    // Crear un registro de ejecución
+    // Create an execution record
     await prisma.test_executions.create({
       data: {
         test_case_id: id,
@@ -82,20 +82,20 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    // Si el caso de prueba falló y se solicitó un informe de error, crearlo
+    // If the test case failed and an error report was requested, create it
     if (status === 'FAILED' && bug_report) {
       try {
-        // Obtener el usuario por email
+        // Get user by email
         const user = await prisma.users.findUnique({
           where: { email: session.user.email },
         });
 
         if (!user) {
-          console.error("Usuario no encontrado para crear informe de error");
+          console.error("User not found to create error report");
         } else {
           await prisma.bug_reports.create({
             data: {
-              title: bug_report.title || `Bug en caso de prueba: ${testCase.title}`,
+              title: bug_report.title || `Bug in test case: ${testCase.title}`,
               description: bug_report.description || '',
               status: 'OPEN',
               priority: 'MEDIUM',
@@ -106,13 +106,13 @@ export async function POST(req: NextRequest) {
         }
       } catch (bugError) {
         console.error("Error creating bug report:", bugError);
-        // Continuamos aunque falle la creación del informe de error
+        // Continue even if error report creation fails
       }
     }
 
-    // Procesar los campos JSON antes de devolver la respuesta
+    // Process JSON fields before returning response
     try {
-      // Obtener las ejecuciones del caso de prueba
+      // Get test case executions
       const testExecutions = await prisma.test_executions.findMany({
         where: { test_case_id: id },
         orderBy: { execution_date: 'desc' },
@@ -138,14 +138,14 @@ export async function POST(req: NextRequest) {
     } catch (parseError) {
       console.error("Error parsing JSON fields:", parseError);
       return NextResponse.json(
-        { error: "Error al procesar los datos del caso de prueba" },
+        { error: "Error processing test case data" },
         { status: 500 }
       );
     }
   } catch (error) {
     console.error("Error executing test case:", error);
     return NextResponse.json(
-      { error: "Error al ejecutar el caso de prueba" },
+      { error: "Error executing test case" },
       { status: 500 }
     );
   }

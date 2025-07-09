@@ -39,8 +39,8 @@ import {
 interface TestStep {
   id: string;
   stepNumber: number;
-  description?: string; // Para compatibilidad con el formulario
-  action: string; // Propiedad principal en enhancedStore.ts
+  description?: string; // For form compatibility
+  action: string; // Main property in enhancedStore.ts
   expectedResult?: string;
   actualResult?: string;
   status?: "Passed" | "Failed" | "Skipped";
@@ -86,7 +86,7 @@ const TestCaseForm: React.FC<TestCaseFormProps> = ({
         id: `step-${index}`,
         stepNumber: index + 1,
         action: typeof step === 'string' ? step : step.action,
-        description: typeof step === 'string' ? step : step.action // Mantenemos description para compatibilidad con el formulario
+        description: typeof step === 'string' ? step : step.action // Keep description for form compatibility
       })) || [{ id: 'step-1', stepNumber: 1, action: '', description: '' }],
       expectedResult: initialData?.expectedResult || '',
       preconditions: initialData?.preconditions || '',
@@ -111,7 +111,7 @@ const TestCaseForm: React.FC<TestCaseFormProps> = ({
       id: `step-${Date.now()}`,
       stepNumber: steps.length + 1,
       action: '',
-      description: '' // Mantenemos description para compatibilidad con el formulario
+      description: '' // Keep description for form compatibility
     };
     setValue('steps', [...steps, newStep]);
   };
@@ -157,7 +157,7 @@ const TestCaseForm: React.FC<TestCaseFormProps> = ({
       steps: data.steps.map(step => ({
         id: step.id,
         stepNumber: step.stepNumber,
-        action: step.action || step.description || "", // Usamos action si existe, o description como fallback
+        action: step.action || step.description || "", // Use action if exists, or description as fallback
         expectedResult: step.expectedResult || "",
         actualResult: step.actualResult || "",
         status: step.status,
@@ -312,7 +312,7 @@ const TestCaseForm: React.FC<TestCaseFormProps> = ({
                               {...field}
                               onChange={(e) => {
                                 field.onChange(e);
-                                // Sincronizamos el valor con description para mantener compatibilidad
+                                // Synchronize value with description to maintain compatibility
                                 setValue(`steps.${index}.description`, e.target.value);
                               }}
                             />

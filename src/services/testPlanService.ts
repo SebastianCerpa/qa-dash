@@ -85,7 +85,7 @@ export const apiToStoreTestPlan = (apiTestPlan: ApiTestPlan): TestPlan => {
     testCaseIds: apiTestPlan.test_cases?.map(tc => tc.id) || [],
     sprintId: undefined,
     status: (apiTestPlan.status || "Draft") as "Draft" | "Active" | "Completed",
-    createdBy: apiTestPlan.created_by,
+    createdBy: apiTestPlan.users?.name || apiTestPlan.created_by,
     createdAt: new Date(apiTestPlan.created_at),
     startDate: apiTestPlan.start_date ? new Date(apiTestPlan.start_date) : undefined,
     endDate: apiTestPlan.end_date ? new Date(apiTestPlan.end_date) : undefined,
@@ -105,11 +105,10 @@ export const apiToStoreTestPlan = (apiTestPlan: ApiTestPlan): TestPlan => {
 
 // Convert store test plan to API test plan format for creating/updating
 export const storeToApiTestPlan = (testPlan: Partial<TestPlan>) => {
-  console.log('Converting test plan to API format:', testPlan);
   return {
     title: testPlan.name,
     description: testPlan.description,
-    projectId: undefined, // This would need to be set based on projectInfo
+    project_id: null, // Fixed: projectInfo is a description string, not a project ID
     testCaseIds: testPlan.testCaseIds,
     objectives: testPlan.objectives,
     scope: testPlan.scope,
@@ -148,16 +147,16 @@ export const fetchTestPlanById = async (id: string): Promise<ApiTestPlan> => {
   console.log('testPlanService: Fetching test plan with ID:', id);
   const response = await fetch(`/api/test-plans/${id}`);
   console.log('testPlanService: Response status:', response.status);
-  
+
   if (!response.ok) {
     const errorText = await response.text();
     console.error('testPlanService: API error:', response.status, errorText);
     throw new Error(`Failed to fetch test plan: ${response.status}`);
   }
-  
+
   const data = await response.json();
   console.log('testPlanService: Raw API data:', data);
-  
+
   return data;
 };
 
@@ -166,7 +165,7 @@ export const createTestPlan = async (testPlan: Partial<TestPlan>): Promise<ApiTe
   console.log('TestPlanService: createTestPlan called with:', testPlan);
   const apiData = storeToApiTestPlan(testPlan);
   console.log('TestPlanService: Sending API data:', apiData);
-  
+
   const response = await fetch("/api/test-plans", {
     method: "POST",
     headers: {

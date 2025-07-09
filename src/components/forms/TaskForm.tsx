@@ -21,7 +21,7 @@ import {
   SparklesIcon,
 } from "@heroicons/react/24/outline";
 
-// Definir el tipo para los datos del formulario
+// Define type for form data
 interface TaskFormData {
   title: string;
   description: string;
@@ -98,7 +98,7 @@ export default function TaskForm({
 
   const onSubmit: SubmitHandler<TaskFormData> = async (data) => {
     try {
-      // Preparar los datos para el store
+      // Prepare data for store
       const taskData: Omit<
         Task,
         "id" | "createdAt" | "updatedAt" | "comments"

@@ -2,8 +2,8 @@ import { useEnhancedQAStore } from '@/store/enhancedStore';
 import { useEffect, useState } from 'react';
 
 /**
- * Hook para inicializar datos de usuarios en el enhancedStore
- * Solo se ejecuta en el cliente y cuando no hay usuarios existentes
+ * Hook to initialize user data in the enhancedStore
+ * Only runs on the client and when no existing users
  */
 export function useEnhancedUserData() {
   const {
@@ -11,18 +11,18 @@ export function useEnhancedUserData() {
     addUser
   } = useEnhancedQAStore();
 
-  // Estado para controlar si ya se han inicializado los datos
+  // State to control if data has already been initialized
   const [initialized, setInitialized] = useState(false);
 
   useEffect(() => {
-    // Evitar inicialización en el servidor
+    // Avoid initialization on server
     if (typeof window === 'undefined') return;
 
-    // Solo inicializar datos si no hay usuarios existentes y no se han inicializado antes
+    // Only initialize data if no existing users and not initialized before
     const shouldSeedData = !initialized && users.length === 0;
 
     if (shouldSeedData) {
-      // Inicializar usuarios
+      // Initialize users
       const initialUsers = [
         {
           name: 'Sebastian Cerpa',
@@ -42,12 +42,12 @@ export function useEnhancedUserData() {
         },
       ];
 
-      // Agregar usuarios al store
+      // Add users to store
       initialUsers.forEach((userData) => {
         addUser(userData as any);
       });
 
-      // Marcar como inicializado para evitar múltiples inicializaciones
+      // Mark as initialized to avoid multiple initializations
       setInitialized(true);
     }
   }, [users.length, addUser, initialized]);

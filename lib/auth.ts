@@ -4,13 +4,14 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import { prisma } from "./prisma";
 
-// Validar variables de entorno
+// Validate environment variables
 if (
   !process.env.GOOGLE_CLIENT_ID ||
   !process.env.GOOGLE_CLIENT_SECRET ||
-  !process.env.NEXTAUTH_SECRET
+  !process.env.NEXTAUTH_SECRET ||
+  !process.env.NEXTAUTH_URL
 ) {
-  throw new Error("Faltan variables de entorno requeridas");
+  throw new Error("Missing required environment variables: GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, NEXTAUTH_SECRET, NEXTAUTH_URL");
 }
 
 export const authOptions: NextAuthOptions = {
@@ -29,14 +30,14 @@ export const authOptions: NextAuthOptions = {
         if (!credentials?.email || !credentials?.password) return null;
 
         try {
-          // Buscar usuario en la base de datos
+          // Find user in database
           const user = await prisma.users.findUnique({
             where: { email: credentials.email },
           });
 
           if (!user) return null;
 
-          // Comparar contraseña hasheada
+          // Compare hashed password
           const isValidPassword = await bcrypt.compare(
             credentials.password,
             user.password_hash
@@ -69,11 +70,9 @@ export const authOptions: NextAuthOptions = {
       },
     }),
   ],
-  pages: {
-    signIn: "/login",
-    error: "/login",
-    signOut: "/logout",
-  },
+  // Note: In Next.js 15 App Router, custom pages are handled differently
+  // The pages config can cause conflicts with App Router
+  // Custom auth pages should be implemented as app routes instead
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
@@ -92,11 +91,11 @@ export const authOptions: NextAuthOptions = {
       return session;
     },
     async redirect({ url, baseUrl }) {
-      // Permite URLs relativas
+      // Allow relative URLs
       if (url.startsWith("/")) return `${baseUrl}${url}`;
-      // Permite URLs del mismo origen
+      // Allow URLs from the same origin
       else if (new URL(url).origin === baseUrl) return url;
-      // Redirige a la página principal (dashboard) por defecto
+      // Redirect to main page (dashboard) by default
       return `${baseUrl}/`;
     },
   },

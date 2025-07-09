@@ -3,18 +3,27 @@
 import React from 'react';
 import { useRouter } from 'next/navigation';
 import { useApiStore } from '@/store/apiStore';
+import DashboardLayout from '@/components/layout/DashboardLayout';
 import TestPlanForm from '@/components/forms/TestPlanForm';
+import SessionDebug from '@/components/debug/SessionDebug';
 
 export default function NewTestPlanPage() {
   const router = useRouter();
   const { addTestPlan, isLoading } = useApiStore();
 
-  const handleSubmit = async (formData: any) => {
+  const handleSubmit = async (testPlan: any) => {
     try {
-      const newTestPlan = await addTestPlan(formData);
-      router.push(`/test-plans/${newTestPlan.id}`);
+      console.log('NewTestPlanPage: handleSubmit called with:', testPlan);
+      if (testPlan && testPlan.id) {
+        console.log('NewTestPlanPage: Navigating to test plan:', testPlan.id);
+        router.push(`/test-plans/${testPlan.id}`);
+      } else {
+        console.error('NewTestPlanPage: Test plan created but no ID returned:', testPlan);
+        // Fallback to test plans list
+        router.push('/test-plans');
+      }
     } catch (error) {
-      console.error('Error creating test plan:', error);
+      console.error('NewTestPlanPage: Error in handleSubmit:', error);
     }
   };
 
@@ -23,12 +32,15 @@ export default function NewTestPlanPage() {
   };
 
   return (
-    <div className="container mx-auto py-6">
-      <h1 className="text-3xl font-bold mb-6">Create New Test Plan</h1>
-      <TestPlanForm 
-        onSuccess={handleSubmit} 
-        onCancel={handleCancel} 
-      />
-    </div>
+    <DashboardLayout>
+      <div className="container mx-auto py-6">
+        <h1 className="text-3xl font-bold mb-6">Create New Test Plan</h1>
+        <SessionDebug />
+        <TestPlanForm 
+          onSuccess={handleSubmit} 
+          onCancel={handleCancel} 
+        />
+      </div>
+    </DashboardLayout>
   );
 }

@@ -48,12 +48,12 @@ const STATUS_COLORS = {
 
 // Define workflow direction indicators
 const WORKFLOW_INDICATORS = {
-  Open: "→",
-  "In Progress": "→",
-  Testing: "→",
-  Review: "→",
-  Passed: "→",
-  Failed: "→",
+  Open: ">",
+  "In Progress": ">",
+  Testing: ">",
+  Review: ">",
+  Passed: ">",
+  Failed: ">",
   Closed: "",
 };
 

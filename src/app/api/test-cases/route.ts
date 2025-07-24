@@ -117,13 +117,26 @@ const convertToEnumValue = (value: string, enumType: 'priority' | 'type' | 'stat
 export async function POST(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session) {
+    console.log('Session data:', session);
+    
+    if (!session?.user?.email) {
       return NextResponse.json(
-        { error: "Unauthorized" },
+        { error: "Unauthorized - Please log in to create test cases" },
         { status: 401 }
       );
     }
 
+    // Get user from database using email (like in test-plans route)
+    const user = await prisma.users.findUnique({
+      where: { email: session.user.email },
+    });
+
+    if (!user) {
+      console.log('User not found in database:', session.user.email);
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+
+    console.log('User found in database:', user.id);
     const body = await req.json();
     console.log('Received test case data:', body);
     const { title, description, priority, type, status, steps, expected_result, preconditions, tags, test_plan_id, ticket_id } = body;
@@ -194,7 +207,7 @@ export async function POST(req: NextRequest) {
         tags: tags ? JSON.stringify(tags) : null,
         test_plan_id,
         ticket_id,
-        created_by: session.user.id,
+        created_by: user.id,
       },
       include: {
         users: {

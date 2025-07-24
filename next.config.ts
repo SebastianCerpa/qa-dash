@@ -31,6 +31,8 @@ const nextConfig: NextConfig = {
     optimizePackageImports: ['lucide-react'],
     externalDir: true,
   },
+  // Add explicit UTF-8 handling
+  pageExtensions: ['tsx', 'ts', 'jsx', 'js'],
   serverExternalPackages: [],
   // Configuración para permitir solicitudes de origen cruzado durante el desarrollo
   allowedDevOrigins: ['192.168.3.21'],
@@ -42,7 +44,7 @@ const nextConfig: NextConfig = {
         cacheGroups: {
           ...config.optimization.splitChunks.cacheGroups,
           vendor: {
-            test: /[\\/]node_modules[\\/]/,
+            test: /[\/]node_modules[\/]/,
             name: 'vendors',
             chunks: 'all',
           },

@@ -338,7 +338,7 @@ class NotificationService {
       case "CRITICAL_BUG_ALERT":
         return {
           ...baseTemplate,
-          subject: `🚨 Critical Bug Alert: ${notification.title}`,
+          subject: `[CRITICAL] Bug Alert: ${notification.title}`,
           html: baseTemplate.html.replace(
             "border-left: 4px solid #3b82f6",
             "border-left: 4px solid #ef4444"
@@ -348,7 +348,7 @@ class NotificationService {
       case "BUG_ASSIGNED":
         return {
           ...baseTemplate,
-          subject: `📋 Bug Assigned: ${notification.title}`,
+          subject: `[ASSIGNED] Bug: ${notification.title}`,
           html: baseTemplate.html.replace(
             "border-left: 4px solid #3b82f6",
             "border-left: 4px solid #10b981"
@@ -358,7 +358,7 @@ class NotificationService {
       case "TEST_FAILURE_ALERT":
         return {
           ...baseTemplate,
-          subject: `❌ Test Failure Alert: ${notification.title}`,
+          subject: `[FAILED] Test Alert: ${notification.title}`,
           html: baseTemplate.html.replace(
             "border-left: 4px solid #3b82f6",
             "border-left: 4px solid #f59e0b"
@@ -456,3 +456,4 @@ export const notificationService = new NotificationService();
 export const sendNotification = (data: NotificationData) =>
   notificationService.sendNotification(data);
 export default NotificationService;
+

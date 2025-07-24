@@ -88,9 +88,9 @@ export default function BugReportForm({
       regression_version: "",
     }
   });
-  
+
   const { control, watch, setValue, handleSubmit: formSubmit } = form;
-  
+
   const [formData, setFormData] = useState({
     title: "",
     description: "",

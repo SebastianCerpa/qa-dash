@@ -459,7 +459,7 @@ export default function LoginPage() {
         {/* Footer */}
         <div className="mt-8 text-center">
           <p className="text-sm text-gray-500">
-            © 2024 QA Dashboard. All rights reserved.
+            (c) 2024 QA Dashboard. All rights reserved.
           </p>
         </div>
       </div>

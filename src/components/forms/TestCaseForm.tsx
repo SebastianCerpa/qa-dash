@@ -170,116 +170,165 @@ const TestCaseForm: React.FC<TestCaseFormProps> = ({
 
   return (
     <form onSubmit={handleSubmit(onFormSubmit)}>
-      <Card>
-        <CardContent className="space-y-6 pt-6">
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="title">Title <span className="text-destructive">*</span></Label>
-              <Controller
-                name="title"
-                control={control}
-                rules={{ required: 'Title is required' }}
-                render={({ field }) => (
-                  <Input
-                    id="title"
-                    placeholder="Enter test case title"
-                    {...field}
-                    error={errors.title?.message}
-                  />
-                )}
-              />
-              {errors.title && (
-                <p className="text-sm text-destructive">{errors.title.message}</p>
-              )}
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="description">Description</Label>
-              <Controller
-                name="description"
-                control={control}
-                render={({ field }) => (
-                  <Textarea
-                    id="description"
-                    placeholder="Describe the purpose of this test case"
-                    className="min-h-[100px]"
-                    {...field}
-                  />
-                )}
-              />
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="priority">Priority <span className="text-destructive">*</span></Label>
-                <Controller
-                  name="priority"
-                  control={control}
-                  rules={{ required: 'Priority is required' }}
-                  render={({ field }) => (
-                    <Select value={field.value} onValueChange={field.onChange}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select priority" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Critical">Critical</SelectItem>
-                        <SelectItem value="High">High</SelectItem>
-                        <SelectItem value="Medium">Medium</SelectItem>
-                        <SelectItem value="Low">Low</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  )}
-                />
+      <Card className="w-full max-w-4xl mx-auto shadow-lg border-0 bg-white">
+        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 px-6 py-4 border-b border-gray-100">
+          <h2 className="text-2xl font-semibold text-gray-900 tracking-tight">
+            {initialData ? 'Edit Test Case' : 'Create New Test Case'}
+          </h2>
+          <p className="text-sm text-gray-600 mt-1">
+            {initialData ? 'Update the test case details below' : 'Fill in the details to create a comprehensive test case'}
+          </p>
+        </div>
+        <CardContent className="p-8">
+          <div className="space-y-8">
+            {/* Basic Information Section */}
+            <div className="bg-gray-50 rounded-xl p-6 space-y-6">
+              <div className="flex items-center space-x-2 mb-4">
+                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                <h3 className="text-lg font-medium text-gray-900">Information</h3>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="type">Type <span className="text-destructive">*</span></Label>
+                <Label htmlFor="title" className="text-sm font-medium text-gray-700">
+                  Title <span className="text-red-500">*</span>
+                </Label>
                 <Controller
-                  name="type"
+                  name="title"
                   control={control}
-                  rules={{ required: 'Type is required' }}
+                  rules={{ required: 'Title is required' }}
                   render={({ field }) => (
-                    <Select value={field.value} onValueChange={field.onChange}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select type" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Manual">Manual</SelectItem>
-                        <SelectItem value="Automated">Automated</SelectItem>
-                        <SelectItem value="Exploratory">Exploratory</SelectItem>
-                        <SelectItem value="Regression">Regression</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <Input
+                      id="title"
+                      placeholder="Enter a clear and descriptive test case title"
+                      className="border-gray-200 focus:border-blue-500 focus:ring-blue-500 transition-colors"
+                      {...field}
+                    />
+                  )}
+                />
+                {errors.title && (
+                  <p className="text-sm text-red-600 flex items-center mt-1">
+                    <span className="mr-1">!</span>{errors.title.message}
+                  </p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="description" className="text-sm font-medium text-gray-700">
+                  Description
+                </Label>
+                <Controller
+                  name="description"
+                  control={control}
+                  render={({ field }) => (
+                    <Textarea
+                      id="description"
+                      placeholder="Provide a detailed description of what this test case validates"
+                      className="min-h-[120px] border-gray-200 focus:border-blue-500 focus:ring-blue-500 transition-colors resize-none"
+                      {...field}
+                    />
                   )}
                 />
               </div>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="preconditions">Preconditions</Label>
-              <Controller
-                name="preconditions"
-                control={control}
-                render={({ field }) => (
-                  <Textarea
-                    id="preconditions"
-                    placeholder="List any preconditions required for this test case"
-                    {...field}
+            {/* Test Configuration Section */}
+            <div className="bg-ray-50 rounded-xl p-6 space-y-6">
+              <div className="flex items-center space-x-2 mb-4">
+                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                <h3 className="text-lg font-medium text-gray-900">Test Configuration</h3>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <Label htmlFor="priority" className="text-sm font-medium text-gray-700">
+                    Priority <span className="text-red-500">*</span>
+                  </Label>
+                  <Controller
+                    name="priority"
+                    control={control}
+                    rules={{ required: 'Priority is required' }}
+                    render={({ field }) => (
+                      <Select value={field.value} onValueChange={field.onChange}>
+                        <SelectTrigger className="border-gray-200 focus:border-blue-500 focus:ring-blue-500 transition-colors">
+                          <SelectValue placeholder="Select priority level" />
+                        </SelectTrigger>
+                        <SelectContent className="z-50 bg-white border border-gray-200 shadow-lg">
+                          <SelectItem value="Critical" className="text-red-600 font-medium">Critical</SelectItem>
+                          <SelectItem value="High" className="text-orange-600 font-medium">High</SelectItem>
+                          <SelectItem value="Medium" className="text-yellow-600 font-medium">Medium</SelectItem>
+                          <SelectItem value="Low" className="text-green-600 font-medium">Low</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    )}
                   />
-                )}
-              />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="type" className="text-sm font-medium text-gray-700">
+                    Type <span className="text-red-500">*</span>
+                  </Label>
+                  <Controller
+                    name="type"
+                    control={control}
+                    rules={{ required: 'Type is required' }}
+                    render={({ field }) => (
+                      <Select value={field.value} onValueChange={field.onChange}>
+                        <SelectTrigger className="border-gray-200 focus:border-blue-500 focus:ring-blue-500 transition-colors">
+                          <SelectValue placeholder="Select test type" />
+                        </SelectTrigger>
+                        <SelectContent className="z-50 bg-white border border-gray-200 shadow-lg">
+                          <SelectItem value="Manual">Manual</SelectItem>
+                          <SelectItem value="Automated">Automated</SelectItem>
+                          <SelectItem value="Exploratory">Exploratory</SelectItem>
+                          <SelectItem value="Regression">Regression</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    )}
+                  />
+                </div>
+              </div>
             </div>
 
-            <Separator />
+            {/* Preconditions Section */}
+            <div className="bg-gray-50 rounded-xl p-6 space-y-4">
+              <div className="flex items-center space-x-2 mb-4">
+                <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                <h3 className="text-lg font-medium text-gray-900">Preconditions</h3>
+              </div>
 
-            <div className="space-y-4">
-              <div className="flex justify-between items-center">
-                <Label>Test Steps <span className="text-destructive">*</span></Label>
+              <div className="space-y-2">
+                <Label htmlFor="preconditions" className="text-sm font-medium text-gray-700">
+                  Setup Requirements
+                </Label>
+                <Controller
+                  name="preconditions"
+                  control={control}
+                  render={({ field }) => (
+                    <Textarea
+                      id="preconditions"
+                      placeholder="List any setup requirements, data conditions, or system states needed before executing this test"
+                      className="min-h-[100px] border-gray-200 focus:border-blue-500 focus:ring-blue-500 transition-colors resize-none"
+                      {...field}
+                    />
+                  )}
+                />
+              </div>
+            </div>
+
+            {/* Test Steps Section */}
+            <div className="bg-gray-50 rounded-xl p-6 space-y-6">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
+                  <h3 className="text-lg font-medium text-gray-900">Test Steps</h3>
+                  <span className="text-red-500 text-sm">*</span>
+                </div>
                 <Button
                   type="button"
                   variant="outline"
                   size="sm"
                   onClick={addStep}
+                  className="bg-white border-gray-200 hover:bg-blue-50 hover:border-blue-300 transition-colors"
                 >
                   <Plus className="h-4 w-4 mr-2" />
                   Add Step
@@ -287,54 +336,62 @@ const TestCaseForm: React.FC<TestCaseFormProps> = ({
               </div>
 
               {steps.length === 0 ? (
-                <div className="text-center p-4 border border-dashed rounded-md">
-                  <p className="text-muted-foreground">No steps added yet. Click "Add Step" to begin.</p>
+                <div className="text-center p-8 border-2 border-dashed border-gray-300 rounded-lg bg-white">
+                  <div className="w-12 h-12 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
+                    <Plus className="h-6 w-6 text-gray-400" />
+                  </div>
+                  <p className="text-gray-500 font-medium">No test steps defined yet</p>
+                  <p className="text-gray-400 text-sm mt-1">Click "Add Step" to start building your test case</p>
                 </div>
               ) : (
-                <div className="space-y-3">
+                <div className="space-y-4">
                   {Array.isArray(steps) ? steps.map((step, index) => (
-                    <div key={step.id} className="flex items-start space-x-3 p-3 border rounded-md">
-                      <div className="flex-none pt-2">
-                        <GripVertical className="h-5 w-5 text-muted-foreground" />
-                      </div>
-                      <div className="flex-none pt-2 w-8 text-center font-medium">
-                        {index + 1}.
-                      </div>
-                      <div className="flex-grow">
-                        <Controller
-                          name={`steps.${index}.action`}
-                          control={control}
-                          rules={{ required: 'Step action is required' }}
-                          render={({ field }) => (
-                            <Textarea
-                              placeholder={`Describe step ${index + 1}`}
-                              className="resize-none"
-                              {...field}
-                              onChange={(e) => {
-                                field.onChange(e);
-                                // Synchronize value with description to maintain compatibility
-                                setValue(`steps.${index}.description`, e.target.value);
-                              }}
-                            />
+                    <div key={step.id} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow">
+                      <div className="flex items-start space-x-4">
+                        <div className="flex-none pt-1">
+                          <GripVertical className="h-5 w-5 text-gray-400 hover:text-gray-600 cursor-move" />
+                        </div>
+                        <div className="flex-none">
+                          <div className="w-8 h-8 bg-blue-100 text-blue-700 rounded-full flex items-center justify-center text-sm font-semibold">
+                            {index + 1}
+                          </div>
+                        </div>
+                        <div className="flex-grow">
+                          <Controller
+                            name={`steps.${index}.action`}
+                            control={control}
+                            rules={{ required: 'Step action is required' }}
+                            render={({ field }) => (
+                              <Textarea
+                                placeholder={`Describe what should be done in step ${index + 1}...`}
+                                className="resize-none border-gray-200 focus:border-blue-500 focus:ring-blue-500 transition-colors min-h-[80px]"
+                                {...field}
+                                onChange={(e) => {
+                                  field.onChange(e);
+                                  // Synchronize value with description to maintain compatibility
+                                  setValue(`steps.${index}.description`, e.target.value);
+                                }}
+                              />
+                            )}
+                          />
+                          {errors.steps?.[index]?.action && (
+                            <p className="text-sm text-red-600 flex items-center mt-2">
+                              <span className="mr-1">!</span>{errors.steps[index]?.action?.message}
+                            </p>
                           )}
-                        />
-                        {errors.steps?.[index]?.action && (
-                          <p className="text-sm text-destructive mt-1">
-                            {errors.steps[index]?.action?.message}
-                          </p>
-                        )}
-                      </div>
-                      <div className="flex-none pt-2">
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleRemoveStepClick(step.id)}
-                          disabled={steps.length <= 1}
-                          className="text-destructive hover:text-destructive"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+                        </div>
+                        <div className="flex-none">
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleRemoveStepClick(step.id)}
+                            disabled={steps.length <= 1}
+                            className="text-red-500 hover:text-red-700 hover:bg-red-50 transition-colors"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
                       </div>
                     </div>
                   )) : null}
@@ -342,127 +399,197 @@ const TestCaseForm: React.FC<TestCaseFormProps> = ({
               )}
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="expectedResult">Expected Result <span className="text-destructive">*</span></Label>
-              <Controller
-                name="expectedResult"
-                control={control}
-                rules={{ required: 'Expected result is required' }}
-                render={({ field }) => (
-                  <Textarea
-                    id="expectedResult"
-                    placeholder="Describe the expected outcome of the test"
-                    {...field}
-                  />
+            {/* Expected Result Section */}
+            <div className="bg-gray-50 rounded-xl p-6 space-y-4">
+              <div className="flex items-center space-x-2 mb-4">
+                <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
+                <h3 className="text-lg font-medium text-gray-900">Expected Result</h3>
+                <span className="text-red-500 text-sm">*</span>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="expectedResult" className="text-sm font-medium text-gray-700">
+                  What should happen when the test is executed successfully?
+                </Label>
+                <Controller
+                  name="expectedResult"
+                  control={control}
+                  rules={{ required: 'Expected result is required' }}
+                  render={({ field }) => (
+                    <Textarea
+                      id="expectedResult"
+                      placeholder="Describe the expected behavior, output, or state after executing all test steps"
+                      className="min-h-[120px] border-gray-200 focus:border-blue-500 focus:ring-blue-500 transition-colors resize-none"
+                      {...field}
+                    />
+                  )}
+                />
+                {errors.expectedResult && (
+                  <p className="text-sm text-red-600 flex items-center mt-1">
+                    <span className="mr-1">!</span>{errors.expectedResult.message}
+                  </p>
                 )}
-              />
-              {errors.expectedResult && (
-                <p className="text-sm text-destructive">{errors.expectedResult.message}</p>
-              )}
+              </div>
             </div>
 
-            <Separator />
-
-            <div className="space-y-4">
-              <Label>Tags</Label>
-              <div className="flex flex-wrap gap-2 mb-2">
-                {tags.map((tag, index) => (
-                  <Badge key={index} variant="secondary" className="flex items-center gap-1">
-                    {tag}
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      className="h-4 w-4 p-0 text-muted-foreground hover:text-foreground"
-                      onClick={() => removeTag(tag)}
-                    >
-                      <Trash2 className="h-3 w-3" />
-                    </Button>
-                  </Badge>
-                ))}
+            {/* Tags Section */}
+            <div className="bg-gray-50 rounded-xl p-6 space-y-6">
+              <div className="flex items-center space-x-2 mb-4">
+                <div className="w-2 h-2 bg-indigo-500 rounded-full"></div>
+                <h3 className="text-lg font-medium text-gray-900">Tags</h3>
               </div>
-              <div className="flex space-x-2">
-                <div className="flex-grow">
-                  <Input
-                    placeholder="Add a tag"
-                    value={newTag}
-                    onChange={(e) => setNewTag(e.target.value)}
-                    onKeyDown={handleKeyDown}
+
+              <div className="space-y-4">
+                <Label className="text-sm font-medium text-gray-700">
+                  Add labels to categorize and organize this test case
+                </Label>
+
+                {tags.length > 0 && (
+                  <div className="flex flex-wrap gap-2">
+                    {tags.map((tag, index) => (
+                      <Badge key={index} variant="secondary" className="bg-blue-100 text-blue-800 border-blue-200 hover:bg-blue-200 transition-colors flex items-center gap-2 px-3 py-1">
+                        <TagIcon className="h-3 w-3" />
+                        {tag}
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="h-4 w-4 p-0 text-blue-600 hover:text-blue-800 hover:bg-blue-200 rounded-full"
+                          onClick={() => removeTag(tag)}
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </Button>
+                      </Badge>
+                    ))}
+                  </div>
+                )}
+
+                <div className="flex space-x-3">
+                  <div className="flex-grow">
+                    <Input
+                      placeholder="Type a tag and press Enter or click Add"
+                      value={newTag}
+                      onChange={(e) => setNewTag(e.target.value)}
+                      onKeyDown={handleKeyDown}
+                      className="border-gray-200 focus:border-blue-500 focus:ring-blue-500 transition-colors"
+                    />
+                  </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={addTag}
+                    disabled={!newTag.trim()}
+                    className="bg-white border-gray-200 hover:bg-blue-50 hover:border-blue-300 transition-colors px-4"
+                  >
+                    <TagIcon className="h-4 w-4 mr-2" />
+                    Add Tag
+                  </Button>
+                </div>
+              </div>
+            </div>
+
+            {/* Additional Configuration Section */}
+            <div className="bg-gray-50 rounded-xl p-6 space-y-6">
+              <div className="flex items-center space-x-2 mb-4">
+                <div className="w-2 h-2 bg-teal-500 rounded-full"></div>
+                <h3 className="text-lg font-medium text-gray-900">Additional Configuration</h3>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <Label htmlFor="environment" className="text-sm font-medium text-gray-700">
+                    Environment
+                  </Label>
+                  <Controller
+                    name="environment"
+                    control={control}
+                    render={({ field }) => (
+                      <Input
+                        id="environment"
+                        placeholder="e.g., Production, Staging, QA, Development"
+                        className="border-gray-200 focus:border-blue-500 focus:ring-blue-500 transition-colors"
+                        {...field}
+                      />
+                    )}
                   />
                 </div>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={addTag}
-                  disabled={!newTag.trim()}
-                >
-                  <TagIcon className="h-4 w-4 mr-2" />
-                  Add
-                </Button>
-              </div>
-            </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="environment">Environment</Label>
-                <Controller
-                  name="environment"
-                  control={control}
-                  render={({ field }) => (
-                    <Input
-                      id="environment"
-                      placeholder="e.g., Production, Staging, QA"
-                      {...field}
-                    />
-                  )}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="estimatedTime">Estimated Time (minutes)</Label>
-                <Controller
-                  name="estimatedTime"
-                  control={control}
-                  render={({ field }) => (
-                    <Input
-                      id="estimatedTime"
-                      type="number"
-                      min="0"
-                      placeholder="Estimated execution time"
-                      {...field}
-                      onChange={(e) => field.onChange(e.target.valueAsNumber || 0)}
-                    />
-                  )}
-                />
+                <div className="space-y-2">
+                  <Label htmlFor="estimatedTime" className="text-sm font-medium text-gray-700">
+                    Estimated Time (minutes)
+                  </Label>
+                  <Controller
+                    name="estimatedTime"
+                    control={control}
+                    render={({ field }) => (
+                      <Input
+                        id="estimatedTime"
+                        type="number"
+                        min="0"
+                        placeholder="How long should this test take?"
+                        className="border-gray-200 focus:border-blue-500 focus:ring-blue-500 transition-colors"
+                        {...field}
+                        onChange={(e) => field.onChange(e.target.valueAsNumber || 0)}
+                      />
+                    )}
+                  />
+                </div>
               </div>
             </div>
 
             {watch('type') === 'Automated' && (
-              <div className="space-y-2">
-                <Label htmlFor="automationScript">Automation Script</Label>
-                <Controller
-                  name="automationScript"
-                  control={control}
-                  render={({ field }) => (
-                    <Textarea
-                      id="automationScript"
-                      placeholder="Enter automation script or reference"
-                      className="min-h-[100px] font-mono text-sm"
-                      {...field}
-                    />
-                  )}
-                />
+              <div className="bg-gray-50 rounded-xl p-6 space-y-4">
+                <div className="flex items-center space-x-2 mb-4">
+                  <div className="w-2 h-2 bg-cyan-500 rounded-full"></div>
+                  <h3 className="text-lg font-medium text-gray-900">Automation Script</h3>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="automationScript" className="text-sm font-medium text-gray-700">
+                    Script or Reference
+                  </Label>
+                  <Controller
+                    name="automationScript"
+                    control={control}
+                    render={({ field }) => (
+                      <Textarea
+                        id="automationScript"
+                        placeholder="Enter automation script code, file path, or reference to the automated test"
+                        className="min-h-[120px] font-mono text-sm border-gray-200 focus:border-blue-500 focus:ring-blue-500 transition-colors resize-none bg-gray-900 text-green-400"
+                        {...field}
+                      />
+                    )}
+                  />
+                </div>
               </div>
             )}
           </div>
         </CardContent>
-        <CardFooter className="flex justify-between">
-          <Button type="button" variant="outline" onClick={onCancel}>
-            Cancel
-          </Button>
-          <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? 'Saving...' : initialData ? 'Update Test Case' : 'Create Test Case'}
-          </Button>
+        <CardFooter className="bg-gray-50 border-t border-gray-100 px-8 py-6 rounded-b-xl">
+          <div className="flex justify-end space-x-4 w-full">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onCancel}
+              className="px-6 py-2 border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400 transition-colors"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              disabled={isSubmitting}
+              className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isSubmitting ? (
+                <div className="flex items-center space-x-2">
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  <span>Creating...</span>
+                </div>
+              ) : (
+                initialData ? 'Update Test Case' : 'Create Test Case'
+              )}
+            </Button>
+          </div>
         </CardFooter>
       </Card>
 

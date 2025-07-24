@@ -125,7 +125,7 @@ class WorkflowAutomationService {
         await sendNotification({
           user_id: manager.id,
           type: "CRITICAL_BUG_ALERT",
-          title: `🚨 Critical Bug Alert: ${bugData.severity}`,
+          title: `[CRITICAL] Bug Alert: ${bugData.severity}`,
           message: `A ${bugData.severity.toLowerCase()} bug has been reported: "${
             bugData.title
           }". Immediate attention required.`,
@@ -183,7 +183,7 @@ class WorkflowAutomationService {
           await sendNotification({
             user_id: user.id,
             type: "REGRESSION_PATTERN_ALERT",
-            title: "⚠️ Regression Pattern Detected",
+            title: "[WARNING] Regression Pattern Detected",
             message: `Multiple regression bugs detected in the project. This may indicate a quality issue that needs attention.`,
             data: {
               project_id: bugData.project_id,
@@ -425,3 +425,4 @@ class WorkflowAutomationService {
 
 export const workflowAutomation = new WorkflowAutomationService();
 export default WorkflowAutomationService;
+

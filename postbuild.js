@@ -30,11 +30,17 @@ async function postBuild() {
   const isProduction = process.env.NODE_ENV === 'production';
   const databaseUrl = process.env.DATABASE_URL;
   
-  console.log('Environment:', process.env.NODE_ENV);
-  console.log('Database URL present:', !!databaseUrl);
+  // Only log environment details in production or when explicitly requested
+  if (isProduction || process.env.VERBOSE_BUILD === 'true') {
+    console.log('Environment:', process.env.NODE_ENV);
+    console.log('Database URL present:', !!databaseUrl);
+  }
   
   if (!databaseUrl) {
-    console.log('⚠️  No DATABASE_URL found, skipping database operations');
+    // Only show warning in production or verbose mode
+    if (isProduction || process.env.VERBOSE_BUILD === 'true') {
+      console.log('⚠️  No DATABASE_URL found, skipping database operations');
+    }
     return;
   }
   

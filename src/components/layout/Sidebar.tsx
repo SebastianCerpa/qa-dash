@@ -101,7 +101,7 @@ export default function Sidebar() {
       <div className="p-6 border-b border-slate-700/50">
         <div className="flex items-center space-x-3">
           <div className="w-10 h-10 bg-gradient-to-br from-orange-400 via-red-400 to-pink-500 rounded-xl flex items-center justify-center shadow-lg">
-            <span className="text-white font-bold text-base">🎯</span>
+            <span className="text-white font-bold text-base">QA</span>
           </div>
           <div>
             <h1 className="text-base font-bold text-white">

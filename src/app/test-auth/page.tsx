@@ -35,7 +35,7 @@ export default function TestAuthPage() {
           {session ? (
             <div className="space-y-4">
               <div className="bg-green-50 border border-green-200 p-4 rounded-lg">
-                <h3 className="font-semibold text-green-800 mb-2">✅ Usuario Autenticado</h3>
+                <h3 className="font-semibold text-green-800 mb-2">[OK] Usuario Autenticado</h3>
                 <div className="text-sm text-green-700 space-y-1">
                   <p><strong>ID:</strong> {session.user?.id}</p>
                   <p><strong>Nombre:</strong> {session.user?.name}</p>
@@ -64,7 +64,7 @@ export default function TestAuthPage() {
           ) : (
             <div className="space-y-4">
               <div className="bg-yellow-50 border border-yellow-200 p-4 rounded-lg">
-                <h3 className="font-semibold text-yellow-800 mb-2">⚠️ Usuario No Autenticado</h3>
+                <h3 className="font-semibold text-yellow-800 mb-2">[WARNING] Usuario No Autenticado</h3>
                 <p className="text-sm text-yellow-700">
                   No hay una sesión activa. Necesitas iniciar sesión.
                 </p>
@@ -89,7 +89,7 @@ export default function TestAuthPage() {
           )}
 
           <div className="bg-blue-50 border border-blue-200 p-4 rounded-lg">
-            <h3 className="font-semibold text-blue-800 mb-2">🔍 Información de Debug</h3>
+            <h3 className="font-semibold text-blue-800 mb-2">[DEBUG] Información de Debug</h3>
             <div className="text-xs text-blue-700 space-y-1">
               <p><strong>Timestamp:</strong> {new Date().toISOString()}</p>
               <p><strong>User Agent:</strong> {navigator.userAgent.substring(0, 50)}...</p>

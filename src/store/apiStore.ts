@@ -161,39 +161,44 @@ export const useApiStore = create<ApiStore>()(
         set({ isLoading: true, error: null });
         try {
           const response = await testPlanService.fetchTestCasesForTestPlan(testPlanId, page, limit);
-          // Update the test cases array
-          set((state) => ({
-            testCases: [
-              ...state.testCases.filter(tc => !tc.testPlanId || tc.testPlanId !== testPlanId),
-              ...response.testCases.map(apiTestCase => ({
-                id: apiTestCase.id,
-                title: apiTestCase.title,
-                description: apiTestCase.description || "",
-                type: apiTestCase.type as "Manual" | "Automated" | "Exploratory" | "Regression",
-                steps: apiTestCase.steps || [],
-                expectedResult: apiTestCase.expected_result || "",
-                actualResult: apiTestCase.actual_result || "",
-                status: apiTestCase.status as "Not Executed" | "Passed" | "Failed" | "Blocked" | "Skipped",
-                priority: apiTestCase.priority as "Low" | "Medium" | "High" | "Critical",
-                linkedTicketIds: apiTestCase.linked_task && apiTestCase.linked_task.id ? [apiTestCase.linked_task.id] : [],
-                linkedTickets: apiTestCase.linked_task && apiTestCase.linked_task.id ? [apiTestCase.linked_task.id] : [],
-                assigneeId: apiTestCase.assigned_to || "",
-                executedBy: apiTestCase.last_executed_by || "",
-                executedAt: apiTestCase.last_executed ? new Date(apiTestCase.last_executed) : undefined,
-                estimatedTime: apiTestCase.estimated_time || 0,
-                actualTime: apiTestCase.actual_time || 0,
-                environment: apiTestCase.environment || "",
-                preconditions: apiTestCase.preconditions || "",
-                prerequisites: apiTestCase.prerequisites || "",
-                tags: apiTestCase.tags || [],
-                ticketId: apiTestCase.ticket_id || "",
-                testPlanId: apiTestCase.test_plan_id || "",
-                automationScript: apiTestCase.automation_script || "",
-                createdAt: apiTestCase.created_at ? new Date(apiTestCase.created_at) : undefined,
-              })),
-            ],
-            isLoading: false,
+          
+          // Convert API test cases to store format
+          const newTestCases = response.testCases.map(apiTestCase => ({
+            id: apiTestCase.id,
+            title: apiTestCase.title,
+            description: apiTestCase.description || "",
+            type: apiTestCase.type as "Manual" | "Automated" | "Exploratory" | "Regression",
+            steps: apiTestCase.steps || [],
+            expectedResult: apiTestCase.expected_result || "",
+            actualResult: apiTestCase.actual_result || "",
+            status: apiTestCase.status as "Not Executed" | "Passed" | "Failed" | "Blocked" | "Skipped",
+            priority: apiTestCase.priority as "Low" | "Medium" | "High" | "Critical",
+            linkedTicketIds: apiTestCase.linked_task && apiTestCase.linked_task.id ? [apiTestCase.linked_task.id] : [],
+            linkedTickets: apiTestCase.linked_task && apiTestCase.linked_task.id ? [apiTestCase.linked_task.id] : [],
+            assigneeId: apiTestCase.assigned_to || "",
+            executedBy: apiTestCase.last_executed_by || "",
+            executedAt: apiTestCase.last_executed ? new Date(apiTestCase.last_executed) : undefined,
+            estimatedTime: apiTestCase.estimated_time || 0,
+            actualTime: apiTestCase.actual_time || 0,
+            environment: apiTestCase.environment || "",
+            preconditions: apiTestCase.preconditions || "",
+            prerequisites: apiTestCase.prerequisites || "",
+            tags: apiTestCase.tags || [],
+            ticketId: apiTestCase.ticket_id || "",
+            testPlanId: apiTestCase.test_plan_id || "",
+            automationScript: apiTestCase.automation_script || "",
+            createdAt: apiTestCase.created_at ? new Date(apiTestCase.created_at) : undefined,
           }));
+          
+          // Update the test cases array by removing existing test cases for this test plan
+          // and adding the new ones to prevent duplicates
+          set((state) => {
+            const filteredTestCases = state.testCases.filter(tc => tc.testPlanId !== testPlanId);
+            return {
+              testCases: [...filteredTestCases, ...newTestCases],
+              isLoading: false,
+            };
+          });
         } catch (error) {
           console.error("Error fetching test cases for test plan:", error);
           set({ error: "Failed to fetch test cases", isLoading: false });

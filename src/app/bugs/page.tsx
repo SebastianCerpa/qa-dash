@@ -295,7 +295,7 @@ export default function BugsPage() {
             {bug.assignee && (
               <div className="flex items-center gap-1">
                 <User className="h-4 w-4" />
-                <span>→ {bug.assignee.name}</span>
+                <span>- {bug.assignee.name}</span>
               </div>
             )}
             <div className="flex items-center gap-1">
@@ -310,7 +310,7 @@ export default function BugsPage() {
             )}
             <div className="flex items-center gap-1 text-sm">
               <span>{bug._count.bug_comments} comments</span>
-              <span>•</span>
+              <span>|</span>
               <span>{bug._count.bug_attachments} files</span>
             </div>
             <Button variant="ghost" size="sm">

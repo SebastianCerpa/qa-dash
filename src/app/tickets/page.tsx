@@ -784,3 +784,4 @@ export default function TicketsPage() {
     </DndProvider>
   );
 }
+

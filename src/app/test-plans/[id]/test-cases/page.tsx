@@ -23,12 +23,12 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/Checkbox";
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
 } from "@/components/ui/select-radix";
 import {
   Pagination,
@@ -38,7 +38,7 @@ import {
   PaginationNext,
   PaginationPrevious
 } from "@/components/ui/pagination";
-import { ArrowLeft, Check, Loader2, Plus, Search } from 'lucide-react';
+import { ArrowLeft, Loader2, Plus, Search } from 'lucide-react';
 
 interface TestCasesPageProps {
   params: Promise<{
@@ -215,7 +215,7 @@ export default function TestCasesPage({ params }: TestCasesPageProps) {
           <PaginationItem>
             <PaginationNext
               onClick={() => setPage(prev => Math.min(prev + 1, totalPages))}
-              className={page >= totalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer'} size={undefined}            />
+              className={page >= totalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer'} size={undefined} />
           </PaginationItem>
         </PaginationContent>
       </Pagination>

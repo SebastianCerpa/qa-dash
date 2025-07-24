@@ -122,24 +122,24 @@ model test_cycles {
 }
 
 model test_plans {
-  id                 String       @id @default(cuid())
-  title              String
-  description        String?
-  project_id         String?
-  objectives         String?
-  scope              String?
-  test_strategy      String?
-  environment        String?
+  id                  String       @id @default(cuid())
+  title               String
+  description         String?
+  project_id          String?
+  created_by          String?
+  created_at          DateTime?    @default(now())
   acceptance_criteria String?
-  risk_management    String?
-  resources          String?
-  schedule           String?
-  deliverables       String?
-  created_by         String?
-  created_at         DateTime?    @default(now())
-  test_cases         test_cases[]
-  users              users?       @relation(fields: [created_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  projects           projects?    @relation(fields: [project_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  deliverables        String?
+  environment         String?
+  objectives          String?
+  resources           String?
+  risk_management     String?
+  schedule            String?
+  scope               String?
+  test_strategy       String?
+  test_cases          test_cases[]
+  users               users?       @relation(fields: [created_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  projects            projects?    @relation(fields: [project_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 model user_teams {

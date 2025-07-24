@@ -78,7 +78,8 @@ import {
   Package,
   TestTube,
   History,
-  ListChecks
+  ListChecks,
+  List
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { formatDate } from '@/lib/utils';
@@ -104,7 +105,7 @@ const TestPlanDetails: React.FC<TestPlanDetailsProps> = ({ testPlanId }) => {
   const [testPlan, setTestPlan] = useState<TestPlan | null>(null);
   const [planTestCases, setPlanTestCases] = useState<TestCase[]>([]);
   const [executeDialogOpen, setExecuteDialogOpen] = useState(false);
-  const [executionStatus, setExecutionStatus] = useState('completed');
+  const [executionStatus, setExecutionStatus] = useState('COMPLETED');
   const [executionResults, setExecutionResults] = useState<Record<string, any>[]>([]);
   const [isExecuting, setIsExecuting] = useState(false);
   const [removeDialogOpen, setRemoveDialogOpen] = useState(false);
@@ -725,133 +726,211 @@ const TestPlanDetails: React.FC<TestPlanDetailsProps> = ({ testPlanId }) => {
 
       {/* Execute Test Plan Dialog */}
       <Dialog open={executeDialogOpen} onOpenChange={setExecuteDialogOpen}>
-        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Execute Test Plan: {testPlan.name}</DialogTitle>
-            <DialogDescription>
-              Update the status of each test case and provide execution notes.
-            </DialogDescription>
-          </DialogHeader>
+        <DialogContent className="max-w-5xl max-h-[85vh] overflow-hidden bg-white border-0 shadow-2xl rounded-xl">
+          {/* Header with gradient background */}
+          <div className="bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-4 -mx-6 -mt-6 mb-6">
+            <DialogHeader className="text-white">
+              <DialogTitle className="text-xl font-semibold flex items-center space-x-2">
+                <Play className="h-6 w-6" />
+                <span>Execute Test Plan</span>
+              </DialogTitle>
+              <DialogDescription className="text-blue-100 mt-2">
+                Execute and track the progress of test plan: <span className="font-medium text-white">{testPlan.name}</span>
+              </DialogDescription>
+            </DialogHeader>
+          </div>
 
-          <div className="space-y-4 my-4">
-            <div className="flex items-center space-x-4">
-              <Label htmlFor="execution-status">Test Plan Status:</Label>
-              <Select value={executionStatus} onValueChange={setExecutionStatus}>
-                <SelectTrigger id="execution-status" className="w-[180px]">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="active">Active</SelectItem>
-                  <SelectItem value="completed">Completed</SelectItem>
-                </SelectContent>
-              </Select>
+          {/* Scrollable Content */}
+          <div className="overflow-y-auto max-h-[calc(85vh-200px)] space-y-6">
+            {/* Test Plan Status Section */}
+            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-4 border border-blue-200">
+              <div className="flex items-center space-x-4">
+                <div className="flex items-center space-x-2">
+                  <Target className="h-5 w-5 text-blue-600" />
+                  <Label htmlFor="execution-status" className="text-sm font-semibold text-gray-700">Test Plan Status:</Label>
+                </div>
+                <Select value={executionStatus} onValueChange={setExecutionStatus}>
+                  <SelectTrigger id="execution-status" className="w-[180px] bg-white border-blue-300 focus:border-blue-500">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="ACTIVE">
+                      <div className="flex items-center">
+                        <Clock className="mr-2 h-4 w-4 text-blue-500" />
+                        Active
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="COMPLETED">
+                      <div className="flex items-center">
+                        <CheckCircle className="mr-2 h-4 w-4 text-green-500" />
+                        Completed
+                      </div>
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
 
-            <Separator />
+            <Separator className="my-6" />
 
-            {planTestCases.map((testCase, index) => {
-              const result = executionResults.find(r => r.id === testCase.id) || {
-                status: 'PASSED',
-                notes: '',
-                steps: testCase.steps
-              };
+            {/* Test Cases Section */}
+            <div className="space-y-4">
+              <div className="flex items-center space-x-2 mb-4">
+                <FileText className="h-5 w-5 text-gray-600" />
+                <h3 className="text-lg font-semibold text-gray-900">Test Cases ({planTestCases.length})</h3>
+              </div>
+              
+              {planTestCases.map((testCase, index) => {
+                const result = executionResults.find(r => r.id === testCase.id) || {
+                  status: 'PASSED',
+                  notes: '',
+                  steps: testCase.steps
+                };
 
-              return (
-                <div key={testCase.id} className="border rounded-md p-4 space-y-4">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <h3 className="font-medium">{testCase.title}</h3>
-                      <p className="text-sm text-muted-foreground">{testCase.description}</p>
+                return (
+                  <div key={testCase.id} className="bg-white border-2 border-gray-200 rounded-xl p-6 space-y-4 shadow-sm hover:shadow-md transition-shadow">
+                    {/* Test Case Header */}
+                    <div className="flex justify-between items-start">
+                      <div className="flex-1">
+                        <div className="flex items-center space-x-2 mb-2">
+                          <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                            <span className="text-sm font-semibold text-blue-600">#{index + 1}</span>
+                          </div>
+                          <h4 className="text-lg font-semibold text-gray-900">{testCase.title}</h4>
+                        </div>
+                        <p className="text-sm text-gray-600 ml-10">{testCase.description}</p>
+                      </div>
+                      
+                      {/* Status Selection */}
+                      <div className="ml-4">
+                        <label className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2 block">Status</label>
+                        <Select
+                          value={result.status}
+                          onValueChange={(value) => handleExecutionStatusChange(testCase.id, value)}
+                        >
+                          <SelectTrigger className="w-[140px] bg-gray-50 border-gray-300 focus:border-blue-500">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="PASSED">
+                              <div className="flex items-center">
+                                <CheckCircle className="mr-2 h-4 w-4 text-green-500" />
+                                Passed
+                              </div>
+                            </SelectItem>
+                            <SelectItem value="FAILED">
+                              <div className="flex items-center">
+                                <XCircle className="mr-2 h-4 w-4 text-red-500" />
+                                Failed
+                              </div>
+                            </SelectItem>
+                            <SelectItem value="BLOCKED">
+                              <div className="flex items-center">
+                                <AlertCircle className="mr-2 h-4 w-4 text-orange-500" />
+                                Blocked
+                              </div>
+                            </SelectItem>
+                            <SelectItem value="SKIPPED">
+                              <div className="flex items-center">
+                                <Clock className="mr-2 h-4 w-4 text-purple-500" />
+                                Skipped
+                              </div>
+                            </SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
                     </div>
-                    <Select
-                      value={result.status}
-                      onValueChange={(value) => handleExecutionStatusChange(testCase.id, value)}
-                    >
-                      <SelectTrigger className="w-[120px]">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="PASSED">
-                          <div className="flex items-center">
-                            <Check className="mr-2 h-4 w-4 text-green-500" />
-                            Passed
-                          </div>
-                        </SelectItem>
-                        <SelectItem value="FAILED">
-                          <div className="flex items-center">
-                            <X className="mr-2 h-4 w-4 text-red-500" />
-                            Failed
-                          </div>
-                        </SelectItem>
-                        <SelectItem value="BLOCKED">
-                          <div className="flex items-center">
-                            <X className="mr-2 h-4 w-4 text-orange-500" />
-                            Blocked
-                          </div>
-                        </SelectItem>
-                        <SelectItem value="SKIPPED">
-                          <div className="flex items-center">
-                            <Clock className="mr-2 h-4 w-4 text-purple-500" />
-                            Skipped
-                          </div>
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
 
-                  {Array.isArray(testCase.steps) && testCase.steps.length > 0 && (
-                    <div className="space-y-2">
-                      <h4 className="text-sm font-medium">Test Steps</h4>
-                      <Table>
-                        <TableHeader>
-                          <TableRow>
-                            <TableHead className="w-12">#</TableHead>
-                            <TableHead>Action</TableHead>
-                            <TableHead>Expected Result</TableHead>
-                            <TableHead className="w-24">Status</TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {testCase.steps.map((step, stepIndex) => (
-                            <TableRow key={stepIndex}>
-                              <TableCell>{stepIndex + 1}</TableCell>
-                              <TableCell>{step.action}</TableCell>
-                              <TableCell>{step.expectedResult}</TableCell>
-                              <TableCell>
-                                <Select
-                                  value={result.steps[stepIndex]?.status || 'PASSED'}
-                                  onValueChange={(value) => handleStepStatusChange(testCase.id, stepIndex, value)}
-                                >
-                                  <SelectTrigger className="w-[100px]">
-                                    <SelectValue />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    <SelectItem value="PASSED">Passed</SelectItem>
-                                    <SelectItem value="FAILED">Failed</SelectItem>
-                                    <SelectItem value="BLOCKED">Blocked</SelectItem>
-                                    <SelectItem value="SKIPPED">Skipped</SelectItem>
-                                  </SelectContent>
-                                </Select>
-                              </TableCell>
-                            </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
+                    {/* Test Steps Section */}
+                    {Array.isArray(testCase.steps) && testCase.steps.length > 0 && (
+                      <div className="bg-gray-50 rounded-lg p-4 space-y-3">
+                        <div className="flex items-center space-x-2">
+                          <List className="h-4 w-4 text-gray-600" />
+                          <h5 className="text-sm font-semibold text-gray-700">Test Steps ({testCase.steps.length})</h5>
+                        </div>
+                        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                          <Table>
+                            <TableHeader>
+                              <TableRow className="bg-gray-50">
+                                <TableHead className="w-12 text-center">#</TableHead>
+                                <TableHead className="font-semibold">Action</TableHead>
+                                <TableHead className="font-semibold">Expected Result</TableHead>
+                                <TableHead className="w-32 text-center font-semibold">Status</TableHead>
+                              </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                              {testCase.steps.map((step, stepIndex) => (
+                                <TableRow key={stepIndex} className="hover:bg-gray-50">
+                                  <TableCell className="text-center font-medium text-gray-600">{stepIndex + 1}</TableCell>
+                                  <TableCell className="text-sm">{step.action}</TableCell>
+                                  <TableCell className="text-sm">{step.expectedResult}</TableCell>
+                                  <TableCell className="text-center">
+                                    <Select
+                                      value={result.steps[stepIndex]?.status || 'PASSED'}
+                                      onValueChange={(value) => handleStepStatusChange(testCase.id, stepIndex, value)}
+                                    >
+                                      <SelectTrigger className="w-[110px] h-8 text-xs">
+                                        <SelectValue />
+                                      </SelectTrigger>
+                                      <SelectContent>
+                                        <SelectItem value="PASSED">
+                                          <div className="flex items-center">
+                                            <CheckCircle className="mr-1 h-3 w-3 text-green-500" />
+                                            <span className="text-xs">Passed</span>
+                                          </div>
+                                        </SelectItem>
+                                        <SelectItem value="FAILED">
+                                          <div className="flex items-center">
+                                            <XCircle className="mr-1 h-3 w-3 text-red-500" />
+                                            <span className="text-xs">Failed</span>
+                                          </div>
+                                        </SelectItem>
+                                        <SelectItem value="BLOCKED">
+                                          <div className="flex items-center">
+                                            <AlertCircle className="mr-1 h-3 w-3 text-orange-500" />
+                                            <span className="text-xs">Blocked</span>
+                                          </div>
+                                        </SelectItem>
+                                        <SelectItem value="SKIPPED">
+                                          <div className="flex items-center">
+                                            <Clock className="mr-1 h-3 w-3 text-purple-500" />
+                                            <span className="text-xs">Skipped</span>
+                                          </div>
+                                        </SelectItem>
+                                      </SelectContent>
+                                    </Select>
+                                  </TableCell>
+                                </TableRow>
+                              ))}
+                            </TableBody>
+                          </Table>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Execution Notes Section */}
+                    <div className="space-y-3">
+                      <div className="flex items-center space-x-2">
+                        <FileText className="h-4 w-4 text-gray-600" />
+                        <Label htmlFor={`notes-${testCase.id}`} className="text-sm font-semibold text-gray-700">Execution Notes</Label>
+                      </div>
+                      <div className="relative">
+                        <Textarea
+                          id={`notes-${testCase.id}`}
+                          className="min-h-[100px] p-4 rounded-lg border-2 border-gray-200 bg-gray-50 text-sm placeholder:text-gray-400 focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:ring-opacity-20 transition-all duration-200 resize-none"
+                          placeholder="Add detailed notes about the test execution, any issues encountered, or observations..."
+                          value={result.notes}
+                          onChange={(e) => handleExecutionNotesChange(testCase.id, e.target.value)}
+                        />
+                        <div className="absolute bottom-3 right-3 text-xs text-gray-400">
+                          {result.notes.length}/500
+                        </div>
+                      </div>
                     </div>
-                  )}
-
-                  <div className="space-y-2">
-                    <Label htmlFor={`notes-${testCase.id}`}>Execution Notes</Label>
-                    <Textarea
-                      id={`notes-${testCase.id}`}
-                      placeholder="Add any notes about the execution..."
-                      value={result.notes}
-                      onChange={(e) => handleExecutionNotesChange(testCase.id, e.target.value)}
-                    />
                   </div>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
 
           <DialogFooter>

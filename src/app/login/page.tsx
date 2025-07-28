@@ -20,8 +20,8 @@ interface FormErrors {
 export default function LoginPage() {
   const router = useRouter();
   const [formData, setFormData] = useState<FormData>({
-    email: "sebastian.cerpa@ridepanda.com",
-    password: "Ride..0106",
+    email: "",
+    password: "",
   });
   const [errors, setErrors] = useState<FormErrors>({});
   const [isLoading, setIsLoading] = useState(false);

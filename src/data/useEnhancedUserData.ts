@@ -25,10 +25,10 @@ export function useEnhancedUserData() {
       // Initialize users
       const initialUsers = [
         {
-          name: 'Sebastian Cerpa',
-          email: 'sebastian.cerpa@example.com',
+          name: 'John Doe',
+          email: 'john.doe@example.com',
           role: 'QA Lead',
-          avatar: '/avatars/sebastian.jpg',
+          avatar: '/avatars/default.jpg',
           permissions: [
             { resource: 'tickets', actions: ['create', 'read', 'update', 'delete'] },
             { resource: 'users', actions: ['create', 'read', 'update', 'delete'] },
